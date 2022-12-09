@@ -1,4 +1,4 @@
-IN=../land-cover/w080n40.shp
+IN=./source/vector/w080n40_landcover.shp
 OUT=./data/shapefiles
 
 while read line; do
@@ -6,7 +6,7 @@ while read line; do
         type=`echo $line | sed -e 's/,yes,.*$//'`
         name=`echo $line | sed -e 's/^.*,yes,//'`
         echo $type $name ...
-        ogr2ogr $OUT/lc-${name}.shp $IN -sql "select * from w080n40 where type=$type"
+        ogr2ogr $OUT/lc-${name}.shp $IN -sql "select * from w080n40_landcover where value=$type"
     fi
 done < landcover.csv
 

@@ -6,7 +6,7 @@ MIN_LON=-76
 MAX_LON=-75
 MIN_LAT=45
 MAX_LAT=46
-DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --all-threads
+DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --threads 2
 
 prepare-airports:
 	rm -vf ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
@@ -37,8 +37,10 @@ areas:
 		row=`echo $$row | sed -e 's/\r//'`; \
 		if echo $$row | grep ',yes,area,' > /dev/null; then \
 			F=($${row//,/ }); \
-			ogr-decode ${DECODE_OPTS} --area-type $${F[3]} work/$${F[0]} ${DATA_DIR}/shapefiles/$${F[0]}.shp;\
-		fi \
+			if [ ! -e work/$${F[0]} ]; then \
+				ogr-decode ${DECODE_OPTS} --area-type $${F[3]} work/$${F[0]} ${DATA_DIR}/shapefiles/$${F[0]}.shp;\
+			fi; \
+		fi; \
 	done
 
 lines:
@@ -46,8 +48,10 @@ lines:
 		row=`echo $$row | sed -e 's/\r//'`; \
 		if echo $$row | grep ',yes,line,' > /dev/null; then \
 			F=($${row//,/ }); \
-			ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} work/$${F[0]} ${DATA_DIR}/shapefiles/$${F[0]}.shp;\
-		fi \
+			if [ ! -e work/$${F[0]} ]; then \
+				ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} work/$${F[0]} ${DATA_DIR}/shapefiles/$${F[0]}.shp;\
+			fi; \
+		fi; \
 	done
 
 scenery:
