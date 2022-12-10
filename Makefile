@@ -2,14 +2,14 @@ SHELL=/bin/bash
 DATA_DIR=./data
 WORK_DIR=./work
 OUTPUT_DIR=./output
-MIN_LON=-76
+MIN_LON=-77
 MAX_LON=-75
-MIN_LAT=45
+MIN_LAT=44
 MAX_LAT=46
 DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --threads 2
 
 prepare-airports:
-	rm -vf ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
+	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
 	cat ${DATA_DIR}/airports/apt.dat | python3 split-airports.py ${DATA_DIR}/airports/original
 	sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
 
@@ -20,7 +20,8 @@ elevations:
 
 airports:
 	rm -rvf ${WORK_DIR}/AirportObj ${WORK_DIR}/AirportArea
-	genapts850 --input=${DATA_DIR}/airports/modified.apt.dat --work=${WORK_DIR} --dem-path=SRTM-3 \
+	genapts850 --input=${DATA_DIR}/airports/modified.apt.dat --work=${WORK_DIR} --threads=4 \
+		--dem-path=SRTM-3 \
 		--min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT}
 
 landmass:
@@ -56,7 +57,7 @@ lines:
 
 scenery:
 	rm -rvf ${OUTPUT_DIR}/Terrain ${WORK_DIR}/Shared
-	tg-construct --threads=2 --priorities=./default_priorities.txt --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
+	tg-construct --threads=4 --priorities=./default_priorities.txt --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
 		--ignore-landmass \
 		--min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT} \
 		Default AirportObj AirportArea SRTM-3 $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-)

@@ -36,9 +36,6 @@ PackIce			other	# Water with ice packs
 PolarIce		other
 Ocean			ocean
 Estuary			ocean
-Urban			other	# Densely-populated city or large town
-SubUrban		other	# Densely-populated city or large town
-Town			other	# Small town or village
 Fishing			other
 Construction		other
 Industrial		other
@@ -56,6 +53,9 @@ Dirt			other
 Rock			other	# Rock
 Lava			other	# Lava-covered area
 OpenMining		other	# OpenMining
+Urban			other	# Densely-populated city or large town
+Greenspace		other
+SubUrban		other	# Densely-populated city or large town
 
 # USGS Land Covers
 # These are low-priority, since known polygons should always win.
@@ -76,8 +76,8 @@ CropWood		other	# Cropland/Woodland Mosaic
 AgroForest		other
 Olives			other
 GolfCourse		other	# GolfCourse
-Greenspace		other
 GrassCover		other	# Grassland
+Town			other	# Small town or village
 Grassland		other
 ScrubCover		other	# Scrub
 Scrub			other

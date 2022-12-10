@@ -5,7 +5,7 @@
 
 SOURCE=../osm
 DEST=./data/shapefiles
-MIN_AREA=0.00001
+MIN_AREA=0.000005
 
 #
 # Roads

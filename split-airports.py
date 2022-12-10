@@ -13,7 +13,7 @@ with io.open(sys.stdin.fileno(),'r',encoding='latin-1') as input:
             code = result.group(1)
             filename = "{}/{}.apt.dat".format(output_dir, code)
             with open(filename, 'w') as output:
-                print("Writing", filename, "...")
+                print(line, file=output, end='')
                 for line in input:
                     if re.match(r'^\s+$', line):
                         break
