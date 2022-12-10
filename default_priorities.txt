@@ -60,7 +60,6 @@ OpenMining		other	# OpenMining
 # USGS Land Covers
 # These are low-priority, since known polygons should always win.
 
-BuiltUpCover		other	# Urban and Built-Up Land
 Transport		other	# Transport
 Cemetery		other	# Cemetery
 DryCrop			other	# Dryland Cropland and Pasture
@@ -87,6 +86,7 @@ SavannaCover		other	# Savanna
 Orchard			other	# Orchard
 DeciduousForest		other	# Deciduous Forest
 DeciduousBroadCover	other	# Deciduous Forest
+BuiltUpCover		other	# Urban and Built-Up Land
 EvergreenForest		other	# Evergreen Forest
 EvergreenBroadCover	other	# Evergreen Forest
 MixedForest		other	# Mixed Forest
