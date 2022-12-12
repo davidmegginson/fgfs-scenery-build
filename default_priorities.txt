@@ -53,7 +53,6 @@ Dirt			other
 Rock			other	# Rock
 Lava			other	# Lava-covered area
 OpenMining		other	# OpenMining
-Urban			other	# Densely-populated city or large town
 Greenspace		other
 SubUrban		other	# Densely-populated city or large town
 
@@ -65,7 +64,6 @@ Cemetery		other	# Cemetery
 DryCrop			other	# Dryland Cropland and Pasture
 IrrCrop			other	# Irrigated Cropland and Pasture
 Rice			other
-MixedCrop		other	# Mixed Dryland/Irrigated Cropland and Pasture
 Vineyard		other
 Bamboo			other
 Mangrove		other
@@ -77,19 +75,19 @@ AgroForest		other
 Olives			other
 GolfCourse		other	# GolfCourse
 GrassCover		other	# Grassland
-Town			other	# Small town or village
 Grassland		other
 ScrubCover		other	# Scrub
 Scrub			other
 ShrubGrassCover		other	# Mixed Shrubland/Grassland
 SavannaCover		other	# Savanna
 Orchard			other	# Orchard
+MixedForest		other	# Mixed Forest
+MixedCrop		other	# Mixed Dryland/Irrigated Cropland and Pasture
+BuiltUpCover		other	# Urban and Built-Up Land
 DeciduousForest		other	# Deciduous Forest
 DeciduousBroadCover	other	# Deciduous Forest
-BuiltUpCover		other	# Urban and Built-Up Land
 EvergreenForest		other	# Evergreen Forest
 EvergreenBroadCover	other	# Evergreen Forest
-MixedForest		other	# Mixed Forest
 RainForest		other	# Rain Forest
 BarrenCover		other	# Barren or Sparsely Vegetated
 HerbTundra		other	# Herbaceous Tundra
@@ -97,6 +95,9 @@ Sclerophyllous		other
 Heath			other
 Burnt			other
 SnowCover		other	# Snow or Ice
+
+Town		other	# Urban and Built-Up Land
+Urban			other	# Densely-populated city or large town
 
 Island			island	# any island area not covered otherwise
 Default			landmass # any land area not covered otherwise

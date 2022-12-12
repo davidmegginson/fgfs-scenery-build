@@ -2,9 +2,9 @@ SHELL=/bin/bash
 DATA_DIR=./data
 WORK_DIR=./work
 OUTPUT_DIR=./output
-MIN_LON=-77
-MAX_LON=-75
-MIN_LAT=44
+MIN_LON=-80
+MAX_LON=-73
+MIN_LAT=43
 MAX_LAT=46
 DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --threads 2
 
@@ -26,7 +26,7 @@ airports:
 
 landmass:
 	rm -rvf ${WORK_DIR}/Default
-	ogr-decode ${DECODE_OPTS} --area-type Default work/Default ${DATA_DIR}/shapefiles/land-polygons-split-4326/
+	ogr-decode ${DECODE_OPTS} --area-type Default work/Default ${DATA_DIR}/land-polygons-split-4326/
 
 layers: clean-layers areas lines
 
