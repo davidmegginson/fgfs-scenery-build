@@ -3,7 +3,7 @@
 # Extract shapefiles for FlightGear layers from OSM shapefiles
 ########################################################################
 
-SOURCE=../osm
+SOURCE=../osm/extracts
 DEST=./data/shapefiles
 MIN_AREA=0.000005
 
