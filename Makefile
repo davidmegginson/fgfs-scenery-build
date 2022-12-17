@@ -19,7 +19,7 @@ cliffs:
 
 prepare-airports:
 	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
-	cat ${DATA_DIR}/airports/apt.dat | python3 split-airports.py ${DATA_DIR}/airports/original
+	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 split-airports.py ${DATA_DIR}/airports/original
 	sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
 
 clean-airports:
