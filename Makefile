@@ -2,10 +2,10 @@ SHELL=/bin/bash
 DATA_DIR=./data
 WORK_DIR=./work
 OUTPUT_DIR=./output
-MIN_LON=-90
-MAX_LON=-60
-MIN_LAT=30
-MAX_LAT=60
+MIN_LON=-80
+MAX_LON=-70
+MIN_LAT=40
+MAX_LAT=50
 DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --threads 2
 
 elevations:
@@ -21,6 +21,9 @@ prepare-airports:
 	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
 	cat ${DATA_DIR}/airports/apt.dat | python3 split-airports.py ${DATA_DIR}/airports/original
 	sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
+
+clean-airports:
+	rm -rf ${WORK_DIR}/AirportObj ${WORK_DIR}/AirportArea
 
 airports:
 	rm -rvf ${WORK_DIR}/AirportObj ${WORK_DIR}/AirportArea
