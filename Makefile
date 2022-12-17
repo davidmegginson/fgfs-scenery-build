@@ -13,6 +13,10 @@ elevations:
 	gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/*.hgt
 	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
 
+cliffs:
+	cliff-decode ${WORK_DIR}/SRTM-3 ${DATA_DIR}/shapefiles/osm-cliff-natural.shp
+	rectify_height --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT} --min-dist=100
+
 prepare-airports:
 	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
 	cat ${DATA_DIR}/airports/apt.dat | python3 split-airports.py ${DATA_DIR}/airports/original
