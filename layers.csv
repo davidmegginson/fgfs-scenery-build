@@ -22,7 +22,6 @@ osm-abandoned-railway,yes,line,ShrubGrassCover,9
 osm-airfield-aeroway,no,area,Greenspace
 osm-airfield-military,no,area,Greenspace
 osm-brownfield-landuse,no,area,Town
-osm-canal-waterway,no,line,Canal,25
 osm-cemetery-landuse,yes,area,Cemetery
 osm-cliff-natural,yes,area,Cliffs
 osm-commercial-landuse,yes,area,Town
@@ -38,7 +37,7 @@ osm-greenfield-landuse,yes,area,Greenspace
 osm-industrial-landuse,yes,area,ShrubGrassCover
 osm-institutional-landuse,yes,area,Greenspace
 osm-landfill-landuse,yes,area,Dump
-osm-line-power,yes,line,ShrubGrassCover,50
+osm-line-power,yes,line,ShrubGrassCover,20
 osm-meadow-landuse,yes,area,CropGrass
 osm-motorway-highway,yes,line,Freeway,10
 osm-motorway-highway,yes,line,ShrubGrassCover,30
@@ -52,7 +51,6 @@ osm-railway-railway,yes,no,ShrubGrassCover,9
 osm-recreation-ground-landuse,yes,area,Greenspace
 osm-residential-landuse,yes,area,Town
 osm-retail-landuse,yes,area,Town
-osm-river-waterway,no,line,River,100
 osm-rock-natural,yes,area,Rock
 osm-scrub-natural,yes,area,Scrub
 osm-secondary-highway,yes,line,Road-Secondary,8
