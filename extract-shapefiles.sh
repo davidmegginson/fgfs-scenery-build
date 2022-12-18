@@ -31,7 +31,7 @@ ogr2ogr $DEST/osm-secondary-highway.shp $SOURCE/highway.shp \
 #
 echo Railways..
 ogr2ogr $DEST/osm-railway-railway.shp $SOURCE/railway.shp \
-        -sql "select * from railway where railway in ('rail', 'light_rail') and (tunnel is null or tunnel != 'yes')"
+        -sql "select * from railway where railway in ('rail', 'light_rail') and (tunnel is null or tunnel != 'yes') and service not in ('crossover', 'siding', 'yard')"
 
 echo Abandoned railways..
 ogr2ogr $DEST/osm-abandoned-railway.shp $SOURCE/railway.shp \
