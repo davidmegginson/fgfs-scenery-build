@@ -37,7 +37,7 @@ osm-greenfield-landuse,yes,area,Greenspace
 osm-industrial-landuse,yes,area,ShrubGrassCover
 osm-institutional-landuse,yes,area,Greenspace
 osm-landfill-landuse,yes,area,Dump
-osm-line-power,yes,line,ShrubGrassCover,20
+osm-line-power,yes,line,ShrubGrassCover,30
 osm-meadow-landuse,yes,area,CropGrass
 osm-motorway-highway,yes,line,Freeway,10
 osm-motorway-highway,yes,line,ShrubGrassCover,30
