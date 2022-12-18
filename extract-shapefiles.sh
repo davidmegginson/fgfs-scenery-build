@@ -177,16 +177,3 @@ ogr2ogr $DEST/osm-orchard-landuse.shp $SOURCE/landuse.shp \
 echo Vineyard...
 ogr2ogr $DEST/osm-vineyard-landuse.shp $SOURCE/landuse.shp \
         -sql "select * from landuse where landuse = 'vineyard' and OGR_GEOM_AREA > $MIN_AREA"
-
-#
-# Aviation
-#
-
-echo Military airfield...
-ogr2ogr $DEST/osm-airfield-military.shp $SOURCE/military.shp \
-        -sql "select * from military where military = 'airfield'"
-
-echo General airfield...
-ogr2ogr $DEST/osm-airfield-aeroway.shp $SOURCE/aeroway.shp \
-        -sql "select * from aeroway where aeroway = 'aerodrome'"
-
