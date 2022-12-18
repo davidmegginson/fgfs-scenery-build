@@ -45,17 +45,6 @@ ogr2ogr $DEST/osm-lines-power.shp $SOURCE/power.shp \
         -sql "select * from power where power in ('lines')"
 
 #
-# River lines
-#
-echo River lines...
-ogr2ogr $DEST/osm-river-waterway.shp $SOURCE/waterway.shp \
-        -sql "select * from waterway where waterway in ('river') and (tunnel is null or tunnel != 'yes')"
-
-echo Canal lines...
-ogr2ogr $DEST/osm-canal-waterway.shp $SOURCE/waterway.shp \
-        -sql "select * from waterway where waterway in ('canal') and (tunnel is null or tunnel != 'yes')"
-
-#
 # Water areas
 #
 echo Wetlands...
