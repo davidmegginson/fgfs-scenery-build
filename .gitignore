@@ -1,5 +1,10 @@
-/Scenery
 /*.qgz
+/Scenery
+/data/SRTM-3
+/data/airports/modified.apt.dat
+/data/airports/original
+/data/land-polygons-split-4326
+/data/shapefiles
 /output
 /source
 /work
