@@ -35,7 +35,13 @@ Download SRTM-3 from e.g. https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/20
 
 ### Airports preparation
 
+Create the directory ``./data/airports`` and copy the ``Airports/apt.dat.gz`` copy from the FlightGear distribution into it.
+
+Run ``make prepare-airports`` to generate a new airports file for scenery building (requires Python3).
+
 ### OSM preparation
+
+(TODO)
 
 ### Landcover preparation
 
@@ -57,4 +63,3 @@ Inside qgis:
 Put the result in source/vector/<whatever>.shp
 
 Next, generate the input polygons for FlightGear. Put the appropriate source in extract-landcover.sh, check the type mappings in landcover.csv, and then run extract-landcover.sh
-
