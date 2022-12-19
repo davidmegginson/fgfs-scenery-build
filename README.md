@@ -1,13 +1,43 @@
 North American Scenery
 ======================
 
-## Elevations preparation
+## Building the scenery
 
-## Airports preparation
+A Makefile drives the process. Edit the variables at the top of the Makefile to set the area you're building and the bounds, like this:
 
-## OSM preparation
+```
+# What area are we building?
+AREA=w080n40
+MIN_LON=-80
+MAX_LON=-70
+MIN_LAT=40
+MAX_LAT=50
+```
 
-## Landcover preparation
+Once you have the data prepared, ``make all`` will run through the following steps:
+
+1. Generate and fit elevation data in work/SRTM-3 (``make elevations``)
+2. Generate airport objects and areas (``make airports``)
+3. Generate the landmass layer (``make landmass``)
+4. Generate the OSM and landcover layers (``make layers``)
+5. Build the actual scenery (``make scenery``)
+
+All of the steps but ``make scenery`` will skip anything that's already built under the ``work/`` directory. To force something to rebuild, use the *-rebuild variants of the targets above, including ``make all-rebuild``.
+
+All of the steps will leave scenery alone that's already built for different areas.
+
+
+## Data download and preparation
+
+### Elevations preparation
+
+Download SRTM-3 from e.g. https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip (needs login)
+
+### Airports preparation
+
+### OSM preparation
+
+### Landcover preparation
 
 This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
 
