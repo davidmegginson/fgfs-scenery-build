@@ -3,9 +3,10 @@
 # Extract shapefiles for FlightGear layers from OSM shapefiles
 ########################################################################
 
-SOURCE=../osm/shapefiles
+AREA=w080n40
+SOURCE=../osm/shapefiles/$AREA
 DEST=./data/shapefiles
-MIN_AREA=0.000005
+MIN_AREA=0.00001
 
 #
 # Roads
@@ -31,7 +32,7 @@ ogr2ogr $DEST/osm-secondary-highway.shp $SOURCE/highway.shp \
 #
 echo Railways..
 ogr2ogr $DEST/osm-railway-railway.shp $SOURCE/railway.shp \
-        -sql "select * from railway where railway in ('rail', 'light_rail') and (tunnel is null or tunnel != 'yes') and service not in ('crossover', 'siding', 'yard')"
+        -sql "select * from railway where railway in ('rail', 'light_rail') and (tunnel is null or tunnel != 'yes') and service not in ('crossover', 'siding', 'yard') and usage in ('main', 'branch')"
 
 echo Abandoned railways..
 ogr2ogr $DEST/osm-abandoned-railway.shp $SOURCE/railway.shp \
@@ -49,11 +50,11 @@ ogr2ogr $DEST/osm-lines-power.shp $SOURCE/power.shp \
 #
 echo Wetlands...
 ogr2ogr $DEST/osm-wetland-natural.shp $SOURCE/natural.shp \
-        -sql "select * from natural where natural = 'wetland' and OGR_GEOM_AREA > 0.00001"
+        -sql "select * from natural where natural = 'wetland' and OGR_GEOM_AREA > $MIN_AREA"
 
 echo Water areas - natural ...
 ogr2ogr $DEST/osm-water-natural.shp $SOURCE/natural.shp \
-        -sql "select * from natural where natural = 'water' and OGR_GEOM_AREA > 0.00001"
+        -sql "select * from natural where natural = 'water' and OGR_GEOM_AREA > $MIN_AREA"
 
 # catches some small continuities for rivers and canals
 echo Water areas - water...

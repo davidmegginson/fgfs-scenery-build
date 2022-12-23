@@ -1,16 +1,18 @@
 # What area are we building?
 AREA=w080n40
-MIN_LON=-80
+MIN_LON=-80n
 MAX_LON=-70
 MIN_LAT=40
 MAX_LAT=50
+
+MAX_THREADS=2
 
 # Standard setup
 SHELL=/bin/bash
 DATA_DIR=./data
 WORK_DIR=./work
 OUTPUT_DIR=./output
-DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --threads 2
+DECODE_OPTS=--spat ${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT} --threads $MAX_THREADS
 
 # Steps that require TerraGear (prepare-airports needs Python, which isn't in the Docker image)
 all: elevations airports landmass layers scenery
@@ -33,7 +35,7 @@ elevations-rebuild: elevations-clean elevations
 # Build the airport areas and objects
 airports:
 	if [ ! -d ${WORK_DIR}/AirportObj/${AREA}/ ]; then \
-	  genapts850 --input=${DATA_DIR}/airports/modified.apt.dat --work=${WORK_DIR} --threads=4 \
+	  genapts850 --input=${DATA_DIR}/airports/modified.apt.dat --work=${WORK_DIR} --threads=$MAX_THREADS \
 		--dem-path=SRTM-3 \
 		--min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT}; \
 	fi
@@ -96,12 +98,16 @@ cliffs:
 
 # Pull it all together and generate scenery in the output directory
 scenery:
-	rm -rvf ${OUTPUT_DIR}/Terrain/${AREA}/
-	tg-construct --threads=4 --priorities=./default_priorities.txt --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
+	tg-construct --threads=$MAX_THREADS --priorities=./default_priorities.txt --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
 		--ignore-landmass \
 		--min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT} \
 		Default AirportObj AirportArea SRTM-3 $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-)
 	cp -v ${DATA_DIR}/airports/modified/*.dat ${OUTPUT_DIR}/NavData/apt/
+
+scenery-clean:
+	rm -rvf ${OUTPUT_DIR}/Terrain/${AREA}/
+
+scenery-rebuild: scenery-clean scenery
 
 
 #
@@ -114,3 +120,10 @@ prepare-airports:
 	sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
 
 
+shapefiles-prepare:
+	sh ./extract-shapefiles.sh
+
+shapefiles-clean:
+	rm -fv ${DATA_DIR}/shapefiles/osm-*
+
+shapefiles-rebuild: shapefiles-clean shapefiles-prepare
