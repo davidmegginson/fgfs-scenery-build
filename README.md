@@ -3,7 +3,7 @@ North American Scenery
 
 ## Building the scenery
 
-A Makefile drives the process. Edit the variables at the top of the Makefile to set the area you're building and the bounds, like this:
+A Makefile drives the process. Note these variables at the top of the Makefile:
 
 ```
 # What area are we building?
@@ -12,6 +12,12 @@ MIN_LON=-80
 MAX_LON=-70
 MIN_LAT=40
 MAX_LAT=50
+```
+
+You can override these whenever you need to work with a different area, e.g.
+
+```
+$ make AREA=w090n30 MIN_LON=-95 MAX_LON=-94 MIN_LAT=35 MAX_LAT=36 all
 ```
 
 Once you have the data prepared, ``make all`` will run through the following steps:
@@ -43,22 +49,34 @@ Run ``make prepare-airports`` to generate a new airports file for scenery buildi
 
 (TODO)
 
+The Makefile expects to find OSM shapefiles for your bucket in the directory ../osm, e.g. ``../osm/shapefiles/w080n40/highways.shp``
+
+If you have them somewhere else, you can override OSM_DIR on the command line, e.g.
+
+```
+$ make OSM_DIR=/usr/share/osm shapefiles-prepare
+```
+
 ### Landcover preparation
 
 This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
 
 We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/
 
-Clip to the scenery area (using gdalwarp?).
-
 Inside qgis:
 
-- run the GRASS neighbours function with 3 neighbours (median, not average)
-- run GDAL sieve to remove areas smaller than 32 pixels
-- run the GRASS neighbours function again with 3 neighbours (median, not average)
-- run GDAL sieve again to remove areas smaller than 32 pixels
+- go to Raster/Projections/Warp (Reproject) and reproject to EPSG:4326/WGS 84
+- go to Raster/Extraction/Clip Raster by Extent and clip to the desired area (min lon, max lon, min lat, max lat)
+
+In the qgis toolbox:
+
+- run the GRASS/Raster/r.neighbours function with 3 neighbours (median, not average)
+- run GDAL/Raster analysis/Sieve to remove areas smaller than 32 pixels
+- run the GRASS/Raster/r.neighbours function again with 3 neighbours (median, not average)
+- run GDAL/Raster analysis/Sieve again to remove areas smaller than 32 pixels
 - use GRASS r.to.vect to vectorise, selecting rounded corners
 - (Could also try GRASS v.generalize, but not doing that for now.)
+- save the layer in ESRI Shapefile format
 
 Put the result in source/vector/<whatever>.shp
 
