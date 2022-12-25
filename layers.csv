@@ -15,7 +15,7 @@ lc-shrubland-polar,no,area,HerbTundra
 lc-shrubland-temperate,yes,area,ScrubCover
 lc-shrubland-tropical,no,area,
 lc-snow-ice,yes,area,SnowCover
-lc-urban,yes,area,Town
+lc-urban,yes,area,Urban
 lc-water,yes,area,GrassCover
 lc-wetland,yes,area,GrassCover
 osm-abandoned-railway,yes,line,ShrubGrassCover,9

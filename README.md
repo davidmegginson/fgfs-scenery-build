@@ -7,7 +7,7 @@ A Makefile drives the process. Note these variables at the top of the Makefile:
 
 ```
 # What area are we building?
-AREA=w080n40
+BUCKET=w080n40
 MIN_LON=-80
 MAX_LON=-70
 MIN_LAT=40
@@ -17,12 +17,12 @@ MAX_LAT=50
 You can override these whenever you need to work with a different area, e.g.
 
 ```
-$ make AREA=w090n30 MIN_LON=-95 MAX_LON=-94 MIN_LAT=35 MAX_LAT=36 all
+$ make BUCKET=w090n30 MIN_LON=-95 MAX_LON=-94 MIN_LAT=35 MAX_LAT=36 all
 ```
 
 Once you have the data prepared, ``make all`` will run through the following steps:
 
-1. Generate and fit elevation data in work/SRTM-3 (``make elevations``)
+1. Generate and fit elevation data in work/SRTM-3 (``make elevations`` and optionally, ``make cliffs``)
 2. Generate airport objects and areas (``make airports``)
 3. Generate the landmass layer (``make landmass``)
 4. Generate the OSM and landcover layers (``make layers``)
@@ -32,6 +32,16 @@ All of the steps but ``make scenery`` will skip anything that's already built un
 
 All of the steps will leave scenery alone that's already built for different areas.
 
+### Splitting the work
+
+The TerraGear scenery tools often fail over large areas. The do-make.sh script allows you to split the work into several smaller jobs:
+
+```
+$ sh do-make.sh <bucket> <min-lon> <min-lat> <max-lon> <max-lat> <step> <target>
+```
+
+_bucket_ is the 10x10 bucket being built, e.g. w080n40. _step_ is the number of degrees (squared) to process at once, so a step of 2 will process a 2x2 area. _target_ is the Makefile target to run repeatedly over each area.
+
 
 ## Data download and preparation
 
@@ -39,11 +49,15 @@ All of the steps will leave scenery alone that's already built for different are
 
 Download SRTM-3 from e.g. https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip (needs login)
 
+Place the data in ``data/SRTM-3`` in the appropriate buckets.
+
 ### Airports preparation
 
-Create the directory ``./data/airports`` and copy the ``Airports/apt.dat.gz`` copy from the FlightGear distribution into it.
+Create the directory ``data/airports`` and copy the ``Airports/apt.dat.gz`` copy from the FlightGear distribution into it.
 
 Run ``make prepare-airports`` to generate a new airports file for scenery building (requires Python3).
+
+Place any new airport files in ``data/airports/modified/`` (these will override airports in ``apt.dat.gz``).
 
 ### OSM preparation
 

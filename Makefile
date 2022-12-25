@@ -64,33 +64,33 @@ landmass-rebuild: landmass-clean landmass
 
 layers: areas lines
 
-clean-layers:
+layers-clean:
 	rm -rfv ${WORK_DIR}/osm-*/${BUCKET}/ ${WORK_DIR}/lc-*/${BUCKET}/
 
-layers-rebuild: clean-layers areas lines
+layers-rebuild: layers-clean areas lines
 
 areas:
 	for row in $$(grep ,area, layers.csv); do \
-		row=`echo $$row | sed -e 's/\r//'`; \
-		if echo $$row | grep ',yes,area,' > /dev/null; then \
-			F=($${row//,/ }); \
-			if [ ! -e work/$${F[0]}/${BUCKET}/ ]; then \
-				ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-					work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
-			fi; \
-		fi; \
+	  row=`echo $$row | sed -e 's/\r//'`; \
+	  if echo $$row | grep ',yes,area,' > /dev/null; then \
+	    F=($${row//,/ }); \
+	    if [ ! -e work/$${F[0]}/${BUCKET}/ ]; then \
+	      ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
+		work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	    fi; \
+	  fi; \
 	done
 
 lines:
 	for row in $$(grep ,line, layers.csv); do \
-		row=`echo $$row | sed -e 's/\r//'`; \
-		if echo $$row | grep ',yes,line,' > /dev/null; then \
-			F=($${row//,/ }); \
-			if [ ! -e work/$${F[0]}/${BUCKET}/ ]; then \
-				ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
-					work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
-			fi; \
-		fi; \
+	  row=`echo $$row | sed -e 's/\r//'`; \
+	  if echo $$row | grep ',yes,line,' > /dev/null; then \
+	    F=($${row//,/ }); \
+	    if [ ! -e work/$${F[0]}/${BUCKET}/ ]; then \
+	      ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
+		work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	    fi; \
+	  fi; \
 	done
 
 # Special handling for cliffs (currently skipping; causes scenery building to crash later)
@@ -101,21 +101,10 @@ cliffs:
 
 # Pull it all together and generate scenery in the output directory
 scenery:
-	min_lat=${MIN_LAT}; \
-	while [ $$min_lat -lt ${MAX_LAT} ]; do \
-	  min_lon=${MIN_LON}; \
-	  while [ $$min_lon -lt ${MAX_LON} ]; do \
-	    echo Building $$min_lat $$min_lon; \
-	    tg-construct --threads=${MAX_THREADS} --priorities=./default_priorities.txt --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
-		    --ignore-landmass \
-		    --min-lon=$$min_lon --max-lon=$$(expr $$min_lon + 1) --min-lat=$$min_lat --max-lat=$$(expr $$min_lat + 1) \
-		    Default AirportObj AirportArea SRTM-3 $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-); \
-	    min_lon=$$(expr $$min_lon + 1); \
-	  done; \
-	  min_lat=$$(expr $$min_lat + 1); \
-	done
-	cp -v ${DATA_DIR}/airports/modified/*.dat ${OUTPUT_DIR}/NavData/apt/
-
+	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
+	  --min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT} \
+	  --priorities=./default_priorities.txt \
+	  Default AirportObj AirportArea SRTM-3 $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-); \
 
 #
 # Data preparation (does not require TerraGear)
