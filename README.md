@@ -37,10 +37,18 @@ All of the steps will leave scenery alone that's already built for different are
 The TerraGear scenery tools often fail over large areas. The do-make.sh script allows you to split the work into several smaller jobs:
 
 ```
-$ sh do-make.sh <bucket> <min-lon> <min-lat> <max-lon> <max-lat> <step> <target>
+$ sh do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <target>
 ```
 
-_bucket_ is the 10x10 bucket being built, e.g. w080n40. _step_ is the number of degrees (squared) to process at once, so a step of 2 will process a 2x2 area. _target_ is the Makefile target to run repeatedly over each area.
+_target_ is the Makefile target to run repeatedly over each area.
+
+If you want to go by bigger that 1x1 degree squares, set the environment variable _STEP_. For example,
+
+```
+% STEP=2 do-make.sh -80 40 -70 50 layers
+```
+
+will go through in 2x2 degree increments instead of 1x1 degree.
 
 
 ## Data download and preparation

@@ -137,3 +137,7 @@ shapefiles-clean:
 	rm -fv ${DATA_DIR}/shapefiles/${BUCKET}/osm-*
 
 shapefiles-rebuild: shapefiles-clean shapefiles-prepare
+
+# Test that do-make.sh is working
+echo:
+	echo BUCKET=${BUCKET} MIN_LON=${MIN_LON} MIN_LAT=${MIN_LAT} MAX_LON=${MAX_LON} MAX_LAT=${MAX_LAT}
