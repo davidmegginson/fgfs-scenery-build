@@ -22,10 +22,8 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 
 # Build elevation data from the SRTM-3x
 elevations:
-	if [ ! -d ${WORK_DIR}/SRTM-3/${BUCKET} ]; then \
-	  gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt; \
-	  terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1; \
-	fi
+	gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt; \
+	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1; \
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
@@ -35,11 +33,9 @@ elevations-rebuild: elevations-clean elevations
 
 # Build the airport areas and objects
 airports:
-	if [ ! -d ${WORK_DIR}/AirportObj/${BUCKET}/ ]; then \
-	  genapts850 --input=${DATA_DIR}/airports/modified.apt.dat --work=${WORK_DIR} --threads=${MAX_THREADS} \
-		--dem-path=SRTM-3 \
-		--min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT}; \
-	fi
+	genapts850 --input=${DATA_DIR}/airports/modified.apt.dat --work=${WORK_DIR} --threads=${MAX_THREADS} \
+	      --dem-path=SRTM-3 \
+	      --min-lon=${MIN_LON} --max-lon=${MAX_LON} --min-lat=${MIN_LAT} --max-lat=${MAX_LAT}; \
 
 airports-clean:
 	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/
@@ -49,9 +45,7 @@ airports-rebuild: airports-clean airports
 
 # Build the default landmass
 landmass:
-	if [ ! -d ${WORK_DIR}/Default/${BUCKET}/ ]; then \
-	  ogr-decode ${DECODE_OPTS} --area-type Default work/Default ${DATA_DIR}/land-polygons-split-4326/; \
-	fi
+	ogr-decode ${DECODE_OPTS} --area-type Default work/Default ${DATA_DIR}/land-polygons-split-4326/; \
 
 landmass-clean:
 	rm -rvf ${WORK_DIR}/Default/${BUCKET}/
@@ -74,10 +68,8 @@ areas:
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,area,' > /dev/null; then \
 	    F=($${row//,/ }); \
-	    if [ ! -e work/$${F[0]}/${BUCKET}/ ]; then \
-	      ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-		work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
-	    fi; \
+	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
+	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
 	  fi; \
 	done
 
@@ -86,10 +78,8 @@ lines:
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,line,' > /dev/null; then \
 	    F=($${row//,/ }); \
-	    if [ ! -e work/$${F[0]}/${BUCKET}/ ]; then \
-	      ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
-		work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
-	    fi; \
+	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
+	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
 	  fi; \
 	done
 
