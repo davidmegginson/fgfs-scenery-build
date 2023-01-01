@@ -54,7 +54,6 @@ Rock			other	# Rock
 Lava			other	# Lava-covered area
 OpenMining		other	# OpenMining
 Greenspace		other
-SubUrban		other	# Densely-populated city or large town
 
 # USGS Land Covers
 # These are low-priority, since known polygons should always win.
@@ -96,8 +95,10 @@ Heath			other
 Burnt			other
 SnowCover		other	# Snow or Ice
 
-Town		other	# Urban and Built-Up Land
+# Moved down so that urban forests can pop
 Urban			other	# Densely-populated city or large town
+SubUrban		other	# Densely-populated city or large town
+Town                    other	# Urban and Built-Up Land
 
 Island			island	# any island area not covered otherwise
 Default			landmass # any land area not covered otherwise
