@@ -108,10 +108,11 @@ areas:
 	done
 
 # Single area
-MATERIAL ?= TOWN
-LAYER ?= lc-urban
-single-area:
-	ogr-decode ${DECODE_OPTS} --area-type ${MATERIAL} work/${LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${LAYER}.shp
+AREA_MATERIAL ?= Town
+AREA_LAYER ?= lc-urban
+single-layer:
+	ogr-decode ${DECODE_OPTS} --area-type ${AREA_MATERIAL} work/${AREA_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${AREA_LAYER}.shp
+
 
 # Build line layers
 lines:
@@ -124,6 +125,15 @@ lines:
 	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
 	  fi; \
 	done
+
+# Single line
+LINE_MATERIAL ?= Road-Secondary
+LINE_LAYER ?= osm-motorway-highway
+LINE_WIDTH ?= 10
+single-line:
+	ogr-decode ${DECODE_OPTS} --texture-lines --line-width ${LINE_WIDTH} --area-type ${LINE_MATERIAL} \
+	  work/${LINE_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${LINE_LAYER}.shp;\
+
 
 #
 # Special handling for cliffs
