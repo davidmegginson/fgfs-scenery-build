@@ -3,8 +3,11 @@
 # Merge airports into a single file
 ########################################################################
 
-ORIGINAL=data/airports/original
-MODIFIED=data/airports/modified
+BUCKET=${BUCKET:-w080n40}
+echo $BUCKET 1>&2
+
+SPLIT=data/airports/split
+MODIFIED=data/airports/modified/$BUCKET
 
 cat <<__EOF__
 I
@@ -13,15 +16,10 @@ nnn
 
 __EOF__
 
-# Remove duplicates
-for f in $MODIFIED/*.apt.dat; do
-    rm -fv data/airports/original/`basename $f` 1>&2
-done
-
-# Send the modified airports first
-cat $MODIFIED/*.apt.dat | egrep -v '^99'
+# Override with modified airports
+cp -v $MODIFIED/*.apt.dat $SPLIT 1>&2
 
 # Send the original airports next
-cat $ORIGINAL/*.apt.dat | egrep -v '^99'
+cat $SPLIT/*.apt.dat | egrep -v '^99'
 
 echo '99'

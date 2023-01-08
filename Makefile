@@ -32,9 +32,9 @@ LANDMASS_SOURCE=../land-polygons-split-4326/land_polygons.shp
 # Top-level targets
 #
 
-all: elevations airports landmass layers cliffs scenery
+all: elevations airports landmass layers cliffs scenery thresholds
 
-all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild scenery
+all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild scenery thresholds
 
 ########################################################################
 # Scenery building
@@ -154,6 +154,16 @@ scenery:
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
 
+#
+# Generate custom threshold files for modified airports
+#
+
+thresholds:
+	python3 gen-thresholds.py ${OUTPUT_DIR}/Airports ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat
+
+thresholds-clean:
+	rm -rf ${DATA_DIR}/Airports
+
 
 ########################################################################
 # Data preparation (does not require TerraGear)
@@ -178,8 +188,8 @@ landmass-source-rebuild: landmass-source-clean landmass-source-prepare
 #
 
 airports-source-prepare:
-	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 split-airports.py ${DATA_DIR}/airports/original
-	sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
+	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 split-airports.py ${DATA_DIR}/airports/split
+	BUCKET=${BUCKET} sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
 
 airports-source-clean:
 	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
