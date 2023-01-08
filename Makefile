@@ -153,7 +153,7 @@ scenery:
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
-	cp -v gen-symlinks.sh ${OUTPUT_DIR}
+	cp -v gen-symlinks.sh clean-symlinks.sh ${OUTPUT_DIR}
 
 #
 # Generate custom threshold files for modified airports
