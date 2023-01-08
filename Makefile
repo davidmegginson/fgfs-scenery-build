@@ -15,7 +15,7 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 # Build configuration variables
 #
 
-MAX_THREADS=1
+MAX_THREADS=3
 DATA_DIR=./data
 WORK_DIR=./work
 OUTPUT_DIR=./output
