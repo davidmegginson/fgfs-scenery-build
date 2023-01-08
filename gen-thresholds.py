@@ -186,7 +186,7 @@ def add_bearings(runway):
             (float(runway['le_lat']), float(runway['le_lon']),),
             (float(runway['he_lat']), float(runway['he_lon']),),
         ))
-        runway['he_bearing'] = ":0.8f".format(calculate_initial_compass_bearing(
+        runway['he_bearing'] = "{:0.8f}".format(calculate_initial_compass_bearing(
             (float(runway['he_lat']), float(runway['he_lon']),),
             (float(runway['le_lat']), float(runway['le_lon']),),
         ))
