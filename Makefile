@@ -45,8 +45,8 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 #
 
 elevations:
-	gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt; \
-	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1; \
+	gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
+	terrafit ${WORK_DIR}/SRTM-3/${BUCKET} -m 50 -x 22500 -e 1
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
