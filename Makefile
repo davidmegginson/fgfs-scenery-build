@@ -25,6 +25,7 @@ DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 # Data sources
 #
 
+LC_DIR=../land-cover
 OSM_DIR=../osm
 LANDMASS_SOURCE=../land-polygons-split-4326/land_polygons.shp
 
@@ -34,7 +35,7 @@ LANDMASS_SOURCE=../land-polygons-split-4326/land_polygons.shp
 
 all: elevations airports landmass layers cliffs scenery thresholds
 
-all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild scenery thresholds
+all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild cliffs scenery thresholds
 
 ########################################################################
 # Scenery building
@@ -46,12 +47,16 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 
 elevations:
 	gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
-	terrafit ${WORK_DIR}/SRTM-3/${BUCKET} -m 50 -x 22500 -e 1
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
 
 elevations-rebuild: elevations-clean elevations
+
+
+fit-elevations:
+	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
+
 
 
 #
@@ -110,7 +115,7 @@ areas:
 # Single area
 AREA_MATERIAL ?= Town
 AREA_LAYER ?= lc-urban
-single-layer:
+single-area:
 	ogr-decode ${DECODE_OPTS} --area-type ${AREA_MATERIAL} work/${AREA_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${AREA_LAYER}.shp
 
 
@@ -140,8 +145,11 @@ single-line:
 #
 
 cliffs:
-	cliff-decode ${WORK_DIR}/SRTM-3 ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
-	rectify_height --work-dir=${WORK_DIR} --height-dir=SRTM-3 ${LATLON} --min-dist=100
+	cliff-decode --spat ${SPAT} ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
+
+# optional step (probably not worth it for non-mountainous terrain)
+rectify-cliffs:
+	rectify_height ${LATLON} --work-dir=${WORK_DIR}/${BUCKET} --height-dir=SRTM-3 --min-dist=100
 
 #
 # Pull it all together and generate scenery in the output directory
@@ -156,7 +164,7 @@ scenery:
 	cp -v gen-symlinks.sh clean-symlinks.sh ${OUTPUT_DIR}
 
 #
-# Generate custom threshold files for modified airports
+# Generate custom threshold and navdata files for modified airports
 #
 
 thresholds:
@@ -164,6 +172,10 @@ thresholds:
 
 thresholds-clean:
 	rm -rf ${DATA_DIR}/Airports
+
+navdata:
+	mkdir -p ${OUTPUT_DIR}/NavData/apt
+	cp -v ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat ${OUTPUT_DIR}/NavData/apt
 
 
 ########################################################################
@@ -202,7 +214,22 @@ airports-source-rebuild: airports-source-clean airports-source-rebuild
 # Prepare landcover shapefiles
 #
 
-shapefiles-prepare:
+lc-shapefiles-prepare:
+	grep ',yes,' lc-extracts.csv \
+	| while read -r row; do \
+	  row=$$(echo "$$row" | sed -e 's/\r//'); \
+	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
+	  dest=$$(echo "$$row" | sed -e 's/^.*,//'); \
+	  source_dir=${LC_DIR}; \
+          dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
+	  mkdir -p $$dest_dir; \
+	  echo "Building $$dest for ${BUCKET}..."; \
+	  ogr2ogr $$dest_dir/$$dest $$source_dir/${BUCKET}.shp -sql "select * from ${BUCKET} where value='$$value'"; \
+	done
+
+# TODO lc shapefiles
+
+osm-shapefiles-prepare:
 	grep ',yes,' osm-extracts.csv \
 	| while read -r row; do \
 	    row=`echo "$$row" | sed -e 's/\r//'`; \
@@ -219,10 +246,10 @@ shapefiles-prepare:
 	    fi; \
 	  done
 
-shapefiles-clean:
+osm-shapefiles-clean:
 	rm -fv ${DATA_DIR}/shapefiles/${BUCKET}/osm-*
 
-shapefiles-rebuild: shapefiles-clean shapefiles-prepare
+osm-shapefiles-rebuild: osm-shapefiles-clean osm-shapefiles-prepare
 
 
 ########################################################################

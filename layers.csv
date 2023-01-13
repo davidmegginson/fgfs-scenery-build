@@ -13,11 +13,11 @@ lc-shrubland-barren,yes,area,BarrenCover
 lc-shrubland-moss,yes,area,Scrub
 lc-shrubland-polar,no,area,HerbTundra
 lc-shrubland-temperate,yes,area,ScrubCover
-lc-shrubland-tropical,no,area,
+lc-shrubland-tropical,no,area,ScrubCover
 lc-snow-ice,yes,area,SnowCover
 lc-urban,yes,area,Town
-lc-water,yes,area,GrassCover
-lc-wetland,yes,area,GrassCover
+lc-water,no,area,Default
+lc-wetland,no,area,Default
 osm-abandoned-railway,yes,line,ShrubGrassCover,9
 osm-airfield-aeroway,no,area,GrassCover
 osm-airfield-military,no,area,GrassCover

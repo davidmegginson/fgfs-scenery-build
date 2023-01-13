@@ -53,7 +53,7 @@ will go through in 2x2 degree increments instead of 1x1 degree.
 Use the _do-make.sh_ script only for later steps in scenery building; earlier steps (like elevations and airports) need to work on the entire bucket.
 
 
-## Making elevations
+### Making elevations
 
 Once you've prepared the elevation data, run _make_ with the ``elevations`` target, and _BUCKET_ set to the bucket you're building, e.g.
 
@@ -61,25 +61,18 @@ Once you've prepared the elevation data, run _make_ with the ``elevations`` targ
 $ make BUCKET=w090n40 elevations
 ```
 
-This will run _gdalchop_ to prepare the elevation data, the _terrafit_ to smooth it out. Expect it to run for a few minutes.
+This will run _gdalchop_ to prepare the elevation data. Expect it to run for a few minutes.
+
+Once your done building elevations, run _make_ with the ``fit-elevations`` target. That will refit elevations for *all* buckets, and again, runs for a while:
+
+```
+$ make fit-elevations
+```
 
 If you want to remove all the data for a bucket, use the _elevations-clean_ target instead; if you want to remove and rebuild in a single step, use the _elevations-rebuild- target.
 
 
-## Making airports
-
-Once you've prepared the airport data, run _make_ with the ``airports`` target, and _MIN\_LON_, _MIN\_LAT_, _MAX\_LON_ and _MAX\_LAT_ set to the area you're building, e.g.
-
-```
-$ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 airports
-```
-
-This will run the _genapts850_ command to build the airport areas and objects within those bounds, overriding the default airports with any custom ones you supplied during the preparation process.
-
-If you want to remove all the airports for a bucket, use the _airports-clean_ target (and supply the _BUCKET_). If you want to rebuild, use the _airports-rebuild_ target (and supply both lat/lon bounds and the bucket).
-
-
-## Making the default landmass
+### Making the default landmass
 
 Once you've prepared the default landmass data, run _make_ with the _landmass_ target, and _BUCKET_ set to the bucket you're building, e.g.
 
@@ -91,7 +84,7 @@ This will run the _ogr\_decode_ command to build the default landmass for your b
 
 If you want to delete the landmass, use the _landmass-clean_ target; if you want to delete and rebuild in a single step, use the _landmass-rebuild_ target.
 
-## Making the layers
+### Making the layers
 
 Once you've prepared the landcover and OSM layers, use the _do-make.sh_ script to build layers degree by degree (if you attempt the whole bucket at once, it will generally fail). For example
 
@@ -106,6 +99,31 @@ Using _areas_ or _lines_ as the target at the end of the command will build only
 ```
 $ AREA_MATERIAL=Town AREA_LAYER=lc-urban sh do-make.sh -90 40 -80 50 single-layer
 ```
+
+### Making cliffs
+
+This step is optional, but makes nicer scenery. If you've included the osm-cliff-natural layer in the previous step (and you should), you can give the scenery engine hints to allow steeper cliffs rather than smoothing them out. You will need to provide both lat/lon and the bucket:
+
+```
+$ make BUCKET=w090n40 MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 cliffs
+```
+
+This command will run both _cliff-decode_ and _rectify\_height_ with the appropriate arguments.
+
+### Making airports
+
+(Note: this should run _after_ cliffs, since making cliffs can affect elevation data.)
+
+Once you've prepared the airport data, run _make_ with the ``airports`` target, and _MIN\_LON_, _MIN\_LAT_, _MAX\_LON_ and _MAX\_LAT_ set to the area you're building, e.g.
+
+```
+$ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 airports
+```
+
+This will run the _genapts850_ command to build the airport areas and objects within those bounds, overriding the default airports with any custom ones you supplied during the preparation process.
+
+If you want to remove all the airports for a bucket, use the _airports-clean_ target (and supply the _BUCKET_). If you want to rebuild, use the _airports-rebuild_ target (and supply both lat/lon bounds and the bucket).
+
 
 ## Data download and preparation
 
@@ -134,7 +152,7 @@ The Makefile expects to find OSM shapefiles for your bucket in the directory ../
 If you have them somewhere else, you can override OSM_DIR on the command line, e.g.
 
 ```
-$ make OSM_DIR=/usr/share/osm shapefiles-prepare
+$ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
 ```
 
 ### Landcover preparation
@@ -158,7 +176,9 @@ In the qgis toolbox:
 - (Could also try GRASS v.generalize, but not doing that for now.)
 - save the layer in ESRI Shapefile format
 
-Put the result in source/vector/<whatever>.shp
+Next, generate the input polygons for FlightGear, e.g.
 
-Next, generate the input polygons for FlightGear. Put the appropriate source in extract-landcover.sh, check the type mappings in landcover.csv, and then run extract-landcover.sh
+```
+$ make BUCKET=w090n40 lc-shapefiles-prepare
+```
 
