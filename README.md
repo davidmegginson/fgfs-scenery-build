@@ -161,13 +161,17 @@ This section describes the default background, for when we don't have any more-d
 
 We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/
 
+Run each step on the output from the previous step.
+
 Inside qgis:
 
-- go to Raster/Projections/Warp (Reproject) and reproject to EPSG:4326/WGS 84
+- go to Raster/Projections/Warp (Reproject) and reproject to EPSG:4326/WGS 84 using "Nearest neighbours" (fast) or "Mode" (slower, but maybe better; try both and see which you prefer)
 - go to Raster/Extraction/Clip Raster by Extent and clip to the desired area (min lon, max lon, min lat, max lat)
 
 In the qgis toolbox:
 
+- run the GRASS/Raster/r.null function to change value 18 (water) to null
+- run GRASS/Raster/r.fill.stats to partly fill in the now-empty water spaces. Set "Statistic for interpolated cell values" to "mode", check "Preserve original cell values". (Optionally, you may delete the extra "Uncertainty Map", and to copy the style from a previous step to restore the original colours)
 - run the GRASS/Raster/r.neighbours function with 3 neighbours (median, not average)
 - run GDAL/Raster analysis/Sieve to remove areas smaller than 32 pixels
 - run the GRASS/Raster/r.neighbours function again with 3 neighbours (median, not average)
