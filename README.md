@@ -171,13 +171,9 @@ Inside qgis:
 In the qgis toolbox:
 
 - run the GRASS/Raster/r.null function to change value 18 (water) to null
-- run GRASS/Raster/r.fill.stats to partly fill in the now-empty water spaces. Set "Statistic for interpolated cell values" to "mode", check "Preserve original cell values". (Optionally, you may delete the extra "Uncertainty Map", and to copy the style from a previous step to restore the original colours)
 - run the GRASS/Raster/r.neighbours function with 3 neighbours (median, not average)
-- run GDAL/Raster analysis/Sieve to remove areas smaller than 32 pixels
-- run the GRASS/Raster/r.neighbours function again with 3 neighbours (median, not average)
-- run GDAL/Raster analysis/Sieve again to remove areas smaller than 32 pixels
+- run the GRASS/Raster/r.neighbours function with 3 neighbours again (median, not average)
 - use GRASS r.to.vect to vectorise, selecting rounded corners
-- (Could also try GRASS v.generalize, but not doing that for now.)
 - save the layer in ESRI Shapefile format
 
 Next, generate the input polygons for FlightGear, e.g.

@@ -101,8 +101,21 @@ layers-clean:
 layers-rebuild: layers-clean areas lines
 
 # Build area layers
-areas:
-	for row in $$(grep ,area, layers.csv); do \
+areas: lc-areas osm-areas
+
+lc-areas:
+	for row in $$(grep lc- layers.csv); do \
+	  row=`echo $$row | sed -e 's/\r//'`; \
+	  if echo $$row | grep ',yes,area,' > /dev/null; then \
+	    readarray -d ',' -t F <<< $$row; \
+	    echo Trying $${F[0]}; \
+	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
+	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	  fi; \
+	done
+
+osm-areas:
+	for row in $$(grep osm- layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,area,' > /dev/null; then \
 	    readarray -d ',' -t F <<< $$row; \
