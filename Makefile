@@ -16,6 +16,7 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 #
 
 MAX_THREADS=3
+SOURCE_DIR=./source
 DATA_DIR=./data
 WORK_DIR=./work
 OUTPUT_DIR=./fgfs-canada-us-scenery
@@ -46,7 +47,9 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 #
 
 elevations:
-	gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
+	for file in ../srtm-3/unpacked/*.hgt; do hgtchop 3 $file ${WORK_DIR}/SRTM-3; done
+
+# gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
@@ -162,7 +165,7 @@ cliffs:
 
 # optional step (probably not worth it for non-mountainous terrain)
 rectify-cliffs:
-	rectify_height ${LATLON} --work-dir=${WORK_DIR}/${BUCKET} --height-dir=SRTM-3 --min-dist=100
+	rectify_height ${LATLON} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
 
 #
 # Pull it all together and generate scenery in the output directory
