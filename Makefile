@@ -18,7 +18,7 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 MAX_THREADS=3
 DATA_DIR=./data
 WORK_DIR=./work
-OUTPUT_DIR=./output
+OUTPUT_DIR=./fgfs-canada-us-scenery
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
 #
