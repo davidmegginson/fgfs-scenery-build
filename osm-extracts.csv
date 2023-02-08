@@ -36,3 +36,5 @@ osm-forest-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'f
 osm-meadow-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'meadow' and OGR_GEOM_AREA > 0.0001"
 osm-orchard-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'orchard' and OGR_GEOM_AREA > 0.0001"
 osm-vineyard-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'vineyard' and OGR_GEOM_AREA > 0.0001"
+osm-airfield-aeroway.shp,yes,aeroway.shp,"select * from aeroway where aeroway = 'airfield'"
+osm-airfield-military.shp,yes,military.shp,"select * from military where military = 'airfield'"
