@@ -28,6 +28,7 @@ DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
 LC_DIR=../land-cover
 OSM_DIR=../osm
+SRTM_SOURCE=${SOURCE_DIR}/SRTM-3/unpacked
 LANDMASS_SOURCE=../land-polygons-split-4326/land_polygons.shp
 
 #
@@ -47,18 +48,21 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 #
 
 elevations:
-	for file in ../srtm-3/unpacked/*.hgt; do hgtchop 3 $file ${WORK_DIR}/SRTM-3; done
+	for file in ${SRTM_SOURCE}/*.hgt; do hgtchop 3 $$file ${WORK_DIR}/SRTM-3; done
 
 # gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
 
+elevations-clean-all:
+	rm -rfv ${WORK_DIR}/SRTM-3/*
+
 elevations-rebuild: elevations-clean elevations
 
 
 fit-elevations:
-	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
+	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
 
 
 
@@ -161,7 +165,7 @@ single-line:
 #
 
 cliffs:
-	cliff-decode --spat ${SPAT} ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
+	cliff-decode --threads --spat ${SPAT} ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
 
 # optional step (probably not worth it for non-mountainous terrain)
 rectify-cliffs:
@@ -266,6 +270,9 @@ osm-shapefiles-clean:
 	rm -fv ${DATA_DIR}/shapefiles/${BUCKET}/osm-*
 
 osm-shapefiles-rebuild: osm-shapefiles-clean osm-shapefiles-prepare
+
+archive:
+	tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${OUTPUT_DIR}/README.md ${OUTPUT_DIR}/UNLICENSE.md ${OUTPUT_DIR}/clean-symlinks.sh ${OUTPUT_DIR}/gen-symlinks.sh ${OUTPUT_DIR}/Airports ${OUTPUT_DIR}/NavData ${OUTPUT_DIR}/Terrain/${BUCKET}
 
 
 ########################################################################
