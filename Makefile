@@ -15,7 +15,7 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 # Build configuration variables
 #
 
-MAX_THREADS=3
+MAX_THREADS=10
 SOURCE_DIR=./source
 DATA_DIR=./data
 WORK_DIR=./work
@@ -48,7 +48,9 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 #
 
 elevations:
-	for file in ${SRTM_SOURCE}/*.hgt; do hgtchop 3 $$file ${WORK_DIR}/SRTM-3; done
+	for file in ${SRTM_SOURCE}/*.hgt; do \
+		hgtchop 3 $$file ${WORK_DIR}/SRTM-3; \
+	done
 
 # gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
 
@@ -71,7 +73,7 @@ fit-elevations:
 #
 
 airports:
-	genapts850 --input=${DATA_DIR}/airports/modified.apt.dat ${LATLON} \
+	genapts850 --threads --input=${DATA_DIR}/airports/modified.apt.dat ${LATLON} \
 	  --work=${WORK_DIR} --threads=${MAX_THREADS} --dem-path=SRTM-3
 
 airports-clean:
@@ -165,7 +167,7 @@ single-line:
 #
 
 cliffs:
-	cliff-decode --threads --spat ${SPAT} ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
+	cliff-decode --log-level bulk --all-threads --spat ${SPAT} ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
 
 # optional step (probably not worth it for non-mountainous terrain)
 rectify-cliffs:
@@ -176,7 +178,7 @@ rectify-cliffs:
 #
 
 scenery:
-	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
+	tg-construct --threads --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
 	  ${LATLON} --priorities=./default_priorities.txt \
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
