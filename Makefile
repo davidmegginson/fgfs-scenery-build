@@ -73,7 +73,7 @@ fit-elevations:
 #
 
 airports:
-	genapts850 --threads --input=${DATA_DIR}/airports/modified.apt.dat ${LATLON} \
+	genapts850 --threads --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} \
 	  --work=${WORK_DIR} --threads=${MAX_THREADS} --dem-path=SRTM-3
 
 airports-clean:
