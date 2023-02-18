@@ -1,6 +1,5 @@
-/*.qgz
-/Scenery
 /data/SRTM-3
+/data/airports
 /data/landmass
 /data/airports/modified.apt.dat
 /data/airports/split

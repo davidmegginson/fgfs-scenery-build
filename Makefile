@@ -15,7 +15,7 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 # Build configuration variables
 #
 
-MAX_THREADS=10
+MAX_THREADS=3
 SOURCE_DIR=./source
 DATA_DIR=./data
 WORK_DIR=./work
@@ -26,6 +26,7 @@ DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 # Data sources
 #
 
+AIRPORTS_SOURCE=source/airports/apt.dat
 LC_DIR=../land-cover
 OSM_DIR=../osm
 SRTM_SOURCE=${SOURCE_DIR}/SRTM-3/unpacked
@@ -222,12 +223,19 @@ landmass-source-rebuild: landmass-source-clean landmass-source-prepare
 # Prepare airports
 #
 
-airports-source-prepare:
-	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 split-airports.py ${DATA_DIR}/airports/split
-	BUCKET=${BUCKET} sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
+airports-prepare:
+	mkdir -p data/airports/${BUCKET}/
+	cat ${AIRPORTS_SOURCE} \
+	| python3 downgrade-apt.py \
+	| python3 filter-airports.py ${BUCKET} \
+	> data/airports/${BUCKET}/apt.dat
 
-airports-source-clean:
-	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
+#airports-source-prepare:
+#	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 split-airports.py ${DATA_DIR}/airports/split
+#	BUCKET=${BUCKET} sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
+
+#airports-source-clean:
+#	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
 
 airports-source-rebuild: airports-source-clean airports-source-rebuild
 
