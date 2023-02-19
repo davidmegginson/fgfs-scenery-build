@@ -1,6 +1,99 @@
 North American Scenery
 ======================
 
+## Configuration
+
+A Makefile drives the process. Note these variables at the top of the Makefile:
+
+```
+# What area are we building?
+BUCKET=w080n40
+MIN_LON=-80
+MAX_LON=-70
+MIN_LAT=40
+MAX_LAT=50
+```
+
+You can override these whenever you need to work with a different area, e.g.
+
+```
+$ make BUCKET=w090n30 MIN_LON=-95 MAX_LON=-94 MIN_LAT=35 MAX_LAT=36 scenery
+```
+
+
+## Data download and preparation
+
+The scenery requires GIS data from several sources
+
+* An elevation raster (DEM) to define the shape of the landscape. We use the 3 arc second SRTM-3 data, which includes an elevation point (nominally) every 90 metres. Higher-resolution DEMs are available, but combined with the other data, they may make the scenery too complex and slow down most graphics cards. If you're building scenery for a ground-based simulation, then the higher resolutions might be appropriate.
+* The MODIS-250 250m Canada/US landcover raster, which provides background landcover to fill in any gaps in more-detailed OSM data (see below).
+* Airport data in the [apt.dat format](http://developer.x-plane.com/wp-content/uploads/2015/11/XP-APT1000-Spec.pdf) that FlightGear shares with the commercial X-Plane simulator. This data defines the shape of runways, taxiways, etc., as well as other information.
+* OpenStreetMap (OSM) data in [PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the area where you want to build scenery. This data defines detailed landcover (like parks and forests), lakes and rivers, as well as linear features like roads, railroads, and powerlines.
+    * (Special case) OSM landmass data defining the boundaries between land and ocean (no scenery outside these polygons will be built)
+
+### SRTM-3 preparation
+
+Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). 
+
+Unzip and place all of the *.hgt files together in ``data/SRTM-3/``
+
+If you are missing *.hgt files for any of the areas you're building, you will end up with flat scenery all at sea level.
+
+
+### Airports preparation
+
+Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
+
+Uncompress the file (if needed) and rename to ``source/airports/apt.dat``
+
+This file can be very large, depending on where you source it from. The next step is to extract the areas you need into buckets under ``data/airports/`` using the ``./downgrade-airports.py`` (if you're using an apt.dat format after 1000) and ``./filter-airports.py`` Python3 scripts, or simply run ``make airports-prepare`` defining the bucket you need. Example:
+
+```
+$ make BUCKET=w090n40 airports-prepare
+```
+
+This will downgrade the file to apt.dat 1000 format, extract the airports inside the 10x10 deg w090n40 area, and place the result in ``data/airports/w090n40/apt.dat``
+
+
+### OSM preparation
+
+(TODO)
+
+The Makefile expects to find OSM shapefiles for your bucket in the directory ../osm, e.g. ``../osm/shapefiles/w080n40/highways.shp``
+
+If you have them somewhere else, you can override OSM_DIR on the command line, e.g.
+
+```
+$ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
+```
+
+### Landcover preparation
+
+This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
+
+We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/
+
+Run each step on the output from the previous step.
+
+Inside qgis:
+
+- go to Raster/Projections/Warp (Reproject) and reproject to EPSG:4326/WGS 84 using "Nearest neighbours" (fast) or "Mode" (slower, but maybe better; try both and see which you prefer)
+- go to Raster/Extraction/Clip Raster by Extent and clip to the desired area (min lon, max lon, min lat, max lat)
+
+In the qgis toolbox:
+
+- run the GRASS/Raster/r.null function to change value 18 (water) to null
+- run the GRASS/Raster/r.neighbours function with 3 neighbours (median, not average)
+- run the GRASS/Raster/r.neighbours function with 3 neighbours again (median, not average)
+- use GRASS r.to.vect to vectorise, selecting rounded corners
+- save the layer in ESRI Shapefile format
+
+Next, generate the input polygons for FlightGear, e.g.
+
+```
+$ make BUCKET=w090n40 lc-shapefiles-prepare
+```
+
 ## Building the scenery
 
 A Makefile drives the process. Note these variables at the top of the Makefile:
@@ -124,61 +217,4 @@ This will run the _genapts850_ command to build the airport areas and objects wi
 
 If you want to remove all the airports for a bucket, use the _airports-clean_ target (and supply the _BUCKET_). If you want to rebuild, use the _airports-rebuild_ target (and supply both lat/lon bounds and the bucket).
 
-
-## Data download and preparation
-
-### Elevations preparation
-
-Download SRTM-3 from e.g. https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip (needs login)
-
-Place the data in ``data/SRTM-3`` in the appropriate buckets. For example, data/SRTM-3/w090n40/ should include files from N40W081.hgt to N49W090.hgt.
-
-
-### Airports preparation
-
-Create the directory ``data/airports`` and copy the ``Airports/apt.dat.gz`` copy from the FlightGear distribution into it.
-
-Add any custom airports you want under data/airports/modified in uncompressed .apt.dat format, in the appropriate bucket (e.g. data/airports/modified/w080n40/CYRO.apt.dat)
-
-Run ``make prepare-airports`` to generate a new airports file for scenery building (requires Python3).
-
-
-### OSM preparation
-
-(TODO)
-
-The Makefile expects to find OSM shapefiles for your bucket in the directory ../osm, e.g. ``../osm/shapefiles/w080n40/highways.shp``
-
-If you have them somewhere else, you can override OSM_DIR on the command line, e.g.
-
-```
-$ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
-```
-
-### Landcover preparation
-
-This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
-
-We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/
-
-Run each step on the output from the previous step.
-
-Inside qgis:
-
-- go to Raster/Projections/Warp (Reproject) and reproject to EPSG:4326/WGS 84 using "Nearest neighbours" (fast) or "Mode" (slower, but maybe better; try both and see which you prefer)
-- go to Raster/Extraction/Clip Raster by Extent and clip to the desired area (min lon, max lon, min lat, max lat)
-
-In the qgis toolbox:
-
-- run the GRASS/Raster/r.null function to change value 18 (water) to null
-- run the GRASS/Raster/r.neighbours function with 3 neighbours (median, not average)
-- run the GRASS/Raster/r.neighbours function with 3 neighbours again (median, not average)
-- use GRASS r.to.vect to vectorise, selecting rounded corners
-- save the layer in ESRI Shapefile format
-
-Next, generate the input polygons for FlightGear, e.g.
-
-```
-$ make BUCKET=w090n40 lc-shapefiles-prepare
-```
 

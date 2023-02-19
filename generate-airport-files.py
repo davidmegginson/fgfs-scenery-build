@@ -15,7 +15,9 @@ Started 2023-02-17 by David Megginson
 
 """
 
-import json, math, re, sys
+import json, math, os, re, sys
+
+import xml.etree.cElementTree as X
 
 
 RUNWAY_COORD_POS = {
@@ -54,9 +56,9 @@ def generate_facility_files(output_dir, input):
             if current_facility:
                 current_facility['parking'].append({
                     'type': tokens[4],
-                    'lat': float(tokens[1]),
-                    'lon': float(tokens[2]),
-                    'hdg-deg': float(tokens[3]),
+                    'lat': tokens[1],
+                    'lon': tokens[2],
+                    'hdg-deg': tokens[3],
                     'usage': tokens[5].split('|'),
                     'name': ' '.join(tokens[6:]).strip(),
                 })
@@ -78,9 +80,9 @@ def generate_facility_files(output_dir, input):
 
         elif type in ('14',):
             current_facility['viewpoints'].append({
-                'lat': float(tokens[1]),
-                'lon': float(tokens[2]),
-                'elev-m': float(tokens[3]),
+                'lat': tokens[1],
+                'lon': tokens[2],
+                'elev-m': tokens[3],
                 'name': ' '.join(tokens[4:]).strip(),
             })
 
@@ -106,46 +108,46 @@ def parse_runway(tokens):
     pos = RUNWAY_COORD_POS[type]
 
     # Grab the coordinates for each end
-    lat1 = float(tokens[pos[0]])
-    lon1 = float(tokens[pos[1]])
+    lat1 = tokens[pos[0]]
+    lon1 = tokens[pos[1]]
 
     # If we have two ends
     if len(pos) > 2:
-        lat2 = float(tokens[pos[2]])
-        lon2 = float(tokens[pos[3]])
+        lat2 = tokens[pos[2]]
+        lon2 = tokens[pos[3]]
 
         # Calculate the headings (not in the apt.dat file)
-        heading1 = calc_heading((lat1, lon1,), (lat2, lon2,))
-        heading2 = (heading1 + 180.0) % 360.0 # reciprocal
+        heading1 = round(calc_heading((float(lat1), float(lon1),), (float(lat2), float(lon2),)), 2)
+        heading2 = round((heading1 + 180.0) % 360.0, 2) # reciprocal
     
     if type == '100': # land runway
         return {
             'type': type,
-            'width': float(tokens[1]),
-            'surface': float(tokens[2]),
+            'width': tokens[1],
+            'surface': tokens[2],
             'thresholds': [
                 {
                     'rwy': tokens[8],
                     'lat': lat1,
                     'lon': lon1,
                     'hdg-deg': heading1,
-                    'displ-m': float(tokens[11]),
-                    'stopw-m': float(tokens[12]),
+                    'displ-m': tokens[11],
+                    'stopw-m': tokens[12],
                 },
                 {
                     'rwy': tokens[17],
                     'lat': lat2,
                     'lon': lon2,
                     'hdg-deg': heading2,
-                    'displ-m': float(tokens[20]),
-                    'stopw-m': float(tokens[21]),
+                    'displ-m': tokens[20],
+                    'stopw-m': tokens[21],
                 },
             ],
         }
     elif type == '101': # water runway
         return {
             'type': type,
-            'width': float(tokens[1]),
+            'width': tokens[1],
             'surface': tokens[2],
             'thresholds': [
                 {
@@ -165,15 +167,15 @@ def parse_runway(tokens):
     elif type == '102': # helipad
         return {
             'type': type,
-            'width': float(tokens[6]),
-            'length': float(tokens[5]),
+            'width': tokens[6],
+            'length': tokens[5],
             'surface': tokens[7],
             'thresholds': [
                 {
                     'rwy': tokens[1],
-                    'lat': float(tokens[2]),
-                    'lon': float(tokens[3]),
-                    'hdg-deg': float(tokens[4]),
+                    'lat': tokens[2],
+                    'lon': tokens[3],
+                    'hdg-deg': tokens[4],
                 },
             ],
         }
@@ -181,10 +183,39 @@ def parse_runway(tokens):
         raise TypeError("Not a runway: {}".format(str(tokens)))
 
 
-    
 def dump_facility(output_dir, facility):
     """ Create files for a facility in the appropriate directory """
-    print(json.dumps(facility, indent=2))
+
+    dir = make_path(output_dir, facility['ident'])
+    dump_thresholds(dir, facility)
+    dump_tower(dir, facility)
+    dump_groundnet(dir, facility)
+
+
+def dump_thresholds(dir, facility):
+    filename = os.path.join(dir, "{}.threshold.xml".format(facility['ident']))
+
+    p = X.Element('PropertyList')
+    for runway in facility['runways']:
+        for threshold in runway['thresholds']:
+            r = X.SubElement(p, 'runway')
+            for prop in ('lon', 'lat', 'rwy', 'hdg-deg', 'displ-m', 'stopw-m',):
+                if prop in threshold:
+                    X.SubElement(r, prop).text = str(threshold[prop])
+
+    tree = X.ElementTree(p)
+    X.indent(tree, space='  ', level=0)
+    tree.write(filename, encoding='utf-8', xml_declaration=True)
+
+
+def dump_tower(dir, facility):
+    filename = os.path.join(dir, "{}.twr.xml".format(facility['ident']))
+    print(filename)
+
+
+def dump_groundnet(dir, facility):
+    filename = os.path.join(dir, "{}.groundnet.xml".format(facility['ident']))
+    print(filename)
 
 
 def make_path(output_dir, ident):

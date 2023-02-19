@@ -26,11 +26,11 @@ DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 # Data sources
 #
 
-AIRPORTS_SOURCE=source/airports/apt.dat
-LC_DIR=../land-cover
-OSM_DIR=../osm
+AIRPORTS_SOURCE=${SOURCE_DIR}/airports/apt.dat
+LC_DIR=${SOURCE_DIR}/MODIS-250
+OSM_DIR=${SOURCE_DIR}/osm
 SRTM_SOURCE=${SOURCE_DIR}/SRTM-3/unpacked
-LANDMASS_SOURCE=../land-polygons-split-4326/land_polygons.shp
+LANDMASS_SOURCE=${SOURCE_DIR}/land-polygons-split-4326/land_polygons.shp
 
 #
 # Top-level targets
