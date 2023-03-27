@@ -3,7 +3,7 @@ North American Scenery
 
 ## Configuration
 
-A Makefile drives the process. Note these variables at the top of the Makefile:
+A Makefile drives the process. Note these variables and their default values at the top of the Makefile:
 
 ```
 # What area are we building?
@@ -31,7 +31,7 @@ The scenery requires GIS data from several sources
 * OpenStreetMap (OSM) data in [PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the area where you want to build scenery. This data defines detailed landcover (like parks and forests), lakes and rivers, as well as linear features like roads, railroads, and powerlines.
     * (Special case) OSM landmass data defining the boundaries between land and ocean (no scenery outside these polygons will be built)
 
-### SRTM-3 preparation
+### SRTM-3 data preparation
 
 Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). 
 
@@ -40,7 +40,7 @@ Unzip and place all of the *.hgt files together in ``data/SRTM-3/``
 If you are missing *.hgt files for any of the areas you're building, you will end up with flat scenery all at sea level.
 
 
-### Airports preparation
+### Airport data preparation
 
 Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
 
@@ -55,19 +55,7 @@ $ make BUCKET=w090n40 airports-prepare
 This will downgrade the file to apt.dat 1000 format, extract the airports inside the 10x10 deg w090n40 area, and place the result in ``data/airports/w090n40/apt.dat``
 
 
-### OSM preparation
-
-(TODO)
-
-The Makefile expects to find OSM shapefiles for your bucket in the directory ../osm, e.g. ``../osm/shapefiles/w080n40/highways.shp``
-
-If you have them somewhere else, you can override OSM_DIR on the command line, e.g.
-
-```
-$ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
-```
-
-### Landcover preparation
+### MODIS-250 landcover raster preparation
 
 This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
 
@@ -93,6 +81,25 @@ Next, generate the input polygons for FlightGear, e.g.
 ```
 $ make BUCKET=w090n40 lc-shapefiles-prepare
 ```
+
+
+### OSM data preparation
+
+(TODO)
+
+The Makefile expects to find OSM shapefiles for your bucket in the directory ../osm, e.g. ``../osm/shapefiles/w080n40/highways.shp``
+
+If you have them somewhere else, you can override OSM_DIR on the command line, e.g.
+
+```
+$ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
+```
+
+
+#### OSM landmass preparation
+
+(TODO)
+
 
 ## Building the scenery
 
@@ -124,6 +131,7 @@ Once you have the data prepared, ``make all`` will run through the following ste
 All of the steps but ``make scenery`` will skip anything that's already built under the ``work/`` directory. To force something to rebuild, use the *-rebuild variants of the targets above, including ``make all-rebuild``.
 
 All of the steps will leave scenery alone that's already built for different areas.
+
 
 ### Splitting the work
 
@@ -177,6 +185,7 @@ This will run the _ogr\_decode_ command to build the default landmass for your b
 
 If you want to delete the landmass, use the _landmass-clean_ target; if you want to delete and rebuild in a single step, use the _landmass-rebuild_ target.
 
+
 ### Making the layers
 
 Once you've prepared the landcover and OSM layers, use the _do-make.sh_ script to build layers degree by degree (if you attempt the whole bucket at once, it will generally fail). For example
@@ -193,6 +202,7 @@ Using _areas_ or _lines_ as the target at the end of the command will build only
 $ AREA_MATERIAL=Town AREA_LAYER=lc-urban sh do-make.sh -90 40 -80 50 single-layer
 ```
 
+
 ### Making cliffs
 
 This step is optional, but makes nicer scenery. If you've included the osm-cliff-natural layer in the previous step (and you should), you can give the scenery engine hints to allow steeper cliffs rather than smoothing them out. You will need to provide both lat/lon and the bucket:
@@ -202,6 +212,7 @@ $ make BUCKET=w090n40 MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 cliffs
 ```
 
 This command will run both _cliff-decode_ and _rectify\_height_ with the appropriate arguments.
+
 
 ### Making airports
 
@@ -216,5 +227,3 @@ $ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 airports
 This will run the _genapts850_ command to build the airport areas and objects within those bounds, overriding the default airports with any custom ones you supplied during the preparation process.
 
 If you want to remove all the airports for a bucket, use the _airports-clean_ target (and supply the _BUCKET_). If you want to rebuild, use the _airports-rebuild_ target (and supply both lat/lon bounds and the bucket).
-
-

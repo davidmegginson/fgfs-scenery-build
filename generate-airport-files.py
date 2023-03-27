@@ -203,14 +203,25 @@ def dump_thresholds(dir, facility):
                 if prop in threshold:
                     X.SubElement(r, prop).text = str(threshold[prop])
 
-    tree = X.ElementTree(p)
-    X.indent(tree, space='  ', level=0)
-    tree.write(filename, encoding='utf-8', xml_declaration=True)
+    save_xml(filename, p)
 
 
 def dump_tower(dir, facility):
+    
+    if not facility['viewpoints']: # no tower
+        return
+    
     filename = os.path.join(dir, "{}.twr.xml".format(facility['ident']))
-    print(filename)
+
+    twr = facility['viewpoints'][0] # assume first viewpoint is tower
+
+    p = X.Element('PropertyList')
+    x = X.SubElement(p, 'tower')
+    y = X.SubElement(x, 'twr')
+    for prop in ('lon', 'lat', 'elev-m',):
+        X.SubElement(y, prop, twr[prop])
+
+    save_xml(filename, p)
 
 
 def dump_groundnet(dir, facility):
@@ -227,6 +238,12 @@ def make_path(output_dir, ident):
     if not os.path.exists(path):
         os.makedirs(path)
     return path
+
+
+def save_xml(filename, root):
+    tree = X.ElementTree(root)
+    X.indent(tree, space='  ', level=0)
+    tree.write(filename, encoding='utf-8', xml_declaration=True)
 
 
 # Function by Jérôme Renard

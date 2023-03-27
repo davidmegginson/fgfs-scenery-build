@@ -15,11 +15,13 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 # Build configuration variables
 #
 
-MAX_THREADS=3
+SCENERY_NAME=fgfs-canada-us-scenery
+MAX_THREADS=16
 SOURCE_DIR=./source
 DATA_DIR=./data
 WORK_DIR=./work
-OUTPUT_DIR=./fgfs-canada-us-scenery
+OUTPUT_DIR=./output
+SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
 #
@@ -179,26 +181,26 @@ rectify-cliffs:
 #
 
 scenery:
-	tg-construct --threads --work-dir=${WORK_DIR} --output-dir=${OUTPUT_DIR}/Terrain \
+	tg-construct --threads --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=./default_priorities.txt \
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
-	cp -v gen-symlinks.sh clean-symlinks.sh ${OUTPUT_DIR}
+	cp -v gen-symlinks.sh clean-symlinks.sh ${SCENERY_DIR}
 
 #
 # Generate custom threshold and navdata files for modified airports
 #
 
 thresholds:
-	python3 gen-thresholds.py ${OUTPUT_DIR}/Airports ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat
+	python3 gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat
 
 thresholds-clean:
 	rm -rf ${DATA_DIR}/Airports
 
 navdata:
-	mkdir -p ${OUTPUT_DIR}/NavData/apt
-	cp -v ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat ${OUTPUT_DIR}/NavData/apt
+	mkdir -p ${SCENERY_DIR}/NavData/apt
+	cp -v ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat ${SCENERY_DIR}/NavData/apt
 
 
 ########################################################################
@@ -282,7 +284,7 @@ osm-shapefiles-clean:
 osm-shapefiles-rebuild: osm-shapefiles-clean osm-shapefiles-prepare
 
 archive:
-	tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${OUTPUT_DIR}/README.md ${OUTPUT_DIR}/UNLICENSE.md ${OUTPUT_DIR}/clean-symlinks.sh ${OUTPUT_DIR}/gen-symlinks.sh ${OUTPUT_DIR}/Airports ${OUTPUT_DIR}/NavData ${OUTPUT_DIR}/Terrain/${BUCKET}
+	cd ${OUTPUT_DIR} && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData ${SCENERY_NAME}/Terrain/${BUCKET}
 
 
 ########################################################################
