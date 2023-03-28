@@ -19,10 +19,10 @@ SCENERY_NAME=fgfs-canada-us-scenery
 MAX_THREADS=16
 SCRIPT_DIR=./scripts
 CONFIG_DIR=./config
-SOURCE_DIR=./source
-DATA_DIR=./data
-WORK_DIR=./work
-OUTPUT_DIR=./output
+INPUTS_DIR=./01-inputs
+DATA_DIR=./02-data
+WORK_DIR=./03-work
+OUTPUT_DIR=./04-output
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
@@ -30,11 +30,11 @@ DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 # Data sources
 #
 
-AIRPORTS_SOURCE=${SOURCE_DIR}/airports/apt.dat
-LC_DIR=${SOURCE_DIR}/MODIS-250
-OSM_DIR=${SOURCE_DIR}/osm
-SRTM_SOURCE=${SOURCE_DIR}/SRTM-3/unpacked
-LANDMASS_SOURCE=${SOURCE_DIR}/land-polygons-split-4326/land_polygons.shp
+AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
+LC_DIR=${INPUTS_DIR}/MODIS-250
+OSM_DIR=${INPUTS_DIR}/osm
+SRTM_SOURCE=${INPUTS_DIR}/SRTM-3/unpacked
+LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
 
 #
 # Top-level targets
