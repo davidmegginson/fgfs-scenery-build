@@ -17,6 +17,8 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 
 SCENERY_NAME=fgfs-canada-us-scenery
 MAX_THREADS=16
+SCRIPT_DIR=./scripts
+CONFIG_DIR=./config
 SOURCE_DIR=./source
 DATA_DIR=./data
 WORK_DIR=./work
@@ -116,7 +118,7 @@ layers-rebuild: layers-clean areas lines
 areas: lc-areas osm-areas
 
 lc-areas:
-	for row in $$(grep lc- layers.csv); do \
+	for row in $$(grep lc- ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,area,' > /dev/null; then \
 	    readarray -d ',' -t F <<< $$row; \
@@ -127,7 +129,7 @@ lc-areas:
 	done
 
 osm-areas:
-	for row in $$(grep osm- layers.csv); do \
+	for row in $$(grep osm- ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,area,' > /dev/null; then \
 	    readarray -d ',' -t F <<< $$row; \
@@ -146,7 +148,7 @@ single-area:
 
 # Build line layers
 lines:
-	for row in $$(grep ,line, layers.csv); do \
+	for row in $$(grep ,line, ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,line,' > /dev/null; then \
 	    readarray -d ',' -t F <<< $$row; \
@@ -182,7 +184,7 @@ rectify-cliffs:
 
 scenery:
 	tg-construct --threads --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON} --priorities=./default_priorities.txt \
+	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
@@ -193,7 +195,7 @@ scenery:
 #
 
 thresholds:
-	python3 gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat
+	python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat
 
 thresholds-clean:
 	rm -rf ${DATA_DIR}/Airports
@@ -228,13 +230,13 @@ landmass-source-rebuild: landmass-source-clean landmass-source-prepare
 airports-prepare:
 	mkdir -p data/airports/${BUCKET}/
 	cat ${AIRPORTS_SOURCE} \
-	| python3 downgrade-apt.py \
-	| python3 filter-airports.py ${BUCKET} \
+	| python3 ${SCRIPT_DIR}downgrade-apt.py \
+	| python3 ${CONFIG_DIR}/filter-airports.py ${BUCKET} \
 	> data/airports/${BUCKET}/apt.dat
 
 #airports-source-prepare:
-#	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 split-airports.py ${DATA_DIR}/airports/split
-#	BUCKET=${BUCKET} sh merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
+#	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 ${SCRIPT_DIR}/split-airports.py ${DATA_DIR}/airports/split
+#	BUCKET=${BUCKET} sh ${SCRIPT_DIR}/merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
 
 #airports-source-clean:
 #	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
@@ -247,7 +249,7 @@ airports-source-rebuild: airports-source-clean airports-source-rebuild
 #
 
 lc-shapefiles-prepare:
-	grep ',yes,' lc-extracts.csv \
+	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
 	| while read -r row; do \
 	  row=$$(echo "$$row" | sed -e 's/\r//'); \
 	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
@@ -262,7 +264,7 @@ lc-shapefiles-prepare:
 # TODO lc shapefiles
 
 osm-shapefiles-prepare:
-	grep ',yes,' osm-extracts.csv \
+	grep ',yes,' ${CONFIG_DIR}/osm-extracts.csv \
 	| while read -r row; do \
 	    row=`echo "$$row" | sed -e 's/\r//'`; \
 	    dest=$$(echo "$$row" | sed -e 's/,.*//'); \
