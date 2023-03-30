@@ -16,7 +16,7 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 #
 
 SCENERY_NAME=fgfs-canada-us-scenery
-MAX_THREADS=16
+MAX_THREADS=8
 SCRIPT_DIR=./scripts
 CONFIG_DIR=./config
 INPUTS_DIR=./01-inputs
@@ -30,10 +30,11 @@ DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 # Data sources
 #
 
+SRTM_BASE=${INPUTS_DIR}/SRTM-3
+SRTM_SOURCE=${SRTM_BASE}/unpacked
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LC_DIR=${INPUTS_DIR}/MODIS-250
 OSM_DIR=${INPUTS_DIR}/osm
-SRTM_SOURCE=${INPUTS_DIR}/SRTM-3/unpacked
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
 
 #
@@ -49,7 +50,7 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 ########################################################################
 
 #
-# Build elevation data from the SRTM-3x
+# Build elevation data from the SRTM-3 DEMs
 #
 
 elevations:
@@ -69,7 +70,7 @@ elevations-rebuild: elevations-clean elevations
 
 
 fit-elevations:
-	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
+	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 10
 
 
 
@@ -92,7 +93,7 @@ airports-rebuild: airports-clean airports
 #
 
 landmass:
-	ogr-decode ${DECODE_OPTS} --area-type Default work/Default ${DATA_DIR}/landmass/${BUCKET}/land_polygons.shp
+	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${DATA_DIR}/landmass/${BUCKET}/land_polygons.shp
 
 landmass-clean:
 	rm -rvf ${WORK_DIR}/Default/${BUCKET}/
@@ -124,7 +125,7 @@ lc-areas:
 	    readarray -d ',' -t F <<< $$row; \
 	    echo Trying $${F[0]}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
 	  fi; \
 	done
 
@@ -135,7 +136,7 @@ osm-areas:
 	    readarray -d ',' -t F <<< $$row; \
 	    echo Trying $${F[0]}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
 	  fi; \
 	done
 
@@ -143,7 +144,7 @@ osm-areas:
 AREA_MATERIAL ?= Town
 AREA_LAYER ?= lc-urban
 single-area:
-	ogr-decode ${DECODE_OPTS} --area-type ${AREA_MATERIAL} work/${AREA_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${AREA_LAYER}.shp
+	ogr-decode ${DECODE_OPTS} --area-type ${AREA_MATERIAL} ${WORK_DIR}/${AREA_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${AREA_LAYER}.shp
 
 
 # Build line layers
@@ -154,7 +155,7 @@ lines:
 	    readarray -d ',' -t F <<< $$row; \
 	    echo Trying $${F[0]}; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
-	      work/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
 	  fi; \
 	done
 
@@ -164,7 +165,7 @@ LINE_LAYER ?= osm-motorway-highway
 LINE_WIDTH ?= 10
 single-line:
 	ogr-decode ${DECODE_OPTS} --texture-lines --line-width ${LINE_WIDTH} --area-type ${LINE_MATERIAL} \
-	  work/${LINE_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${LINE_LAYER}.shp;\
+	  ${WORK_DIR}/${LINE_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${LINE_LAYER}.shp;\
 
 
 #
@@ -210,6 +211,13 @@ navdata:
 ########################################################################
 
 #
+# Unpack downloaded SRTM-3 DEMs
+#
+
+srtm-unpack:
+	${SHELL} ${SCRIPT_DIR}/unpack-dems.sh ${SRTM_BASE}
+
+#
 # Prepare landmass
 #
 
@@ -228,11 +236,11 @@ landmass-source-rebuild: landmass-source-clean landmass-source-prepare
 #
 
 airports-prepare:
-	mkdir -p data/airports/${BUCKET}/
+	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
 	cat ${AIRPORTS_SOURCE} \
-	| python3 ${SCRIPT_DIR}downgrade-apt.py \
-	| python3 ${CONFIG_DIR}/filter-airports.py ${BUCKET} \
-	> data/airports/${BUCKET}/apt.dat
+	| python3 ${SCRIPT_DIR}/downgrade-apt.py \
+	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
+	> ${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 #airports-source-prepare:
 #	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 ${SCRIPT_DIR}/split-airports.py ${DATA_DIR}/airports/split

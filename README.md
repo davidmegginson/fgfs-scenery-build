@@ -33,26 +33,32 @@ The scenery requires GIS data from several sources
 
 ### SRTM-3 data preparation
 
-Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). 
+Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). Place them in 01-data/SRTM-3/orig/
 
-Unzip and place all of the *.hgt files together in ``data/SRTM-3/``
+To unpack the files, run
+
+```
+$ make srtm-unpack
+```
+
+Unzip and place all of the *.hgt files together in ``02-data/SRTM-3/``
 
 If you are missing *.hgt files for any of the areas you're building, you will end up with flat scenery all at sea level.
 
 
 ### Airport data preparation
 
-Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
+Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav 02-data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
 
-Uncompress the file (if needed) and rename to ``source/airports/apt.dat``
+Uncompress the file (if needed) and rename to ``01-inputs/airports/apt.dat``
 
-This file can be very large, depending on where you source it from. The next step is to extract the areas you need into buckets under ``data/airports/`` using the ``./downgrade-airports.py`` (if you're using an apt.dat format after 1000) and ``./filter-airports.py`` Python3 scripts, or simply run ``make airports-prepare`` defining the bucket you need. Example:
+This file can be very large, depending on where you source it from. The next step is to extract the areas you need into buckets under ``02-data/airports/`` using the ``./downgrade-airports.py`` (if you're using an apt.dat format after 1000) and ``./filter-airports.py`` Python3 scripts, or simply run ``make airports-prepare`` defining the bucket you need. Example:
 
 ```
 $ make BUCKET=w090n40 airports-prepare
 ```
 
-This will downgrade the file to apt.dat 1000 format, extract the airports inside the 10x10 deg w090n40 area, and place the result in ``data/airports/w090n40/apt.dat``
+This will downgrade the file to apt.dat 1000 format, extract the airports inside the 10x10 deg w090n40 area, and place the result in ``02-data/airports/w090n40/apt.dat``
 
 
 ### MODIS-250 landcover raster preparation
@@ -100,6 +106,10 @@ $ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
 
 (TODO)
 
+```
+$ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 BUCKET=w090n40 landmass
+```
+
 
 ## Building the scenery
 
@@ -122,13 +132,13 @@ $ make BUCKET=w090n30 MIN_LON=-95 MAX_LON=-94 MIN_LAT=35 MAX_LAT=36 all
 
 Once you have the data prepared, ``make all`` will run through the following steps:
 
-1. Generate and fit elevation data in work/SRTM-3 (``make elevations`` and optionally, ``make cliffs``)
+1. Generate and fit elevation data in 03-work/SRTM-3 (``make elevations`` and optionally, ``make cliffs``)
 2. Generate airport objects and areas (``make airports``)
 3. Generate the landmass layer (``make landmass``)
 4. Generate the OSM and landcover layers (``make layers``)
 5. Build the actual scenery (``make scenery``)
 
-All of the steps but ``make scenery`` will skip anything that's already built under the ``work/`` directory. To force something to rebuild, use the *-rebuild variants of the targets above, including ``make all-rebuild``.
+All of the steps but ``make scenery`` will skip anything that's already built under the ``03-work/`` directory. To force something to rebuild, use the *-rebuild variants of the targets above, including ``make all-rebuild``.
 
 All of the steps will leave scenery alone that's already built for different areas.
 
@@ -164,7 +174,7 @@ $ make BUCKET=w090n40 elevations
 
 This will run _gdalchop_ to prepare the elevation data. Expect it to run for a few minutes.
 
-Once your done building elevations, run _make_ with the ``fit-elevations`` target. That will refit elevations for *all* buckets, and again, runs for a while:
+Once you're done building elevations, run _make_ with the ``fit-elevations`` target. That will refit elevations for *all* buckets, and again, runs for a while:
 
 ```
 $ make fit-elevations
@@ -227,3 +237,19 @@ $ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 airports
 This will run the _genapts850_ command to build the airport areas and objects within those bounds, overriding the default airports with any custom ones you supplied during the preparation process.
 
 If you want to remove all the airports for a bucket, use the _airports-clean_ target (and supply the _BUCKET_). If you want to rebuild, use the _airports-rebuild_ target (and supply both lat/lon bounds and the bucket).
+
+## Scenery build
+
+Once everything is actually ready, to build the scenery for an area use
+
+```
+$ bash do-make.sh <MIN-LON> <MIN-LAT> <MAX-LON> <MAX-LAT> scenery
+```
+
+The output will appear in ``04-output/fgfs-canada-us-scenery/Terrain/``
+
+You may choose to build in bigger than 1x1 degree areas at once. For example, to build the w090n40 scenery doing a 2x2 degree area at once, do
+
+```
+$ STEP=2 bash do-make.sh -90 40 -80 50 scenery
+```
