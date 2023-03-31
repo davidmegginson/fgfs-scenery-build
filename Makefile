@@ -230,6 +230,12 @@ landmass-source-clean:
 
 landmass-source-rebuild: landmass-source-clean landmass-source-prepare
 
+#
+# Extract OSM from PBF
+#
+
+osm-extract:
+	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${CONFIG_DIR}/osmconf.ini ${BUCKET}
 
 #
 # Prepare airports

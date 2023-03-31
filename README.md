@@ -231,8 +231,10 @@ This command will run both _cliff-decode_ and _rectify\_height_ with the appropr
 Once you've prepared the airport data, run _make_ with the ``airports`` target, and _MIN\_LON_, _MIN\_LAT_, _MAX\_LON_ and _MAX\_LAT_ set to the area you're building, e.g.
 
 ```
-$ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 airports
+$ STEP=10 make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 airports
 ```
+
+Note the STEP. Using the default STEP of 1 seems to result in a lot of errors.
 
 This will run the _genapts850_ command to build the airport areas and objects within those bounds, overriding the default airports with any custom ones you supplied during the preparation process.
 
