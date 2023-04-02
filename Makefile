@@ -23,6 +23,7 @@ INPUTS_DIR=./01-inputs
 DATA_DIR=./02-data
 WORK_DIR=./03-work
 OUTPUT_DIR=./04-output
+STATIC_DIR=./static
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
@@ -70,7 +71,10 @@ elevations-rebuild: elevations-clean elevations
 
 
 fit-elevations:
-	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 10
+	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
+
+force-fit-elevations:
+	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -f -m 50 -x 22500 -e 1
 
 
 
@@ -189,21 +193,23 @@ scenery:
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
-	cp -v gen-symlinks.sh clean-symlinks.sh ${SCENERY_DIR}
+
+static-files:
+	cp -v ${STATIC_DIR}/* ${SCENERY_DIR}
 
 #
 # Generate custom threshold and navdata files for modified airports
 #
 
 thresholds:
-	python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat
+	python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 thresholds-clean:
 	rm -rf ${DATA_DIR}/Airports
 
 navdata:
 	mkdir -p ${SCENERY_DIR}/NavData/apt
-	cp -v ${DATA_DIR}/airports/modified/${BUCKET}/*.apt.dat ${SCENERY_DIR}/NavData/apt
+	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt
 
 
 ########################################################################
@@ -259,8 +265,13 @@ airports-source-rebuild: airports-source-clean airports-source-rebuild
 
 
 #
-# Prepare landcover shapefiles
+# Prepare shapefiles
 #
+
+shapefiles-prepare: lc-shapefiles-prepare osm-shapefiles-prepare
+
+shapefiles-clean-bucket:
+	rm -rfv ${DATA_DIR}/shapefiles/${BUCKET}/lc-* -rfv ${DATA_DIR}/shapefiles/${BUCKET}/osm-*
 
 lc-shapefiles-prepare:
 	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
@@ -275,8 +286,6 @@ lc-shapefiles-prepare:
 	  ogr2ogr $$dest_dir/$$dest $$source_dir/${BUCKET}.shp -sql "select * from ${BUCKET} where value='$$value'"; \
 	done
 
-# TODO lc shapefiles
-
 osm-shapefiles-prepare:
 	grep ',yes,' ${CONFIG_DIR}/osm-extracts.csv \
 	| while read -r row; do \
@@ -287,17 +296,9 @@ osm-shapefiles-prepare:
 	    source_dir=${OSM_DIR}/shapefiles/${BUCKET}; \
             dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
 	    mkdir -p $$dest_dir; \
-	    if [ ! -e $$dest_dir/$$dest ]; then \
-	      echo "Creating $$dest..."; \
-	      ogr2ogr $$dest_dir/$$dest $$source_dir/$$source \
-	        -sql "$$query"; \
-	    fi; \
+	    echo "Creating $$dest..."; \
+	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query"; \
 	  done
-
-osm-shapefiles-clean:
-	rm -fv ${DATA_DIR}/shapefiles/${BUCKET}/osm-*
-
-osm-shapefiles-rebuild: osm-shapefiles-clean osm-shapefiles-prepare
 
 archive:
 	cd ${OUTPUT_DIR} && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData ${SCENERY_NAME}/Terrain/${BUCKET}

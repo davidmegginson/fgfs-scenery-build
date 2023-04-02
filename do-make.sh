@@ -70,18 +70,18 @@ set_bucket()
 #
 
 # Check usage
-if [ $# -ne 5 ]; then
-    echo "Usage: $0 <min-lon> <min-lat> <max-lon> <max-lat> <target>" >&2
+if [ $# -lt 5 ]; then
+    echo "Usage: $0 <min-lon> <min-lat> <max-lon> <max-lat> <targets...>" >&2
     exit 2
 fi
 
 # Assign variables
 BUCKET='' # will be assigned using set_bucket() with each iteration
-MIN_LON=$1
-MIN_LAT=$2
-MAX_LON=$3
-MAX_LAT=$4
-TARGET=$5
+MIN_LON=$1; shift
+MIN_LAT=$1; shift
+MAX_LON=$1; shift
+MAX_LAT=$1; shift
+TARGETS=$@
 : ${STEP:=1} # use the STEP environment variable to override
 
 #
@@ -95,7 +95,7 @@ while [ $min_lat -lt $MAX_LAT ]; do
     while [ $min_lon -lt $MAX_LON ]; do
         max_lon=$(expr $min_lon + $STEP)
         set_bucket $min_lon $min_lat
-        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGET
+        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGETS
         min_lon=$max_lon
     done
     min_lat=$max_lat
