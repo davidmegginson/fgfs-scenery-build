@@ -1,4 +1,5 @@
 SHELL=/bin/bash
+MAX_THREADS=4 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
@@ -16,7 +17,6 @@ LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=
 #
 
 SCENERY_NAME=fgfs-canada-us-scenery
-MAX_THREADS=8
 SCRIPT_DIR=./scripts
 CONFIG_DIR=./config
 INPUTS_DIR=./01-inputs
@@ -56,7 +56,7 @@ all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
 
 elevations:
 	for file in ${SRTM_SOURCE}/*.hgt; do \
-		hgtchop 3 $$file ${WORK_DIR}/SRTM-3; \
+	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3; \
 	done
 
 # gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
@@ -71,11 +71,11 @@ elevations-rebuild: elevations-clean elevations
 
 
 fit-elevations:
-	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
+	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
+
 
 force-fit-elevations:
-	terrafit --threads ${MAX_THREADS} ${WORK_DIR}/SRTM-3 -f -m 50 -x 22500 -e 1
-
+	terrafit ${WORK_DIR}/SRTM-3 -f -m 50 -x 22500 -e 1
 
 
 #
@@ -83,8 +83,8 @@ force-fit-elevations:
 #
 
 airports:
-	genapts850 --threads --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} \
-	  --work=${WORK_DIR} --threads=${MAX_THREADS} --dem-path=SRTM-3
+	genapts850 --threads=${MAX_THREADS} --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} \
+	  --work=${WORK_DIR} --dem-path=SRTM-3 # can't use threads here, due to errors with .idx files
 
 airports-clean:
 	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/
@@ -177,7 +177,7 @@ single-line:
 #
 
 cliffs:
-	cliff-decode --log-level bulk --all-threads --spat ${SPAT} ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
+	cliff-decode --all-threads ${WORK_DIR}/SRTM-3/${BUCKET} ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
 
 # optional step (probably not worth it for non-mountainous terrain)
 rectify-cliffs:
@@ -188,11 +188,14 @@ rectify-cliffs:
 #
 
 scenery:
-	tg-construct --threads --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
+
+scenery-clean:
+	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
 
 static-files:
 	cp -v ${STATIC_DIR}/* ${SCENERY_DIR}
@@ -205,11 +208,11 @@ thresholds:
 	python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 thresholds-clean:
-	rm -rf ${DATA_DIR}/Airports
+	rm -rf ${SCENERY_DIR}/Airports
 
 navdata:
 	mkdir -p ${SCENERY_DIR}/NavData/apt
-	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt
+	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt/${BUCKET}.apt
 
 
 ########################################################################
@@ -300,8 +303,9 @@ osm-shapefiles-prepare:
 	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query"; \
 	  done
 
-archive:
-	cd ${OUTPUT_DIR} && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData ${SCENERY_NAME}/Terrain/${BUCKET}
+archive: static-files navdata airports-clean airports
+	cd ${OUTPUT_DIR} \
+	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.apt ${SCENERY_NAME}/Terrain/${BUCKET}
 
 
 ########################################################################

@@ -19,8 +19,8 @@ lc-urban,yes,area,Town
 lc-water,no,area,Default
 lc-wetland,no,area,Default
 osm-abandoned-railway,yes,line,ShrubGrassCover,9
-osm-airfield-aeroway,yes,area,GrassCover
-osm-airfield-military,yes,area,GrassCover
+osm-airfield-aeroway,yes,area,Airport
+osm-airfield-military,yes,area,Airport
 osm-brownfield-landuse,yes,area,ShrubGrassCover
 osm-cemetery-landuse,yes,area,Cemetery
 osm-cliff-natural,yes,area,Cliffs

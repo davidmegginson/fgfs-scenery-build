@@ -13,7 +13,7 @@ Scripts to build scenery: https://github.com/davidmegginson/fgfs-scenery-build
 
 ## Coverage
 
-The release currently contains the 10x10 deg w100n40, w090n40, w080n40, w080n30, w070n40, and w060n40 buckets, which include the following notable locations (among others), together with the Great Lakes, the St Lawrence River, and the U.S. Eastern Seaboard as far south as South Caroline. Note that you an unpack all of the archives into the same top-level directory.
+The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40, w080n30, w070n40, and w060n40 buckets, which include the following notable locations (among others), together with the Great Lakes, the St Lawrence River, and much of the Eastern and Central U.S. Note that you an unpack all of the archives into the same top-level directory.
 
 ### w100n40
 
@@ -28,16 +28,58 @@ The release currently contains the 10x10 deg w100n40, w090n40, w080n40, w080n30,
 * Sioux Falls, SD, USA
 * Winnipeg, MB, CAN
 
+### w100n30
+
+* Abilene, TX, USA
+* Austin, TX, USA
+* Dallas, TX, USA
+* Jackson, MS, USA
+* Kansas City, MO, USA
+* Little Rock, AK, USA
+* Oklahoma City, OK, USA
+* Shreveport, LA, USA
+* St Louis, MO, USA
+* Tulsa, OK, USA
+
 ### w090n40
 
+* Bloomington, IL, USA
 * Chicago, IL, USA
 * Cleveland, OH, USA
 * Detroit, MI, USA
 * Green Bay, WI, USA
+* Kitchener-Waterloo, ON, CAN
+* London, ON, CAN
+* Madison, WI, USA
 * Milwaukee, WI, USA
+* Oshkosh, WI, USA
 * Pittsburgh, PA, USA
 * Sault Ste Marie, ON, CAN
+* Saginaw, MI, USA
+* Sarnia, ON, CAN
+* Sudbury, ON, CAN
+* Timmins, ON, CAN
 * Thunder Bay, ON, CAN
+* Toledo, OH, USA
+* Traverse City, MI, USA
+* Windsor, ON, CAN
+
+### w090n30
+
+* Asheville, NC, USA
+* Atlanta, GA, USA
+* Birmingham, AL, USA
+* Charleston, WV, USA
+* Charlotte, NC, USA
+* Cincinnati, OH, USA
+* Jacksonville, FL, USA
+* Louisville, KY, USA
+* Memphis, TN, USA
+* Mobile, AL, USA
+* Nashville, TN, USA
+* Pensacola, FL, USA
+* Savannah, GA, USA
+* Tallahassee, FL, USA
 
 ### w080n40
 
