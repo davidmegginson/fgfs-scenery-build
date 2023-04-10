@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-MAX_THREADS=4 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=8 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
@@ -83,7 +83,7 @@ force-fit-elevations:
 #
 
 airports:
-	genapts850 --threads=${MAX_THREADS} --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} \
+	genapts850 --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} \
 	  --work=${WORK_DIR} --dem-path=SRTM-3 # can't use threads here, due to errors with .idx files
 
 airports-clean:
@@ -189,7 +189,7 @@ rectify-cliffs:
 
 scenery:
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
+	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt --ignore-landmass \
 	  Default AirportObj AirportArea SRTM-3 \
 	  $$(ls ${WORK_DIR} | grep osm-) \
 	  $$(ls ${WORK_DIR} | grep lc-)
@@ -212,7 +212,7 @@ thresholds-clean:
 
 navdata:
 	mkdir -p ${SCENERY_DIR}/NavData/apt
-	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt/${BUCKET}.apt
+	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt/${BUCKET}.dat
 
 
 ########################################################################
@@ -257,16 +257,6 @@ airports-prepare:
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
 	> ${DATA_DIR}/airports/${BUCKET}/apt.dat
 
-#airports-source-prepare:
-#	zcat ${DATA_DIR}/airports/apt.dat.gz | python3 ${SCRIPT_DIR}/split-airports.py ${DATA_DIR}/airports/split
-#	BUCKET=${BUCKET} sh ${SCRIPT_DIR}/merge-airports.sh > ${DATA_DIR}/airports/modified.apt.dat
-
-#airports-source-clean:
-#	rm -f ${DATA_DIR}/airports/modified.apt.dat ${DATA_DIR}/airports/original/*
-
-airports-source-rebuild: airports-source-clean airports-source-rebuild
-
-
 #
 # Prepare shapefiles
 #
@@ -303,9 +293,9 @@ osm-shapefiles-prepare:
 	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query"; \
 	  done
 
-archive: static-files navdata airports-clean airports
+archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
-	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.apt ${SCENERY_NAME}/Terrain/${BUCKET}
+	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
 
 
 ########################################################################
