@@ -15,18 +15,59 @@ Scripts to build scenery: https://github.com/davidmegginson/fgfs-scenery-build
 
 The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40, w080n30, w070n40, and w060n40 buckets, which include the following notable locations (among others), together with the Great Lakes, the St Lawrence River, and much of the Eastern and Central U.S. Note that you an unpack all of the archives into the same top-level directory.
 
-### w100n40
+Scenery download areas from west to east, south to north:
 
-* Brandon, MB, CAN
-* Des Moines, IA, USA
-* Duluth, MN, USA
-* Fargo, ND, USA
-* Kenora, ON, CAN
-* Minneapolis-Saint Paul, MN, USA
-* Omaha, NE, USA
-* Portage-la-Prairie, MB, CAN
-* Sioux Falls, SD, USA
-* Winnipeg, MB, CAN
+### w120n50
+
+* Athabasca, AB, CAN
+* Calgary, AB, CAN
+* Cold Lake, AB, CAN
+* Edmonton, AB, CAN
+* Fort McMurray, BC, CAN
+* Golden, BC, CAN
+* Jasper, AB, CAN
+* Lloydminster, BC, CAN
+* Medicine Hat, AB, CAN
+* Red Deer, AB, CAN
+* Revelstoke, BC, CAN
+* Slave Lake, AB, CAN
+* Vernon, BC, CAN
+
+### w110n30
+
+* Albuquerque, NM, USA
+* Boulder, CO, USA
+* Colorado Springs, CO, USA
+* Denver, CO, USA
+* El Paso, TX, USA
+* Roswell, NM, USA
+* Santa Fe, NM, USA
+* Salida, CO, USA
+* Sonora, TX, USA
+* Telluride, CO, USA
+
+### w110n40
+
+* Billings, MT, USA
+* Bismarck, ND, USA
+* Cheyenne, WY, USA
+* Esteven, SK, CAN
+* Loveland, CO, USA
+* Pierre, SD, USA
+* Rapid City, SD, USA
+* Vernal, UT, USA
+
+### w110n50
+
+* Flin Flon, MB, CAN
+* Lynn Lake, MB, CAN
+* Moose Jaw, SK, CAN
+* Prince Albert, SK, CAN
+* Regina, SK, CAN
+* Saskatoon, SK, CAN
+* Swift Current, SK, CAN
+* The Pas, MB, CAN
+* Yorkton, SK, CAN
 
 ### w100n30
 
@@ -41,28 +82,30 @@ The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40,
 * St Louis, MO, USA
 * Tulsa, OK, USA
 
-### w090n40
+### w100n40
 
-* Bloomington, IL, USA
-* Chicago, IL, USA
-* Cleveland, OH, USA
-* Detroit, MI, USA
-* Green Bay, WI, USA
-* Kitchener-Waterloo, ON, CAN
-* London, ON, CAN
-* Madison, WI, USA
-* Milwaukee, WI, USA
-* Oshkosh, WI, USA
-* Pittsburgh, PA, USA
-* Sault Ste Marie, ON, CAN
-* Saginaw, MI, USA
-* Sarnia, ON, CAN
-* Sudbury, ON, CAN
-* Timmins, ON, CAN
-* Thunder Bay, ON, CAN
-* Toledo, OH, USA
-* Traverse City, MI, USA
-* Windsor, ON, CAN
+* Brandon, MB, CAN
+* Des Moines, IA, USA
+* Duluth, MN, USA
+* Fargo, ND, USA
+* Kenora, ON, CAN
+* Minneapolis-Saint Paul, MN, USA
+* Omaha, NE, USA
+* Portage-la-Prairie, MB, CAN
+* Sioux Falls, SD, USA
+* Winnipeg, MB, CAN
+
+### w100n50
+
+* Churchill, MB, CAN
+* Deer Lake, ON, CAN
+* Gimli, MB, CAN
+* Norway House, MB, CAN
+* Pickle Lake, ON, CAN
+* Red Lake, ON, CAN
+* Sioux Lookout, ON, CAN
+* Thompson, MB, CAN
+* Winnipeg, MB, CAN
 
 ### w090n30
 
@@ -80,6 +123,49 @@ The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40,
 * Pensacola, FL, USA
 * Savannah, GA, USA
 * Tallahassee, FL, USA
+
+### w090n40
+
+* Bloomington, IL, USA
+* Chicago, IL, USA
+* Cleveland, OH, USA
+* Detroit, MI, USA
+* Green Bay, WI, USA
+* Kapuskasing, ON, CAN
+* Kitchener-Waterloo, ON, CAN
+* London, ON, CAN
+* Madison, WI, USA
+* Milwaukee, WI, USA
+* Oshkosh, WI, USA
+* Pittsburgh, PA, USA
+* Sault Ste Marie, ON, CAN
+* Saginaw, MI, USA
+* Sarnia, ON, CAN
+* Sudbury, ON, CAN
+* Timmins, ON, CAN
+* Thunder Bay, ON, CAN
+* Toledo, OH, USA
+* Traverse City, MI, USA
+* Windsor, ON, CAN
+
+### w090n50
+
+* Armstrong, ON, CAN
+* Attawapiskat, ON, CAN
+* Big Trout Lake, ON, CAN
+* Fort Albany, ON, CAN
+* Fort Severn, ON, CAN
+* Moosonee, ON, CAN
+
+### w080n30
+
+* Baltimore, MD, USA
+* Charleston, SC, USA
+* Norfolk, VA, USA
+* Philadelphia, PA, USA
+* Raleigh, NC, USA
+* Richmond, VA, USA
+* Washington, DC, USA
 
 ### w080n40
 
@@ -102,15 +188,15 @@ The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40,
 * Trenton, NJ, USA
 * Toronto, ON, CAN
 
-### w080n30
+### w080n50
 
-* Baltimore, MD, USA
-* Charleston, SC, USA
-* Norfolk, VA, USA
-* Philadelphia, PA, USA
-* Raleigh, NC, USA
-* Richmond, VA, USA
-* Washington, DC, USA
+* Eastmain River, QC, CAN
+* Inukjuak, QC, CAN
+* Kuujjuarapik, QC, CAN
+* La Grande Rivière, QC, CAN
+* Nemiscau, QC, CAN
+* Sanikiluaq, NU, CAN
+* Umiujaq, NU, CAN
 
 ### w070n40
 
@@ -131,12 +217,34 @@ The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40,
 * Sydney, NS, CAN
 * Yarmouth, NS, CAN
 
+### w070n50
+
+* Churchill Falls, NL, CAN
+* Goose Bay, NL, CAN
+* Havre-St-Pierre, QC, CAN
+* Kangiqsualujjuaq, QC, CAN
+* Schefferville, QC, CAN
+* Sept-Îles, QC, CAN
+* Wabush, NL, CAN
+
 ### w060n40
 
 * Cornerbrook, NL, CAN
 * Gander, NL, CAN
+* Miquelon, PM, FRA
 * St. John's, NL, CAN
-* Saint-Pierre, FRA
+* Saint-Pierre, PM, FRA
+* Stephenville, NL, CAN
+
+### w060n50
+
+* Cartwright, NL, CAN
+* Chevery, QC, CAN
+* Fox Harbour, NL, CAN
+* Lourdes-de-Blanc-Sablon, QC, CAN
+* St. Anthony, NL, CAN
+* St. Augustin, QC, CAN
+* Williams Harbour, NL, CAN
 
 ## Scenery models and osm2city
 

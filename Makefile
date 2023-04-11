@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-MAX_THREADS=8 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=4 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
@@ -27,6 +27,8 @@ STATIC_DIR=./static
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
+DROPBOX_DIR="${HOME}/Dropbox/Downloads"
+
 #
 # Data sources
 #
@@ -39,12 +41,16 @@ OSM_DIR=${INPUTS_DIR}/osm
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
 
 #
-# Top-level targets
+# Top-level targets (assume elevations are already in place)
 #
 
-all: elevations airports landmass layers cliffs scenery thresholds
+all: prepare construct build
 
-all-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild cliffs scenery thresholds
+prepare: osm-extract osm-shapefiles-prepare lc-shapefiles-prepare landmass-source-prepare airports-prepare
+
+construct: landmass airports layers cliffs
+
+build: scenery archive publish-dropbox
 
 ########################################################################
 # Scenery building
@@ -297,6 +303,9 @@ archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
 	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
 
+publish-dropbox:
+	cp -v ${STATIC_DIR}/README.md "${DROPBOX_DIR}"
+	mv -v ${OUTPUT_DIR}/*.tar "${DROPBOX_DIR}"
 
 ########################################################################
 # Test that do-make.sh is working
