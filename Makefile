@@ -44,13 +44,13 @@ LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
 # Top-level targets (assume elevations are already in place)
 #
 
-all: prepare construct build
+all: prepare construct publish
 
 prepare: osm-extract osm-shapefiles-prepare lc-shapefiles-prepare landmass-source-prepare airports-prepare
 
-construct: landmass airports layers cliffs
+construct: landmass airports layers cliffs scenery
 
-build: scenery archive publish-dropbox
+publish: archive publish-dropbox
 
 ########################################################################
 # Scenery building

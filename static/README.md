@@ -17,6 +17,37 @@ The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40,
 
 Scenery download areas from west to east, south to north:
 
+### w120n30
+
+(Includes the Grand Canyon)
+
+* Carson, NV, USA
+* Cedar City, UT, USA
+* Fresno, CA, USA
+* Las Vegas, NV, USA
+* Los Angeles, CA, USA
+* Mexicali, BCN, MEX
+* Phoenix, AZ, USA
+* Reno, NV, USA
+* San Diego, CA, USA
+* Tijuana, BCN, MEX
+* Tucson, AZ, USA
+
+### w120n40
+
+* Baker City, OR, USA
+* Boise, ID, USA
+* Castlegar, BC, CAN
+* Coeur D'Alene, ID, USA
+* Cranbrook, BC, CAN
+* Great Falls, MT, USA
+* Helena, MT, USA
+* Kelowna, BC, CAN
+* Lethbridge, AB, CAN
+* Salt Lake City, UT, USA
+* Spokane, WA, USA
+* Walla Walla, WA, USA
+
 ### w120n50
 
 * Athabasca, AB, CAN
@@ -37,6 +68,7 @@ Scenery download areas from west to east, south to north:
 
 * Albuquerque, NM, USA
 * Boulder, CO, USA
+* Ciudad Juárez, CHH, MEX
 * Colorado Springs, CO, USA
 * Denver, CO, USA
 * El Paso, TX, USA
