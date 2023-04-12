@@ -1,9 +1,7 @@
-FlightGear scenery for the St. Lawrence Seaway
-==============================================
+FlightGear scenery for Canada and the US (CONUS)
+================================================
 
-The St. Lawrence Seaway extends about halfway into the North American continent, from the Gulf of St Lawrence off the North Atlantic to Duluth, Minnesota. This project will eventually include all of the Great Lakes, the St Lawrence River, and the Gulf of St Lawrence, together with large stretches of surrounding scenery. Using the oversimplified assumption that a square degree (lat/lon) in the middle latitudes represents 70x100 km, the scenery will contain approximately 4 million km2 of scenery when complete (allowing for some empty ocean).
-
-The scenery is optimised for low-level visual navigation, and contains much more detail (roads, rivers, streams, coastlines, railroads, lakes, etc) than is available in the default FlightGear scenery for this region as of 2023-01-25, as well as more-varied (and up-to-date) landcover.
+The scenery is optimised for low-level visual navigation, and contains much more detail (roads, rivers, streams, coastlines, railroads, lakes, etc) than is available in the default "TerraSync" FlightGear scenery as of early 2023, as well as more-varied (and up-to-date) landcover. The scenery will work with both the stable "release/2020.3" branch and the "next" branch of FlightGear.
 
 By default, you will not have scenery models and other buildings/roads/etc in this scenery, but see below for an easy hack to include them.
 
@@ -13,17 +11,42 @@ Scripts to build scenery: https://github.com/davidmegginson/fgfs-scenery-build
 
 ## Coverage
 
-The release currently contains the 10x10 deg w100n40, w090n40, w090n30, w080n40, w080n30, w070n40, and w060n40 buckets, which include the following notable locations (among others), together with the Great Lakes, the St Lawrence River, and much of the Eastern and Central U.S. Note that you an unpack all of the archives into the same top-level directory.
+The release currently contains scenery buckets from 30N to 60N, 140W to 50W, covering all of CONUS, much of Canada, and bits of Alaska, Mexico, and France (St-Pierre and Miquelon). Scenery download areas from west to east, south to north, with notable locations for each:
 
-Scenery download areas from west to east, south to north:
+### w140n50
+
+* Haida Gwaii, BC, CAN
+* Juneau, AK, USA
+* Prince Rupert, BC, CAN
+
+### w130n30
+
+San Francisco Bay area
+
+* Sacramento, CA
+* San Francisco, CA
+* San Jose, CA
+
+### w130n40
+
+US Pacific Northwest and southern British Columbia
+
+* Portland, OR, USA
+* Seattle, WA, USA
+* Vancouver, BC, CAN
+* Victoria, BC, CAN
+
+### w130n50
+
+Northern British Columbia
+
+* Kamloops, BC
+* Prince George, BC
 
 ### w120n30
 
-(Includes the Grand Canyon)
+Grand Canyon, northern Baja California, and Southern California
 
-* Carson, NV, USA
-* Cedar City, UT, USA
-* Fresno, CA, USA
 * Las Vegas, NV, USA
 * Los Angeles, CA, USA
 * Mexicali, BCN, MEX
@@ -35,113 +58,126 @@ Scenery download areas from west to east, south to north:
 
 ### w120n40
 
-* Baker City, OR, USA
+Southern Great Plains and US Rockies
+
 * Boise, ID, USA
-* Castlegar, BC, CAN
 * Coeur D'Alene, ID, USA
 * Cranbrook, BC, CAN
-* Great Falls, MT, USA
 * Helena, MT, USA
 * Kelowna, BC, CAN
 * Lethbridge, AB, CAN
 * Salt Lake City, UT, USA
 * Spokane, WA, USA
-* Walla Walla, WA, USA
 
 ### w120n50
 
-* Athabasca, AB, CAN
+Alberta and the Canadian Rockies
+
 * Calgary, AB, CAN
-* Cold Lake, AB, CAN
 * Edmonton, AB, CAN
-* Fort McMurray, BC, CAN
-* Golden, BC, CAN
-* Jasper, AB, CAN
-* Lloydminster, BC, CAN
-* Medicine Hat, AB, CAN
-* Red Deer, AB, CAN
-* Revelstoke, BC, CAN
-* Slave Lake, AB, CAN
+* Fort McMurray, AB, CAN
 * Vernon, BC, CAN
+
+### w110n20
+
+* Chihuahua, CHH, USA
+* Del Rio, TX, USA
+* Durango, DUR, MEX
+* Guadalajara, JAL, MEX
+* Mazatlán, SIN, MEX
+* Monterrey, NLE, MEX
+* Puerto Vallarta, JAL, MEX
+* Saltillo, COA, MEX
 
 ### w110n30
 
+Eastern US/Mexican border, southern US Rockies
+
 * Albuquerque, NM, USA
-* Boulder, CO, USA
 * Ciudad Juárez, CHH, MEX
-* Colorado Springs, CO, USA
 * Denver, CO, USA
+* Dodge City, KS
 * El Paso, TX, USA
-* Roswell, NM, USA
 * Santa Fe, NM, USA
-* Salida, CO, USA
-* Sonora, TX, USA
-* Telluride, CO, USA
 
 ### w110n40
+
+Cattle country
 
 * Billings, MT, USA
 * Bismarck, ND, USA
 * Cheyenne, WY, USA
 * Esteven, SK, CAN
-* Loveland, CO, USA
-* Pierre, SD, USA
 * Rapid City, SD, USA
-* Vernal, UT, USA
 
 ### w110n50
 
-* Flin Flon, MB, CAN
-* Lynn Lake, MB, CAN
-* Moose Jaw, SK, CAN
+Canadian prairies (Great Plains)
+
 * Prince Albert, SK, CAN
 * Regina, SK, CAN
 * Saskatoon, SK, CAN
-* Swift Current, SK, CAN
-* The Pas, MB, CAN
-* Yorkton, SK, CAN
+
+### w100n20
+
+Western Gulf Coast
+
+* Galveston, TX, USA
+* Houston TX, USA
+* Matamoros, TAM, MEX
+* Reynosa, TAM, MEX
+* San Antonio, TX, USA
 
 ### w100n30
 
-* Abilene, TX, USA
+Northern and eastern Texas and surroundings
+
 * Austin, TX, USA
 * Dallas, TX, USA
 * Jackson, MS, USA
 * Kansas City, MO, USA
 * Little Rock, AK, USA
-* Oklahoma City, OK, USA
 * Shreveport, LA, USA
 * St Louis, MO, USA
 * Tulsa, OK, USA
 
 ### w100n40
 
-* Brandon, MB, CAN
+US northern Great Plains, Lake Superior, and western Canadian Shield
+
 * Des Moines, IA, USA
-* Duluth, MN, USA
 * Fargo, ND, USA
 * Kenora, ON, CAN
 * Minneapolis-Saint Paul, MN, USA
 * Omaha, NE, USA
-* Portage-la-Prairie, MB, CAN
 * Sioux Falls, SD, USA
 * Winnipeg, MB, CAN
 
 ### w100n50
 
+Northwestern Ontario and southern Manitoba (forest, Canadian Shield)
+
 * Churchill, MB, CAN
-* Deer Lake, ON, CAN
 * Gimli, MB, CAN
-* Norway House, MB, CAN
-* Pickle Lake, ON, CAN
-* Red Lake, ON, CAN
 * Sioux Lookout, ON, CAN
-* Thompson, MB, CAN
 * Winnipeg, MB, CAN
+
+### w090n20
+
+Eastern Gulf Coast
+
+* Cancún, ROO, MEX
+* Havana, 03, CUB
+* Key West, FL, USA
+* Miami, FL, USA
+* Mérida, YUC, MEX
+* Orlando, FL, USA
+* Tampa, FL, USA
 
 ### w090n30
 
-* Asheville, NC, USA
+US Deep South
+
 * Atlanta, GA, USA
 * Birmingham, AL, USA
 * Charleston, WV, USA
@@ -151,132 +187,98 @@ Scenery download areas from west to east, south to north:
 * Louisville, KY, USA
 * Memphis, TN, USA
 * Mobile, AL, USA
-* Nashville, TN, USA
-* Pensacola, FL, USA
 * Savannah, GA, USA
-* Tallahassee, FL, USA
 
 ### w090n40
 
-* Bloomington, IL, USA
+Central Great Lakes, US Rust Belt (home of Oshkosh!)
+
 * Chicago, IL, USA
 * Cleveland, OH, USA
 * Detroit, MI, USA
-* Green Bay, WI, USA
-* Kapuskasing, ON, CAN
-* Kitchener-Waterloo, ON, CAN
-* London, ON, CAN
-* Madison, WI, USA
 * Milwaukee, WI, USA
-* Oshkosh, WI, USA
-* Pittsburgh, PA, USA
-* Sault Ste Marie, ON, CAN
-* Saginaw, MI, USA
-* Sarnia, ON, CAN
+* Pittsburgh, PA, USA (shared with w080n40)
 * Sudbury, ON, CAN
-* Timmins, ON, CAN
 * Thunder Bay, ON, CAN
-* Toledo, OH, USA
-* Traverse City, MI, USA
 * Windsor, ON, CAN
 
 ### w090n50
 
-* Armstrong, ON, CAN
+Western James Bay
+
 * Attawapiskat, ON, CAN
-* Big Trout Lake, ON, CAN
-* Fort Albany, ON, CAN
 * Fort Severn, ON, CAN
 * Moosonee, ON, CAN
 
 ### w080n30
 
+US Mid Atlantic Seaboard
+
 * Baltimore, MD, USA
 * Charleston, SC, USA
-* Norfolk, VA, USA
 * Philadelphia, PA, USA
 * Raleigh, NC, USA
 * Richmond, VA, USA
-* Washington, DC, USA
+* Washington, DC, USA (Capital of the US)
 
 ### w080n40
 
-* Albany, NY, USA
+US North Atlantic Seaboard, lower Great Lakes, St Lawrence River
+
 * Boston, MA, USA
-* Buffalo, NY, USA
 * Burlington, VT, USA
-* Hamilton, ON, CAN
 * Hartford, CT, USA
 * Montreal, QC, CAN
 * Newark, NJ, USA
 * New York, NY, USA
-* Ottawa, ON, CAN
-* Pittsburgh, PA, USA
+* Ottawa, ON, CAN (Capital of Canada)
+* Pittsburgh, PA, USA (shared with w090n40)
 * Portland, ME, USA
 * Providence, RI, USA
 * Quebec, QC, CAN
-* Rochester, NY,USA
-* Syracuse, NY, USA
-* Trenton, NJ, USA
 * Toronto, ON, CAN
 
 ### w080n50
 
-* Eastmain River, QC, CAN
+Eastern James Bay
+
 * Inukjuak, QC, CAN
-* Kuujjuarapik, QC, CAN
 * La Grande Rivière, QC, CAN
-* Nemiscau, QC, CAN
-* Sanikiluaq, NU, CAN
 * Umiujaq, NU, CAN
 
 ### w070n40
 
-* Baie-Comeau, QC, CAN
+Maine and Canadian Maritimes
+
 * Bangor, ME, USA
-* Bar Harbor, ME, USA
 * Charlottetown, PE, CAN
-* Chatham, MA, USA
 * Fredericton, NB, CAN
+* Gaspé, QC, CAN
 * Halifax, NS, CAN
-* Houlton, ME, USA
-* Millinocket, ME, USA
-* Miramichi, NB, CAN
-* Moncton, NB, CAN
-* Port Hawkesbury, NS, CAN
-* Presque Isle, ME, USA
-* St John, NB, CAN
-* Sydney, NS, CAN
-* Yarmouth, NS, CAN
 
 ### w070n50
 
+Labrador and northeastern Quebec
+
 * Churchill Falls, NL, CAN
 * Goose Bay, NL, CAN
-* Havre-St-Pierre, QC, CAN
-* Kangiqsualujjuaq, QC, CAN
-* Schefferville, QC, CAN
 * Sept-Îles, QC, CAN
-* Wabush, NL, CAN
 
 ### w060n40
 
-* Cornerbrook, NL, CAN
+Newfoundland and St Pierre-Miquelon (France)
+
 * Gander, NL, CAN
-* Miquelon, PM, FRA
 * St. John's, NL, CAN
 * Saint-Pierre, PM, FRA
-* Stephenville, NL, CAN
 
 ### w060n50
 
+Northern Newfoundland and eastern Labrador
+
 * Cartwright, NL, CAN
-* Chevery, QC, CAN
 * Fox Harbour, NL, CAN
 * Lourdes-de-Blanc-Sablon, QC, CAN
-* St. Anthony, NL, CAN
-* St. Augustin, QC, CAN
-* Williams Harbour, NL, CAN
 
 ## Scenery models and osm2city
 
@@ -301,10 +303,6 @@ The scenery uses the following open sources:
 
 For more details, see https://github.com/davidmegginson/fgfs-scenery-build , which contains the build scripts.
 
-
-## Future plans
-
-The scenery will eventually contain all of the 10x10 degree buckets surrounding the Great Lakes, the St Lawrence River, and the Gulf of St Lawrence: w100n40, 1090n40, w080n40, w070n40, w060n50, w070n50, and w080n50.
 
 ## UNLICENSE
 

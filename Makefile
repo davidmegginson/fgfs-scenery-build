@@ -89,7 +89,7 @@ force-fit-elevations:
 #
 
 airports:
-	genapts850 --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} \
+	genapts850 --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} --max-slope=0.2618 \
 	  --work=${WORK_DIR} --dem-path=SRTM-3 # can't use threads here, due to errors with .idx files
 
 airports-clean:
