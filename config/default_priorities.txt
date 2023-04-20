@@ -36,6 +36,9 @@ PackIce			other	# Water with ice packs
 PolarIce		other
 Ocean			ocean
 Estuary			ocean
+Urban			other	# Densely-populated city or large town
+SubUrban		other	# Densely-populated city or large town
+Town			other	# Small town or village
 Fishing			other
 Construction		other
 Industrial		other
@@ -53,16 +56,17 @@ Dirt			other
 Rock			other	# Rock
 Lava			other	# Lava-covered area
 OpenMining		other	# OpenMining
-Greenspace		other
 
 # USGS Land Covers
 # These are low-priority, since known polygons should always win.
 
+BuiltUpCover		other	# Urban and Built-Up Land
 Transport		other	# Transport
 Cemetery		other	# Cemetery
 DryCrop			other	# Dryland Cropland and Pasture
 IrrCrop			other	# Irrigated Cropland and Pasture
 Rice			other
+MixedCrop		other	# Mixed Dryland/Irrigated Cropland and Pasture
 Vineyard		other
 Bamboo			other
 Mangrove		other
@@ -73,6 +77,7 @@ CropWood		other	# Cropland/Woodland Mosaic
 AgroForest		other
 Olives			other
 GolfCourse		other	# GolfCourse
+Greenspace		other
 GrassCover		other	# Grassland
 Grassland		other
 ScrubCover		other	# Scrub
@@ -80,13 +85,11 @@ Scrub			other
 ShrubGrassCover		other	# Mixed Shrubland/Grassland
 SavannaCover		other	# Savanna
 Orchard			other	# Orchard
-MixedForest		other	# Mixed Forest
-MixedCrop		other	# Mixed Dryland/Irrigated Cropland and Pasture
-BuiltUpCover		other	# Urban and Built-Up Land
 DeciduousForest		other	# Deciduous Forest
 DeciduousBroadCover	other	# Deciduous Forest
 EvergreenForest		other	# Evergreen Forest
 EvergreenBroadCover	other	# Evergreen Forest
+MixedForest		other	# Mixed Forest
 RainForest		other	# Rain Forest
 BarrenCover		other	# Barren or Sparsely Vegetated
 HerbTundra		other	# Herbaceous Tundra
@@ -94,11 +97,6 @@ Sclerophyllous		other
 Heath			other
 Burnt			other
 SnowCover		other	# Snow or Ice
-
-# Moved down so that urban forests can pop
-Urban			other	# Densely-populated city or large town
-SubUrban		other	# Densely-populated city or large town
-Town                    other	# Urban and Built-Up Land
 
 Island			island	# any island area not covered otherwise
 Default			landmass # any land area not covered otherwise

@@ -167,7 +167,7 @@ Northwestern Ontario and southern Manitoba (forest, Canadian Shield)
 Eastern Gulf Coast
 
 * Cancún, ROO, MEX
-* Havana, 03, CUB
+* Havana, 03, CUB (note: landcover in Cuba is limited)
 * Key West, FL, USA
 * Miami, FL, USA
 * Mérida, YUC, MEX

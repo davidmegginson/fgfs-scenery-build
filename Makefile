@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-MAX_THREADS=4 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=8 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
@@ -25,6 +25,7 @@ WORK_DIR=./03-work
 OUTPUT_DIR=./04-output
 STATIC_DIR=./static
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
+LC_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
 DROPBOX_DIR="${HOME}/Dropbox/Downloads"
@@ -36,21 +37,39 @@ DROPBOX_DIR="${HOME}/Dropbox/Downloads"
 SRTM_BASE=${INPUTS_DIR}/SRTM-3
 SRTM_SOURCE=${SRTM_BASE}/unpacked
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
-LC_DIR=${INPUTS_DIR}/MODIS-250
+LC_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
 OSM_DIR=${INPUTS_DIR}/osm
-LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
+
+LANDMASS_SOURCE_DIR=land-polygons-split-4326
+LANDMASS_SOURCE=${INPUTS_DIR}/land_polygons.shp
+
+
+#
+# Data extracts (specific to bucket)
+#
+LANDMASS=${DATA_DIR}/landmass/${BUCKET}-landmass.shp
 
 #
 # Top-level targets (assume elevations are already in place)
 #
 
-all: prepare construct publish
+all: prepare build construct publish
 
 prepare: osm-extract osm-shapefiles-prepare lc-shapefiles-prepare landmass-source-prepare airports-prepare
 
-construct: landmass airports layers cliffs scenery
+build: landmass airports layers cliffs
+
+construct: scenery
 
 publish: archive publish-dropbox
+
+# TEMP
+
+clip-modis:
+	ogrinfo -sql "create spatial index on ${BUCKET} depth 5" ${LC_SOURCE_DIR}/${BUCKET}.shp
+	ogr2ogr -clipsrc ${LANDMASS_MASK} ${LC_SOURCE_DIR}/${BUCKET}-clipped.shp ${LC_SOURCE_DIR}/${BUCKET}.shp
+
+# qgis_process run native:clip --distance_units=meters --area_units=m2 --ellipsoid=PARAMETER:6370997:6370997 --INPUT=${LC_SOURCE_DIR}/${BUCKET}.shp --OVERLAY=${LANDMASS_SOURCE} --OUTPUT=${LC_SOURCE_DIR}/${BUCKET}-clipped.shp
 
 ########################################################################
 # Scenery building
@@ -103,7 +122,7 @@ airports-rebuild: airports-clean airports
 #
 
 landmass:
-	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${DATA_DIR}/landmass/${BUCKET}/land_polygons.shp
+	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${DATA_DIR}/landmass/${BUCKET}.shp
 
 landmass-clean:
 	rm -rvf ${WORK_DIR}/Default/${BUCKET}/
@@ -195,10 +214,8 @@ rectify-cliffs:
 
 scenery:
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt --ignore-landmass \
-	  Default AirportObj AirportArea SRTM-3 \
-	  $$(ls ${WORK_DIR} | grep osm-) \
-	  $$(ls ${WORK_DIR} | grep lc-)
+	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
+	  Default AirportObj AirportArea SRTM-3  $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) 
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
@@ -226,6 +243,35 @@ navdata:
 ########################################################################
 
 #
+# Automate landcover
+#
+lc-prepare: ${LC_SOURCE_DIR}/shapefiles/${BUCKET}.shp
+
+lc-rebuild: lc-prepare-clean lc-prepare
+
+lc-prepare-clean:
+	rm -fv ${LC_SOURCE_DIR}/work/${BUCKET}*
+
+${LC_SOURCE_DIR}/work/${BUCKET}-raw.tif: ${LC_SOURCE_DIR}/modis-250-wgs84-nulled.tif
+	gdalwarp -te ${SPAT} ${LC_SOURCE_DIR}/modis-250-wgs84-nulled.tif $@
+	echo foo # extract rectangle
+
+${LC_SOURCE_DIR}/work/${BUCKET}-neighbors.tif: ${LC_SOURCE_DIR}/work/${BUCKET}-raw.tif
+	qgis_process run grass7:r.neighbors --input=$< --output=$@ --method=2 --size=5
+
+${LC_SOURCE_DIR}/work/${BUCKET}-vectorized.shp: ${LC_SOURCE_DIR}/work/${BUCKET}-neighbors.tif
+	qgis_process run grass7:r.to.vect --input=$< --type=2 --column=value ---s=true --output=$@ --GRASS_REGION_CELLSIZE_PARAMETER=.001
+
+${LC_SOURCE_DIR}/work/${BUCKET}-buffered.shp: ${LC_SOURCE_DIR}/work/${BUCKET}-vectorized.shp
+	qgis_process run native:buffer --INPUT=$< --DISTANCE=0.005 --SEGMENTS=5 --END_CAP_STYLE=0 --JOIN_STYLE=0 --MITER_LIMIT=2 --OUTPUT=$@
+
+${LC_SOURCE_DIR}/shapefiles/${BUCKET}.shp: ${LC_SOURCE_DIR}/work/${BUCKET}-buffered.shp ${LANDMASS_MASK}
+	qgis_process run native:clip --INPUT=$< --OVERLAY=${LANDMASS_MASK} --OUTPUT=$@
+
+${LANDMASS_MASK}: ${LANDMASS_SOURCE}
+	ogr2ogr -spat ${SPAT} ${LANDMASS_MASK} ${LANDMASS_SOURCE}
+
+#
 # Unpack downloaded SRTM-3 DEMs
 #
 
@@ -235,6 +281,9 @@ srtm-unpack:
 #
 # Prepare landmass
 #
+
+${LANDMASS_MASK}: ${LANDMASS_SOURCE}
+	ogr2ogr -spat ${SPAT} ${LANDMASS_MASK} ${LANDMASS_SOURCE}
 
 landmass-source-prepare:
 	mkdir -p data/landmass/${BUCKET}/
@@ -278,11 +327,10 @@ lc-shapefiles-prepare:
 	  row=$$(echo "$$row" | sed -e 's/\r//'); \
 	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
 	  dest=$$(echo "$$row" | sed -e 's/^.*,//'); \
-	  source_dir=${LC_DIR}; \
           dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
 	  mkdir -p $$dest_dir; \
 	  echo "Building $$dest for ${BUCKET}..."; \
-	  ogr2ogr $$dest_dir/$$dest $$source_dir/${BUCKET}.shp -sql "select * from ${BUCKET} where value='$$value'"; \
+	  ogr2ogr $$dest_dir/$$dest ${LC_SOURCE_DIR}/shapefiles/${BUCKET}.shp -sql "select * from ${BUCKET} where value='$$value'"; \
 	done
 
 osm-shapefiles-prepare:

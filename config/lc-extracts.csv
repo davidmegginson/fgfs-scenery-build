@@ -16,5 +16,5 @@ value,include,shapefile
 15,yes,lc-cropland.shp
 16,yes,lc-barren.shp
 17,yes,lc-urban.shp
-18,yes,lc-water.shp
+18,no,lc-water.shp
 19,yes,lc-snow-ice.shp
