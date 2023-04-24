@@ -7,18 +7,19 @@
 # Unpacked *.hgt files will be in BASE_DIR/unpacked/
 ########################################################################
 
-if [ $# -ne 1 ]; then
-    echo "Usage: bash $0 BASE-DIR" >&2
+if [ $# -ne 2 ]; then
+    echo "Usage: bash $0 INPUT-DIR OUTPUT-DIR" >&2
     exit 2
 fi
 
-BASE_DIR=$1
+ROOT_DIR=SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-mkdir -p $BASE_DIR/unpacked/
+INPUT_DIR=$1
+OUTPUT_DIR=$1
 
-cd $BASE_DIR/unpacked/
+mkdir -p $OUTPUT_DIR && cd $OUTPUT_DIR
 
-for file in $BASE_DIR/orig/*.zip; do
+for file in $INPUT_DIR/*.zip; do
     unzip -o $file
 done
 

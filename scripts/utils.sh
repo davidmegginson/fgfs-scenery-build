@@ -1,5 +1,11 @@
 # Utility functions for use by other scripts
 
+# Report an error and exit
+fail () {
+    echo $1 >&2
+    exit $2
+}
+
 # Get the closest number divisible by 10 that's less than the arg
 floor10 () {
     python3 -c "from math import floor; print(floor($1/10)*10)"
