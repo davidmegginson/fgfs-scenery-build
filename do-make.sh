@@ -95,7 +95,7 @@ while [ $min_lat -lt $MAX_LAT ]; do
     while [ $min_lon -lt $MAX_LON ]; do
         max_lon=$(expr $min_lon + $STEP)
         set_bucket $min_lon $min_lat
-        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGETS
+        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGETS || exit 1
         min_lon=$max_lon
     done
     min_lat=$max_lat

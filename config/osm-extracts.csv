@@ -7,6 +7,7 @@ osm-cemetery-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 
 osm-cliff-natural.shp,yes,natural.shp,"select * from natural where natural in ('cliff', 'gully')"
 osm-commercial-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'commercial' and OGR_GEOM_AREA > 0.0001"
 osm-construction-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'construction' and OGR_GEOM_AREA > 0.0001"
+osm-desert-natural.shp,yes,natural.shp,"select * from natural where natural in ('desert') and OGR_GEOM_AREA > 0.0001"
 osm-dirt-natural.shp,yes,natural.shp,"select * from natural where natural in ('mud') and OGR_GEOM_AREA > 0.0001"
 osm-education-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'education' and OGR_GEOM_AREA > 0.0001"
 osm-farmland-landuse.shp,yes,landuse.shp,"select * from landuse where landuse in ('farmland', 'farmyard') and OGR_GEOM_AREA > 0.0001"

@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-MAX_THREADS=8 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=2 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
@@ -49,8 +49,8 @@ LANDCOVER_SOURCE=${INPUTS_DIR}/MODIS-250/modis-250-wgs84-nulled.tif
 #
 # Data extracts (specific to bucket)
 #
-LANDMASS=${DATA_DIR}/landmass/${BUCKET}-landmass.shp
-LANDCOVER=${DATA_DIR}/landcover/${BUCKET}-landcover.shp
+LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
+LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
 
 #
 # Top-level targets (assume elevations are already in place)
@@ -58,7 +58,9 @@ LANDCOVER=${DATA_DIR}/landcover/${BUCKET}-landcover.shp
 
 all: prepare build construct publish
 
-prepare: osm-extract landmass-prepare osm-shapefiles-prepare lc-shapefiles-prepare airports-prepare
+extract: landcover-extract osm-extract
+
+prepare: landmass-prepare airports-prepare lc-shapefiles-prepare osm-shapefiles-prepare 
 
 build: landmass cliffs airports layers
 
@@ -86,7 +88,7 @@ clip-modis:
 
 elevations:
 	for file in ${SRTM_SOURCE}/*.hgt; do \
-	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3; \
+	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3 || exit 1; \
 	done
 
 # gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
@@ -159,7 +161,7 @@ lc-areas:
 	    readarray -d ',' -t F <<< $$row; \
 	    echo Trying $${F[0]}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
 	  fi; \
 	done
 
@@ -170,7 +172,7 @@ osm-areas:
 	    readarray -d ',' -t F <<< $$row; \
 	    echo Trying $${F[0]}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
 	  fi; \
 	done
 
@@ -189,7 +191,7 @@ lines:
 	    readarray -d ',' -t F <<< $$row; \
 	    echo Trying $${F[0]}; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
-	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp;\
+	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
 	  fi; \
 	done
 
@@ -270,11 +272,11 @@ ${LANDMASS}: ${LANDMASS_SOURCE}
 #
 # Prepare landcover for current bucket
 #
-landcover-prepare: ${LANDCOVER}
+landcover-extract: ${LANDCOVER}
 
-landcover-prepare-rebuild: lc-prepare-clean lc-prepare
+landcover-extract-rebuild: landcover-extract-clean landcover-extract
 
-landcover-prepare-clean:
+landcover-extract-clean:
 	rm -fv ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}*
 	rm -fv ${LANDCOVER}
 
@@ -341,7 +343,7 @@ lc-shapefiles-prepare:
           dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
 	  mkdir -p $$dest_dir; \
 	  echo "Building $$dest for ${BUCKET}..."; \
-	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER_SOURCE_DIR}/shapefiles/${BUCKET}.shp -sql "select * from ${BUCKET} where value='$$value'"; \
+	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER} -sql "select * from ${BUCKET} where value='$$value'" || exit 1; \
 	done
 
 osm-shapefiles-prepare:
@@ -355,7 +357,7 @@ osm-shapefiles-prepare:
             dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
 	    mkdir -p $$dest_dir; \
 	    echo "Creating $$dest..."; \
-	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query"; \
+	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
 	  done
 
 archive: static-files navdata thresholds-clean thresholds
