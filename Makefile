@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-MAX_THREADS=2 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=3 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
@@ -359,6 +359,21 @@ osm-shapefiles-prepare:
 	    echo "Creating $$dest..."; \
 	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
 	  done
+
+#
+# Simple target to prepare a single OSM feature (using a single attribute)
+#
+OSM_PREPARE_SOURCE=natural
+OSM_PREPARE_FEATURE=forest
+OSM_PREPARE_MIN_AREA=0.0001
+
+# set automatically
+OSM_PREPARE_INPUT=${OSM_DIR}/shapefiles/${BUCKET}/${OSM_PREPARE_SOURCE}.shp
+OSM_PREPARE_OUTPUT=${DATA_DIR}/shapefiles/${BUCKET}/osm-${OSM_PREPARE_FEATURE}-${OSM_PREPARE_SOURCE}.shp
+OSM_PREPARE_QUERY="select * from ${OSM_PREPARE_SOURCE} where ${OSM_PREPARE_SOURCE}='${OSM_PREPARE_FEATURE}' and OGR_GEOM_AREA > ${OSM_PREPARE_MIN_AREA}"
+
+osm-single-shapefile-prepare:
+	ogr2ogr ${OSM_PREPARE_OUTPUT} ${OSM_PREPARE_INPUT} -sql ${OSM_PREPARE_QUERY}
 
 archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
