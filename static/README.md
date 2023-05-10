@@ -11,7 +11,9 @@ Scripts to build scenery: https://github.com/davidmegginson/fgfs-scenery-build
 
 ## Coverage
 
-The release currently contains scenery buckets from 30N to 60N, 140W to 50W, covering all of CONUS, much of Canada, and bits of Alaska, Mexico, and France (St-Pierre and Miquelon). Scenery download areas from west to east, south to north, with notable locations for each:
+The release currently contains scenery buckets from 30N to 60N, 140W to 50W, covering all of CONUS, much of Canada, and bits of Alaska, Mexico, and France (St-Pierre and Miquelon).
+
+Scenery download areas from west to east, south to north, with notable locations for each:
 
 ### w140n50
 
@@ -23,9 +25,9 @@ The release currently contains scenery buckets from 30N to 60N, 140W to 50W, cov
 
 San Francisco Bay area
 
-* Sacramento, CA
-* San Francisco, CA
-* San Jose, CA
+* Sacramento, CA, USA
+* San Francisco, CA, USA
+* San Jose, CA, USA
 
 ### w130n40
 
@@ -40,13 +42,15 @@ US Pacific Northwest and southern British Columbia
 
 Northern British Columbia
 
-* Kamloops, BC
-* Prince George, BC
+* Kamloops, BC, CAN
+* Prince George, BC, CAN
+* Terrance, BC, CAN
 
 ### w120n30
 
 Grand Canyon, northern Baja California, and Southern California
 
+* Fresno, CA, USA
 * Las Vegas, NV, USA
 * Los Angeles, CA, USA
 * Mexicali, BCN, MEX
@@ -73,9 +77,11 @@ Southern Great Plains and US Rockies
 
 Alberta and the Canadian Rockies
 
+* Banff, AB, CAN
 * Calgary, AB, CAN
 * Edmonton, AB, CAN
 * Fort McMurray, AB, CAN
+* Jasper, AB, CAN
 * Vernon, BC, CAN
 
 ### w110n20
@@ -125,6 +131,7 @@ Western Gulf Coast
 * Galveston, TX, USA
 * Houston TX, USA
 * Matamoros, TAM, MEX
+* New Orleans, LA, USA
 * Reynosa, TAM, MEX
 * San Antonio, TX, USA
 
@@ -133,10 +140,13 @@ Western Gulf Coast
 Northern and eastern Texas and surroundings
 
 * Austin, TX, USA
+* Baton Rouge, LA, USA
 * Dallas, TX, USA
 * Jackson, MS, USA
 * Kansas City, MO, USA
 * Little Rock, AK, USA
+* Memphis, TN, USA
+* Oklahoma City, OK, USA
 * Shreveport, LA, USA
 * St Louis, MO, USA
 * Tulsa, OK, USA
@@ -160,6 +170,7 @@ Northwestern Ontario and southern Manitoba (forest, Canadian Shield)
 * Churchill, MB, CAN
 * Gimli, MB, CAN
 * Sioux Lookout, ON, CAN
+* Thompson, MB, CAN
 * Winnipeg, MB, CAN
 
 ### w090n20
@@ -176,13 +187,15 @@ Eastern Gulf Coast
 
 ### w090n30
 
-US Deep South
+US South
 
 * Atlanta, GA, USA
 * Birmingham, AL, USA
 * Charleston, WV, USA
 * Charlotte, NC, USA
+* Columbus, OH, USA
 * Cincinnati, OH, USA
+* Indianapolis, IN, USA
 * Jacksonville, FL, USA
 * Louisville, KY, USA
 * Memphis, TN, USA
@@ -196,23 +209,31 @@ Central Great Lakes, US Rust Belt (home of Oshkosh!)
 * Chicago, IL, USA
 * Cleveland, OH, USA
 * Detroit, MI, USA
+* Green Bay, WI, USA
+* London, ON, CAN
+* Madison, WI, USA
+* Marquette, MI, USA
 * Milwaukee, WI, USA
-* Pittsburgh, PA, USA (shared with w080n40)
+* Oshkosh, WI, USA
+* Pittsburgh, PA, USA
 * Sudbury, ON, CAN
 * Thunder Bay, ON, CAN
+* Timmins, ON, CAN
 * Windsor, ON, CAN
 
 ### w090n50
 
 Western James Bay
 
+* Armstrong, ON, CAN
 * Attawapiskat, ON, CAN
+* Fort Albany, ON, CAN
 * Fort Severn, ON, CAN
 * Moosonee, ON, CAN
 
 ### w080n30
 
-US Mid Atlantic Seaboard
+US Mid Atlantic Seaboard (many U.S. Civil War battlefields)
 
 * Baltimore, MD, USA
 * Charleston, SC, USA
@@ -220,6 +241,7 @@ US Mid Atlantic Seaboard
 * Raleigh, NC, USA
 * Richmond, VA, USA
 * Washington, DC, USA (Capital of the US)
+* Wilmington, DE, USA
 
 ### w080n40
 
@@ -255,6 +277,8 @@ Maine and Canadian Maritimes
 * Fredericton, NB, CAN
 * Gaspé, QC, CAN
 * Halifax, NS, CAN
+* Moncton, NB, CAN
+* Sydney, NS, CAN
 
 ### w070n50
 
@@ -298,7 +322,7 @@ The scenery uses the following open sources:
 
 * Elevations from the SRTM-3 DEM (Digital Elevation Model)
 * Coarse landcover from the joint Canada/US 250m MODIS-250 landcover raster
-* Airport layouts from the X-Plane Scenery Gateway (mostly via FlightGear)
+* Airport layouts from the X-Plane Scenery Gateway
 * Detailed landcover, inland water, roads, railways, and powerline areas from OpenStreetMap
 
 For more details, see https://github.com/davidmegginson/fgfs-scenery-build , which contains the build scripts.
@@ -308,7 +332,7 @@ For more details, see https://github.com/davidmegginson/fgfs-scenery-build , whi
 
 The author, David Megginson, asserts no intellectual property rights over this scenery, so it is likely in the Public Domain. See UNLICENSE.md for details.
 
-The airport source data itself is GPL, including the following statement:
+The airport source data itself is GPL, including the following statement in the original FlightGear copy:
 
 > 1000 Version - data cycle 2013.10, build 20131335, metadata AptXP1000, further modified by the FlightGear team (cf. <https://sourceforge.net/p/flightgear/fgmeta/ci/next/tree/changes-in-dat-files/apt.dat>).  Copyright © 2013, Robin A. Peel (robin@x-plane.com).   This data is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.  You should have received a copy of the GNU General Public License along with this program ("AptNavGNULicence.txt"); if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
