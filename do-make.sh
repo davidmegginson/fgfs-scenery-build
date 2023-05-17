@@ -1,14 +1,15 @@
 #!/bin/bash
 ########################################################################
-# Run the Makefile repeatedly over an area
+# Run the Makefile over an area
 #
 # The TerraGear utils are unreliable over large geographical areas;
 # This script allows breaking those down into smaller areas and
 # iterating easily.
 #
-# Usage:
 #
-#   $ bash do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <target>
+# USAGE
+#
+#  $ bash do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <target>
 #
 #  min-lon: minimum longitude in integer degrees, e.g. -80
 #  min-lat: minimum latitude in integer degrees, e.g. 40
@@ -17,17 +18,27 @@
 #  step: increment in integer degrees, e.g. 1
 #  target: the Makefile target to build each time
 #
-# Set the STEP environment variable to use a lat/lon set other than 1:
 #
-# $ STEP=2 bash do-make.sh ...
+# ENVIRONMENT VARIABLES
 #
-# (STEP must be a factor of 10, i.e. 1, 2, 5, or 10)
+# STEP:build areas larger than 1x1 deg (STEP must be a factor
+# of 10, i.e. 1, 2, 5, or 10):
+#
+# $ STEP=2 bash do-make.sh -80 40 -70 50 scenery
+#
+# START_LAT, START_LON: restart at a specific lat/lon within the area:
+#
+# $ START_LAT=42 START_LON=-75 sh do-make.sh -80 40 -70 50 scenery
+#
+#
+# TESTING PARAMETERS
 #
 # Test with the 'echo' target:
 #
-#   $ bash do-make.sh -80 40 -70 40 1 echo
+# $ bash do-make.sh -80 40 -70 40 1 echo
 #
-# Warning: does not detect if the step will cross buckets.
+#
+# AUTHOR
 #
 # By David Megginson, 2022-12
 # Released into the Public Domain
@@ -89,22 +100,36 @@ MAX_LON=$1; shift
 MAX_LAT=$1; shift
 TARGETS=$@
 : ${STEP:=1} # use the STEP environment variable to override
+: ${START_LAT:=$MIN_LAT} # starting latitude (for restarting)
+: ${START_LON:=$MIN_LON} # starting longitude (for restarting)
+: ${THREADS:=4} # default threads for build
+
+# ensure STEP is reasonable for a full-bucket build
+if [ $STEP -ne 1 -a $STEP -ne 2 -a $STEP -ne 5 -a $STEP -ne 10 ]; then
+    echo "STEP is $STEP; must be 1, 2, 5, or 10." >&2
+    exit 1
+fi
 
 #
 # Main loop
 #
 
-min_lat=$MIN_LAT
-while [ $min_lat -lt $MAX_LAT ]; do
-    max_lat=$(expr $min_lat + $STEP)
-    min_lon=$MIN_LON
-    while [ $min_lon -lt $MAX_LON ]; do
-        max_lon=$(expr $min_lon + $STEP)
-        set_bucket $min_lon $min_lat
+# don't necessarily start at beginning
+bucket_min_lat=$START_LAT
+bucket_min_lon=$START_LON
+
+while [ $bucket_min_lat -lt $MAX_LAT ]; do
+    bucket_max_lat=$(expr $bucket_min_lat + $STEP)
+    while [ $bucket_min_lon -lt $MAX_LON ]; do
+        bucket_max_lon=$(expr $bucket_min_lon + $STEP)
+        set_bucket $bucket_min_lon $bucket_min_lat
         # advance only if the build succeeded
-        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGETS && min_lon=$max_lon
+        make THREADS=$THREADS BUCKET=$BUCKET MIN_LON=$bucket_min_lon MIN_LAT=$bucket_min_lat MAX_LON=$bucket_max_lon MAX_LAT=$bucket_max_lat $TARGETS || exit
+        bucket_min_lon=$bucket_max_lon
     done
-    min_lat=$max_lat
+
+    # start next row
+    bucket_min_lon=$MIN_LON
+    bucket_min_lat=$bucket_max_lat
 done
 
-exit 0
