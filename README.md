@@ -143,12 +143,12 @@ All of the steps but ``make scenery`` will skip anything that's already built un
 All of the steps will leave scenery alone that's already built for different areas.
 
 
-### Splitting the work
+### Splitting the work with do-make.sh
 
 The TerraGear scenery tools often fail over large areas. The do-make.sh script allows you to split the work into several smaller jobs:
 
 ```
-$ sh do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <target>
+$ bash sh do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <target>
 ```
 
 _target_ is the Makefile target to run repeatedly over each area.
@@ -156,12 +156,28 @@ _target_ is the Makefile target to run repeatedly over each area.
 If you want to go by bigger that 1x1 degree squares, set the environment variable _STEP_. For example,
 
 ```
-% STEP=2 do-make.sh -80 40 -70 50 layers
+$ STEP=2 bash do-make.sh -80 40 -70 50 scenery
 ```
 
 will go through in 2x2 degree increments instead of 1x1 degree.
 
+If you want to restart at a specific latlon within the area (e.g. after a crash), set the environment variables _START\_LAT_ and/or _START\_LON_. For example,
+
+```
+$ START_LON=72 START_LAT=41 bash do-make.sh -80 40 -70 50 scenery
+```
+
+If you want to change the number of concurrent threads from the default in the Makefile, set the environment variable _THREADS_. For example,
+
+```
+$ THREADS=16 bash do-make.sh -80 40 -70 50 scenery
+```
+
 Use the _do-make.sh_ script only for later steps in scenery building; earlier steps (like elevations and airports) need to work on the entire bucket.
+
+*Note:* _\*-clean_ targets like _layers_clean_ or _scenery\_clean_ will clean the whole bucket for _every_ iteration, so don't combine them with a build target like _layers_ or _scenery_.
+
+*Note:* after a crash, changing the number of threads will often fix the problem.
 
 
 ### Making elevations
