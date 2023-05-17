@@ -40,7 +40,7 @@ osm-industrial-landuse,yes,area,Urban
 osm-institutional-landuse,yes,area,ShrubGrassCover
 osm-landfill-landuse,yes,area,Dump
 osm-lava-natural,yes,area,Lava
-osm-line-power,yes,line,ShrubGrassCover,20
+osm-line-power,yes,line,ShrubGrassCover,10
 osm-meadow-landuse,yes,area,CropGrass
 osm-motorway-highway,yes,line,Freeway,10
 osm-motorway-highway,no,line,ShrubGrassCover,30
