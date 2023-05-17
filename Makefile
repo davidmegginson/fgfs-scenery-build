@@ -1,5 +1,110 @@
+########################################################################
+# Makefile to build different stages of FlightGear scenery
+#
+# For some stages, instead of using the Makefile directly, you might
+# want to use the do-make.sh shell script, which breaks a large area
+# into smaller ones, and makes it easier to restart the build at a
+# specific spot after a failure. It is especially useful for the
+# "layers" and "scenery" targets.
+#
+#
+# 1. Important Makefile configuration variables
+#
+# BUCKET - the bucket being build (e.g. w080n40)
+#
+# MIN_LON, MIN_LAT, MAX_LON, MAX_LAT - the bottom left and top right
+# corners of the area being built (e.g. -80 40 -70 50)
+#
+# MAX_THREADS - the maximum number of concurrent threads to run for
+# some processes (e.g. 8; increase to speed up the build; decrease to
+# avoid crashes).
+#
+# PUBLISH_DIR- the directory where you want to upload scenery packages
+# to the cloud (e.g. $HOME/Dropbox/Downloads)
+#
+#
+# 2. Important targets
+#
+# 2.1. Data-extraction targets
+#
+# Extract raw data in INPUTS_DIR. Works at the BUCKET level.
+#
+# extract - run all extraction targets for the bucket.
+#
+# landcover-extract - extract landcover shapefile for the requested
+# bucket
+#
+# osm-extract - extract OSM per-feature shapefiles for a bucket
+#
+#
+# 2.2. Data-preparation targets
+#
+# Process data in INPUTS_DIR and place the output in DATA_DIR. Works
+# at the BUCKET level.
+#
+# prepare - run all preparation targets for the requested bucket.
+#
+# landmass-prepare - prepare the landmass mask for the bucket.
+#
+# airports-prepare - prepare the airports file for the bucket.
+#
+# lc-shapefiles-prepare - prepare the background landcover shapefiles
+# for the bucket.
+#
+# osm-shapefiles-prepare - prepare the detailed OSM features for the
+# bucket.
+#
+#
+# 2.3. Data-building targets
+#
+# Build the TerraGear input files for scenery, working at the latlon
+# level (can build an area smaller than a full bucket).
+#
+# build - run the landmass, cliffs, airports, and layers targets for
+# the requested area.
+#
+# landmass - build the landmass mask for the requested area.
+#
+# cliffs - build the cliffs metadata for the requested area (not yet
+# working).
+#
+# airports - build the airport areas and objects for the requested
+# area.
+#
+# layers - build the landcover and OSM layers for the requested area.
+#
+# The elevation-related targets should be run rarely, and may need to
+# use an older version of TerraGear:
+#
+# elevations - build the elevation data from the *.hgt files in
+# INPUT_DIR
+#
+# fit-elevations - fit the elevation data (may need to run across
+# buckets; run with care).
+#
+#
+# 2.4. Scenery-construction targets
+#
+# This can work on a 1x1 area or larger.
+#
+# scenery - build scenery for the requested area.
+#
+# 2.5. Publishing targets
+#
+# Publish a 10x10 deg bucket as a tarball.
+#
+# publish - prepare support files for a scenery distribution, create a
+# tarball, and copy to the publish directory.
+#
+#
+# 3. Author
+#
+# Written by David Megginson
+#
+########################################################################
+
 SHELL=/bin/bash
-MAX_THREADS=4 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=4
 
 #
 # What area are we building (override on the command line)
@@ -9,6 +114,8 @@ MIN_LON=-80
 MAX_LON=-70
 MIN_LAT=40
 MAX_LAT=50
+
+# set automatically
 SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
 LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
@@ -28,7 +135,7 @@ SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 
-DROPBOX_DIR="${HOME}/Dropbox/Downloads"
+PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 #
 # Data sources
@@ -68,7 +175,7 @@ rebuild: landmass-rebuild cliffs-rebuild airports-rebuild layers-rebuild
 
 construct: scenery
 
-publish: archive publish-dropbox
+publish: archive publish-cloud
 
 # TEMP
 
@@ -379,9 +486,9 @@ archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
 	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
 
-publish-dropbox:
-	cp -v ${STATIC_DIR}/README.md "${DROPBOX_DIR}"
-	mv -v ${OUTPUT_DIR}/*.tar "${DROPBOX_DIR}"
+publish-cloud:
+	cp -v ${STATIC_DIR}/README.md "${PUBLISH_DIR}"
+	mv -v ${OUTPUT_DIR}/*.tar "${PUBLISH_DIR}"
 
 ########################################################################
 # Test that do-make.sh is working
