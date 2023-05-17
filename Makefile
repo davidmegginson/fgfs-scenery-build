@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-MAX_THREADS=3 # reduce this if you get crashes; increase if everything works and you want to speed up the build
+MAX_THREADS=4 # reduce this if you get crashes; increase if everything works and you want to speed up the build
 
 #
 # What area are we building (override on the command line)
