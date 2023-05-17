@@ -8,7 +8,7 @@
 #
 # Usage:
 #
-#   $ bash do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <step> <target>
+#   $ bash do-make.sh <min-lon> <min-lat> <max-lon> <max-lat> <target>
 #
 #  min-lon: minimum longitude in integer degrees, e.g. -80
 #  min-lat: minimum latitude in integer degrees, e.g. 40
@@ -16,6 +16,12 @@
 #  max-lat: maximum latitude in integer degrees, e.g. 50
 #  step: increment in integer degrees, e.g. 1
 #  target: the Makefile target to build each time
+#
+# Set the STEP environment variable to use a lat/lon set other than 1:
+#
+# $ STEP=2 bash do-make.sh ...
+#
+# (STEP must be a factor of 10, i.e. 1, 2, 5, or 10)
 #
 # Test with the 'echo' target:
 #
@@ -95,8 +101,8 @@ while [ $min_lat -lt $MAX_LAT ]; do
     while [ $min_lon -lt $MAX_LON ]; do
         max_lon=$(expr $min_lon + $STEP)
         set_bucket $min_lon $min_lat
-        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGETS || exit 1
-        min_lon=$max_lon
+        # advance only if the build succeeded
+        make BUCKET=$BUCKET MIN_LON=$min_lon MIN_LAT=$min_lat MAX_LON=$max_lon MAX_LAT=$max_lat $TARGETS && min_lon=$max_lon
     done
     min_lat=$max_lat
 done
