@@ -88,7 +88,27 @@ set_bucket()
 
 # Check usage
 if [ $# -lt 5 ]; then
-    echo "Usage: $0 <min-lon> <min-lat> <max-lon> <max-lat> <targets...>" >&2
+    cat <<EOF >&2
+Run a Makefile target in chunks (1x1 deg by default), with an option to restart.
+
+Usage:
+
+$0 <min-lon> <min-lat> <max-lon> <max-lat> <targets...>" >&2
+
+Parameters:
+
+min-lon, min-lat  bottom left corner of the area to build (e.g. -80 40)
+max-lon, max-lat  top right corner of the area to build (e.g. -70 50)
+targets           Makefile targets (e.g. scenery)
+
+Environment variables:
+
+STEP       [1] number of degrees square for each build (1 [default], 2, 5, or 10)
+START_LAT  [$min_lat] starting latitude (to restart after a crash, e.g. 42)
+START_LON  [$min_lon] starting longitude (to restart after a crash, e.g. -75)
+THREADS    [4] number of concurrent threads to use
+
+EOF
     exit 2
 fi
 
