@@ -122,8 +122,10 @@ function setup_map (config) {
             }
         })
 
-        // add to the bucket group
-        rectangle_layer.addLayer(rect);
+        // add to the bucket group (for now, skip unavailable buckets)
+        if (available) {
+            rectangle_layer.addLayer(rect);
+        }
     });
 
     // add the bucket group to the map
@@ -131,6 +133,25 @@ function setup_map (config) {
 
     // set the map's zoom
     map.fitBounds(rectangle_layer.getBounds());
+}
+
+function list_links (config) {
+    let parent_node = document.getElementById("links");
+
+    for (const [bucket_name, props] of Object.entries(config)) {
+        let label_node = document.createElement("dt");
+        label_node.appendChild(document.createTextNode(bucket_name));
+        parent_node.appendChild(label_node);
+
+        let description_node = document.createElement("dd");
+        let link_node = document.createElement("a");
+        link_node.setAttribute("href", props.url);
+        link_node.setAttribute("download", props.name);
+        link_node.text = props.name;
+        description_node.appendChild(link_node);
+        description_node.appendChild(document.createTextNode(" (last modified " + props.date.substr(0, 4) + "-" + props.date.substr(4, 2) + "-" + props.date.substr(6, 2) + ")"));
+        parent_node.appendChild(description_node);
+    }
 }
 
 
@@ -145,4 +166,7 @@ window.onload = async function () {
 
     // draw the map
     setup_map(config);
+
+    // list the links
+    list_links(config);
 };

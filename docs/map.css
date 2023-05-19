@@ -1,3 +1,12 @@
+body {
+    font-family: Helvetica, Arial, sanserif;
+}
+
 #map {
-    height: 80vh;
+    height: 60vh;
+}
+
+dl dt {
+    font-weight: bold;
+    margin-top: 1ex;
 }
