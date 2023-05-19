@@ -131,7 +131,7 @@ DATA_DIR=./02-prep
 WORK_DIR=./03-work
 OUTPUT_DIR=./04-output
 STATIC_DIR=./static
-HTML_DIR=./html
+HTML_DIR=./docs
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
@@ -496,6 +496,10 @@ publish-cloud:
 
 update-download-links:
 	cat ${CONFIG_DIR}/dropbox-token.txt | python3 ${SCRIPT_DIR}/make-download-index.py > ${HTML_DIR}/download-links.json
+	git checkout main
+	git add ${HTML_DIR}/download-links.json
+	git commit -m 'Update download links'
+	git push origin main
 
 ########################################################################
 # Test that do-make.sh is working
