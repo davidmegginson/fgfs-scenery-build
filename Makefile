@@ -131,6 +131,7 @@ DATA_DIR=./02-prep
 WORK_DIR=./03-work
 OUTPUT_DIR=./04-output
 STATIC_DIR=./static
+HTML_DIR=./html
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
@@ -486,9 +487,15 @@ archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
 	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
 
+# Will move
 publish-cloud:
-	cp -v ${STATIC_DIR}/README.md "${PUBLISH_DIR}"
-	mv -v ${OUTPUT_DIR}/*.tar "${PUBLISH_DIR}"
+	cp -v ${STATIC_DIR}/README.md "${PUBLISH_DIR}" \
+	  && mkdir -p "${PUBLISH_DIR}"/Old \
+	  && mv -v "${PUBLISH_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"/Old \
+	  && mv -v "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
+
+update-download-links:
+	cat ${CONFIG_DIR}/dropbox-token.txt | python3 ${SCRIPT_DIR}/make-download-index.py > ${HTML_DIR}/download-links.json
 
 ########################################################################
 # Test that do-make.sh is working

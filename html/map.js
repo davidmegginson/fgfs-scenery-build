@@ -1,13 +1,13 @@
-var map = L.map('map').setView([45, -100], 4);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 15,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+/**
+ * Set up the download map for FlightGear Canada/US scenery.
+ *
+ * Uses Leaflet.
+ */
 
-var rectangle_layer = L.featureGroup();
 
-/* Buckets to show on the map (lower left hand corner lat/lon and whether available) */
-var buckets = [
+// Buckets to show on the map (lower left hand corner lat/lon and whether available)
+// TODO: move to an external config file
+const BUCKETS = [
     [60, -140, false],
     [50, -140, true],
     [60, -130, false],
@@ -44,37 +44,105 @@ var buckets = [
     [40, -60, true],
 ];
 
-function make_bucket(lat, lon) {
-    if (lon < 0) {
-        lon = "w" + (lon * -1).toString().padStart(3, "0");
-    } else {
-        lon = "e" + lon.toString().padStart(3, "0");
-    }
-    if (lat < 0) {
-        lat = "s" + (lat * -1).toString().padStart(2, "0");
-    } else {
-        lat = "n" + lat.toString().padStart(2, "0");
-    }
+/**
+ * Function called after the window is rendered and the config file is loaded.
+ */
+function setup_map (config) {
 
-    return lon + lat;
-}
+    /**
+     * Generate a bucket name from a lat/lon
+     */
+    function make_bucket_name(lat, lon) {
+        if (lon < 0) {
+            lon = "w" + (lon * -1).toString().padStart(3, "0");
+        } else {
+            lon = "e" + lon.toString().padStart(3, "0");
+        }
+        if (lat < 0) {
+            lat = "s" + (lat * -1).toString().padStart(2, "0");
+        } else {
+            lat = "n" + lat.toString().padStart(2, "0");
+        }
+
+        return lon + lat;
+    }
 
     
-let available_style = { color: "green", weight: 1 };
-let unavailable_style = { color: "red", weight: 1 };
+    /**
+     * Start a download in the user's browser
+     */
+    function download(url, filename) {
+        var a = document.createElement("a");
+        a.setAttribute("href", url);
+        a.setAttribute("download", filename);
+        a.click();
+    }
 
-buckets.forEach((bucket) => {
-    let lat = bucket[0];
-    let lon = bucket[1];
-    let available = bucket[2];
-    let bounds = [[lat, lon], [lat+10, lon+10]];
-    let text = "w080n40";
-    let style = available ? available_style : unavailable_style;
-    let rect = L.rectangle(bounds, style);
-    rect.bindTooltip(make_bucket(lat, lon));
-    rectangle_layer.addLayer(rect);
-});
+    
+    // the Leaflet map object
+    let map = L.map('map').setView([45, -100], 4);
 
-map.addLayer(rectangle_layer);
+    // add OpenStreetMap tiles
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 15,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
 
-map.fitBounds(rectangle_layer.getBounds());
+    // feature group to hold the scenery-bucket rectangles
+    let rectangle_layer = L.featureGroup();
+
+    // set up the styles
+    let available_style = { color: "green", weight: 1 };
+    let unavailable_style = { color: "red", weight: 1 };
+
+    // Create a rectangle for each bucket
+    BUCKETS.forEach((bucket) => {
+        let lat = bucket[0];
+        let lon = bucket[1];
+        let available = bucket[2];
+        let bounds = [[lat, lon], [lat+10, lon+10]];
+        let style = available ? available_style : unavailable_style;
+        let rect = L.rectangle(bounds, style);
+        let bucket_name = make_bucket_name(lat, lon);
+
+        // add the bucket name to the rect
+        rect.bucket_name = bucket_name;
+
+        // show the bucket name on mouseover
+        rect.bindTooltip(bucket_name);
+
+        // Download when the user clicks on an area
+        rect.on('click', (e) => {
+            let entry = config[e.target.bucket_name];
+            if (entry) {
+                console.log(entry);
+                download(entry.url, entry.name);
+            } else {
+                alert(bucket_name + " not yet available for download.")
+            }
+        })
+
+        // add to the bucket group
+        rectangle_layer.addLayer(rect);
+    });
+
+    // add the bucket group to the map
+    map.addLayer(rectangle_layer);
+
+    // set the map's zoom
+    map.fitBounds(rectangle_layer.getBounds());
+}
+
+
+//
+// Start here
+//
+window.onload = async function () {
+
+    // download the config file
+    response = await fetch('download-links.json');
+    config = await response.json();
+
+    // draw the map
+    setup_map(config);
+};

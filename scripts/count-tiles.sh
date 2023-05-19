@@ -8,7 +8,10 @@ fi
 for d in ./04-output/fgfs-canada-us-scenery/Terrain/$1/*; do
     num=$(ls $d/*.stg | wc -l)
     if [ $num -ne 32 ]; then
-        echo $d $num
+        mark="*"
+    else
+        mark=""
     fi
+    echo $d $num "$mark"
 done
 

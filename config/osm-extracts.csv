@@ -31,7 +31,7 @@ osm-primary-highway.shp,yes,highway.shp,"select * from highway where highway in 
 osm-quarry-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'quarry' and OGR_GEOM_AREA > 0.00001"
 osm-railway-railway.shp,yes,railway.shp,"select * from railway where railway in ('rail', 'light_rail', 'subway') and (tunnel is null or tunnel = 'no') and usage in ('main', 'branch')"
 osm-recreation-ground-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'recreation_ground' and OGR_GEOM_AREA > 0.00001"
-osm-residential-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'residential' and OGR_GEOM_AREA > 0.00001"
+osm-residential-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'residential'"
 osm-retail-landuse.shp,yes,landuse.shp,"select * from landuse where landuse = 'retail' and OGR_GEOM_AREA > 0.00001"
 osm-rock-natural.shp,yes,natural.shp,"select * from natural where natural in ('bare_rock', 'scree', 'stone') and OGR_GEOM_AREA > 0.00001"
 osm-sand-natural.shp,yes,natural.shp,"select * from natural where natural in ('beach', 'dune', 'sand') and OGR_GEOM_AREA > 0.000025"
