@@ -5,66 +5,24 @@
  */
 
 
-// Buckets to show on the map (lower left hand corner lat/lon and whether available)
-// TODO: move to an external config file
-const BUCKETS = [
-    [60, -140, false],
-    [50, -140, true],
-    [60, -130, false],
-    [50, -130, true],
-    [40, -130, true],
-    [30, -130, true],
-    [60, -120, false],
-    [50, -120, true],
-    [40, -120, true],
-    [30, -120, true],
-    [60, -110, false],
-    [50, -110, true],
-    [40, -110, true],
-    [30, -110, true],
-    [20, -110, true],
-    [60, -100, false],
-    [50, -100, true],
-    [40, -100, true],
-    [30, -100, true],
-    [20, -100, true],
-    [60, -90, false],
-    [50, -90, true],
-    [40, -90, true],
-    [30, -90, true],
-    [20, -90, true],
-    [60, -80, false],
-    [50, -80, true],
-    [40, -80, true],
-    [30, -80, true],
-    [60, -70, false],
-    [50, -70, true],
-    [40, -70, true],
-    [50, -60, true],
-    [40, -60, true],
-];
-
 /**
- * Function called after the window is rendered and the config file is loaded.
+ * Create interactive map.
  */
 function setup_map (config) {
 
     /**
-     * Generate a bucket name from a lat/lon
+     * Parse a bucket name to get the lat/lon
      */
-    function make_bucket_name(lat, lon) {
-        if (lon < 0) {
-            lon = "w" + (lon * -1).toString().padStart(3, "0");
-        } else {
-            lon = "e" + lon.toString().padStart(3, "0");
+    function parse_bucket_name(name) {
+        let lon = parseInt(name.substr(1, 3));
+        let lat = parseInt(name.substr(5, 2));
+        if (name.substr(0, 1).toLowerCase() == 'w') {
+            lon *= -1;
         }
-        if (lat < 0) {
-            lat = "s" + (lat * -1).toString().padStart(2, "0");
-        } else {
-            lat = "n" + lat.toString().padStart(2, "0");
+        if (name.substr(4, 1).toLowerCase() == 's') {
+            lat *= -1;
         }
-
-        return lon + lat;
+        return [lat, lon];
     }
 
     
@@ -96,14 +54,11 @@ function setup_map (config) {
     let unavailable_style = { color: "red", weight: 1 };
 
     // Create a rectangle for each bucket
-    BUCKETS.forEach((bucket) => {
-        let lat = bucket[0];
-        let lon = bucket[1];
-        let available = bucket[2];
-        let bounds = [[lat, lon], [lat+10, lon+10]];
-        let style = available ? available_style : unavailable_style;
-        let rect = L.rectangle(bounds, style);
-        let bucket_name = make_bucket_name(lat, lon);
+    for (const [bucket_name, props] of Object.entries(config)) {
+        const [lat, lon] = parse_bucket_name(bucket_name);
+        const bounds = [[lat, lon], [lat+10, lon+10]];
+        const style = available_style;
+        const rect = L.rectangle(bounds, style);
 
         // add the bucket name to the rect
         rect.bucket_name = bucket_name;
@@ -113,20 +68,13 @@ function setup_map (config) {
 
         // Download when the user clicks on an area
         rect.on('click', (e) => {
-            let entry = config[e.target.bucket_name];
-            if (entry) {
-                console.log(entry);
-                download(entry.url, entry.name);
-            } else {
-                alert(bucket_name + " not yet available for download.")
-            }
+            console.log(props);
+            download(props.url, props.name);
         })
 
         // add to the bucket group (for now, skip unavailable buckets)
-        if (available) {
-            rectangle_layer.addLayer(rect);
-        }
-    });
+        rectangle_layer.addLayer(rect);
+    }
 
     // add the bucket group to the map
     map.addLayer(rectangle_layer);
@@ -135,6 +83,10 @@ function setup_map (config) {
     map.fitBounds(rectangle_layer.getBounds());
 }
 
+
+/**
+ * Create list of direct download links.
+ */
 function list_links (config) {
     let parent_node = document.getElementById("links");
 
