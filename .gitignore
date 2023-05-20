@@ -11,4 +11,4 @@
 /04-output
 /accumulator_fail.log
 /venv
-/config/dropbox-token.txt
+/config/dropbox-config.json

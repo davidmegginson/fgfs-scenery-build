@@ -495,7 +495,7 @@ publish-cloud:
 	  && mv -v "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
 
 update-download-links:
-	cat ${CONFIG_DIR}/dropbox-token.txt | python3 ${SCRIPT_DIR}/make-download-index.py > ${HTML_DIR}/download-links.json
+	python3 ${SCRIPT_DIR}/make-download-index.py ${CONFIG_DIR}/dropbox-config.json > ${HTML_DIR}/download-links.json
 	git checkout main
 	git add ${HTML_DIR}/download-links.json
 	git commit -m 'Update download links'
