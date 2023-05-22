@@ -10,3 +10,18 @@ dl dt {
     font-weight: bold;
     margin-top: 1ex;
 }
+
+.gallery {
+    display: grid;
+    align-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(512px, 1fr));
+    grid-gap: 1rem;
+}
+
+.gallery-image .gallery-description {
+    min-height: 3rem;
+}
+
+.gallery-image img {
+    max-width: 100%;
+}

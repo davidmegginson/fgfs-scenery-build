@@ -161,6 +161,11 @@ LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
 LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
 
 #
+# Python virtual environment
+#
+VENV=./venv/bin/activate
+
+#
 # Top-level targets (assume elevations are already in place)
 #
 
@@ -347,8 +352,8 @@ static-files:
 # Generate custom threshold and navdata files for modified airports
 #
 
-thresholds:
-	python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/${BUCKET}/apt.dat
+thresholds: ${VENV}
+	. ${VENV} && python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 thresholds-clean:
 	rm -rf ${SCENERY_DIR}/Airports
@@ -410,7 +415,7 @@ ${LANDCOVER}: ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-buffered.shp ${LANDMASS}
 #
 
 srtm-unpack:
-	${SHELL} ${SCRIPT_DIR}/unpack-dems.sh ${SRTM_BASE}
+	${SHELL} ${SCRIPT_DIR}/unpack-dems.sh ${SRTM_BASE}/orig ${STRM_BASE}/unpacked
 
 #
 # Extract OSM from PBF
@@ -426,9 +431,9 @@ osm-extract-clean:
 # Prepare airports
 #
 
-airports-prepare:
+airports-prepare: ${VENV}
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
-	cat ${AIRPORTS_SOURCE} \
+	. ${VENV} && cat ${AIRPORTS_SOURCE} \
 	| python3 ${SCRIPT_DIR}/downgrade-apt.py \
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
 	> ${DATA_DIR}/airports/${BUCKET}/apt.dat
@@ -491,15 +496,21 @@ archive: static-files navdata thresholds-clean thresholds
 publish-cloud:
 	cp -v ${STATIC_DIR}/README.md "${PUBLISH_DIR}" \
 	  && mkdir -p "${PUBLISH_DIR}"/Old \
-	  && mv -v "${PUBLISH_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"/Old \
-	  && mv -v "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
+	  && (mv -fv "${PUBLISH_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"/Old || echo "No previous file") \
+	  && mv -fv "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
 
-update-download-links:
-	python3 ${SCRIPT_DIR}/make-download-index.py ${CONFIG_DIR}/dropbox-config.json > ${HTML_DIR}/download-links.json
+update-download-links: ${VENV}
+	. ${VENV} && python3 ${SCRIPT_DIR}/make-download-index.py ${CONFIG_DIR}/dropbox-config.json > ${HTML_DIR}/download-links.json
 	git checkout main
 	git add ${HTML_DIR}/download-links.json
 	git commit -m 'Update download links'
 	git push origin main
+
+#
+# Set up Python when needed
+#
+${VENV}: requirements.txt
+	python3 -m venv venv && . ${VENV} && pip3 install -r requirements.txt
 
 ########################################################################
 # Test that do-make.sh is working
