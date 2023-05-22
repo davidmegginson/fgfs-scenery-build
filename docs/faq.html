@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FlightGear Canada/US scenery FAQ</title>
+    <link rel="stylesheet" href="map.css"/>
+  </head>
+  <body>
+    <h1>FlightGear Canada/US scenery FAQ</h1>
+    <p class="nav">
+      <a href=".">Download</a>
+      <a href="gallery.html">Gallery</a>
+      <a>FAQ</a>
+    </p>
+    <main>
+      <dl class="faq">
+
+        <dt>
+          How do I get FlightGear to use the scenery?
+        </dt>
+        <dd>
+          If you are starting from the commandline, add the option
+          <code>--fg-scenery=PATH/fgfs-canada-us-scenery/</code>,
+          replacing <var>PATH</var> with the actual path to the
+          location where you installed the scenery (you can put the
+          option in your <code>$HOME/.fgfsrc</code> file to use it
+          every time). If you are using the launcher, select the
+          <i>Add-ons</i> tab and put the path (without the
+          <code>--fg-scenery=</code> prefix) in the <i>Additional
+          scenery folders</i> section.
+        </dd>
+
+        <dt>
+          Why don't I see airport buildings, osm2city details, etc?
+        </dt>
+        <dd>
+          In Unix-like operating systems (Linux, MacOS, you need to
+          run the script gen-symlinks.sh to create symbolic links to
+          your TerraSync scenery. You also need to have TerraSync
+          enabled. In Windows, or if you have your <code>.fgfs/</code>
+          directory in a non-standard location, you will need to
+          create the links manually.
+        </dd>
+        
+        <dt>
+          Why do roads and railroads stop at rivers?
+        </dt>
+        <dd>
+          Originally, the scenery carried roads and railroads across
+          rivers so that the crossings would be visible for users who
+          haven't enabled osm2city, but that creates strange artifacts
+          for people using more-detailed scenery, so I am gradually
+          rebuilding the scenery to exclude any OSM road/railroad
+          segments with <code>bridge=yes</code>. Some may still
+          appear, when the OSM source is not correctly tagged.
+        </dd>
+
+        <dt>
+          What are the long, wide grassy areas?
+        </dt>
+        <dd>
+          Those are rights of way for high-voltage powerlines. In real
+          life flying, unless you are very low, you usually won't see
+          the towers or lines, but you will see the cleared areas. If
+          you enable osm2city, the lines and towers will usually be
+          added.
+        </dd>
+
+        <dt>
+          Who are you?
+        </dt>
+        <dd>
+          I am <a
+          href="https://en.wikipedia.org/wiki/David_Megginson">David
+          Megginson</a>, a former real-life aircraft owner and early
+          contributor to FlightGear. Starting in the late 1990s, among
+          other features, I created the FlightGear Property system,
+          added support for multi-engine and tailwheel, aircraft, and
+          added the first TerraGear support for line features like
+          roads and railroads. I also created the earliest models of
+          the Piper PA-28-161, Piper Cub, DC-3, Cessna 172, and Cessna
+          310 (all of which have since been improved or replaced by
+          more-talented aircraft designers). The main goal of my early
+          contributions was to make it possible for people to
+          contribute without writing C++ code, and I'm happy to see a
+          thriving community today. I also maintain the open-data <a
+          href="https://ourairports.com">OurAirports</a> site.
+        </dd>
+
+      </dl>
+    </main>
+  </body>
+</html>

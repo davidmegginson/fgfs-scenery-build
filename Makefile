@@ -338,6 +338,7 @@ rectify-cliffs:
 #
 
 scenery:
+	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt --ignore-landmass \
 	  Default AirportObj AirportArea SRTM-3  $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) 

@@ -11,6 +11,15 @@ dl dt {
     margin-top: 1ex;
 }
 
+.nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    font-size: 83.33333%;
+    background: #eeeeff;
+    padding: .75rem 0;
+}
+
 .gallery {
     display: grid;
     align-items: center;
