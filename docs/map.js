@@ -92,6 +92,7 @@ function list_links (config) {
 
     for (const [bucket_name, props] of Object.entries(config)) {
         let label_node = document.createElement("dt");
+        label_node.setAttribute("id", bucket_name);
         label_node.appendChild(document.createTextNode(bucket_name));
         parent_node.appendChild(label_node);
 
