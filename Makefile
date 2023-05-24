@@ -135,7 +135,7 @@ HTML_DIR=./docs
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
-
+TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 22500 -e 10
 PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 #
@@ -216,11 +216,14 @@ elevations-rebuild: elevations-clean elevations
 
 
 fit-elevations:
-	terrafit ${WORK_DIR}/SRTM-3 -m 50 -x 22500 -e 1
-
+	terrafit ${WORK_DIR}/SRTM-3 ${TERRAFIT_OPTS}
 
 force-fit-elevations:
-	terrafit ${WORK_DIR}/SRTM-3 -f -m 50 -x 22500 -e 1
+	terrafit ${WORK_DIR}/SRTM-3 -f ${TERRAFIT_OPTS}
+
+elevations-fit-clean:
+	find ${WORK_DIR}/SRTM-3 -name '*.fit.gz' -print0 \
+	| xargs -0 rm -v
 
 
 #
@@ -339,7 +342,7 @@ rectify-cliffs:
 
 scenery:
 	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
-	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain --match-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt --ignore-landmass \
 	  Default AirportObj AirportArea SRTM-3  $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) 
 
@@ -367,6 +370,15 @@ navdata:
 ########################################################################
 # Data preparation (does not require TerraGear)
 ########################################################################
+
+#
+# Clip OSM areas
+#
+
+osm-clip: ${OSM_DIR}/${BUCKET}.osm.pbf
+
+${OSM_DIR}/${BUCKET}.osm.pbf: ${OSM_DIR}/north-america-latest.osm.pbf ${OSM_DIR}/clip-osm.sh
+	cd ${OSM_DIR} && sh clip-osm.sh north-america-latest.osm.pbf ${MIN_LON} ${MIN_LAT}
 
 #
 # Prepare landmass
@@ -422,7 +434,7 @@ srtm-unpack:
 # Extract OSM from PBF
 #
 
-osm-extract:
+osm-extract: ${OSM_DIR}/${BUCKET}.osm.pbf
 	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${CONFIG_DIR}/osmconf.ini ${BUCKET}
 
 osm-extract-clean:
