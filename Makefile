@@ -109,11 +109,11 @@ MAX_THREADS=4
 #
 # What area are we building (override on the command line)
 #
-BUCKET=w080n40
-MIN_LON=-80
-MAX_LON=-70
-MIN_LAT=40
-MAX_LAT=50
+#BUCKET=w080n40
+#MIN_LON=-80
+#MAX_LON=-70
+#MIN_LAT=40
+#MAX_LAT=50
 
 # set automatically
 SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
@@ -135,7 +135,7 @@ HTML_DIR=./docs
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
-TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 22500 -e 10
+TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 22500 -e 5
 PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 #
@@ -181,6 +181,8 @@ rebuild: landmass-rebuild cliffs-rebuild airports-rebuild layers-rebuild
 
 construct: scenery
 
+reconstruct: scenery-rebuild
+
 publish: archive publish-cloud
 
 # TEMP
@@ -199,12 +201,17 @@ clip-modis:
 # Build elevation data from the SRTM-3 DEMs
 #
 
-elevations:
+elevations: elevations-hgtchop
+
+elevations-hgtchop:
 	for file in ${SRTM_SOURCE}/*.hgt; do \
 	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3 || exit 1; \
 	done
 
-# gdalchop ${WORK_DIR}/SRTM-3 ${DATA_DIR}/SRTM-3/${BUCKET}/*.hgt
+elevations-gdalchop:
+	mkdir -p ${WORK_DIR}/SRTM-3 \
+	&& find ${SRTM_SOURCE} -name '*.hgt' -print0 \
+	| xargs -0 gdalchop ${WORK_DIR}/SRTM-3
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
@@ -214,7 +221,6 @@ elevations-clean-all:
 
 elevations-rebuild: elevations-clean elevations
 
-
 fit-elevations:
 	terrafit ${WORK_DIR}/SRTM-3 ${TERRAFIT_OPTS}
 
@@ -222,7 +228,7 @@ force-fit-elevations:
 	terrafit ${WORK_DIR}/SRTM-3 -f ${TERRAFIT_OPTS}
 
 elevations-fit-clean:
-	find ${WORK_DIR}/SRTM-3 -name '*.fit.gz' -print0 \
+	find ${WORK_DIR}/SRTM-3/${BUCKET} -name '*.fit.gz' -print0 \
 	| xargs -0 rm -v
 
 
@@ -342,12 +348,14 @@ rectify-cliffs:
 
 scenery:
 	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
-	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain --match-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt --ignore-landmass \
+	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
 	  Default AirportObj AirportArea SRTM-3  $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) 
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
+
+scenery-rebuild: scenery-clean scenery
 
 static-files:
 	cp -v ${STATIC_DIR}/* ${SCENERY_DIR}
@@ -513,7 +521,7 @@ publish-cloud:
 	  && mv -fv "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
 
 update-download-links: ${VENV}
-	. ${VENV} && python3 ${SCRIPT_DIR}/make-download-index.py ${CONFIG_DIR}/dropbox-config.json > ${HTML_DIR}/download-links.json
+	. ${VENV} && python3 ${SCRIPT_DIR}/make-download-links.py ${CONFIG_DIR}/dropbox-config.json > ${HTML_DIR}/download-links.json
 	git checkout main
 	git add ${HTML_DIR}/download-links.json
 	git commit -m 'Update download links'
