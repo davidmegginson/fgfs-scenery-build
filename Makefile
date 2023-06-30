@@ -85,7 +85,7 @@
 #
 # 2.4. Scenery-construction targets
 #
-# This can work on a 1x1 area or larger.
+# This can work on a 1x1 deg area or larger.
 #
 # scenery - build scenery for the requested area.
 #
@@ -135,15 +135,16 @@ HTML_DIR=./docs
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
 LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
-TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 22500 -e 5
+TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 22500 -e 10
 PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 #
 # Data sources
 #
 
-SRTM_BASE=${INPUTS_DIR}/SRTM-3
-SRTM_SOURCE=${SRTM_BASE}/unpacked
+#SRTM_BASE=${INPUTS_DIR}/SRTM-3
+#SRTM_SOURCE=${SRTM_BASE}/unpacked
+DEM_SOURCE=${INPUTS_DIR}/FABDEM/Unpacked
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
 OSM_DIR=${INPUTS_DIR}/osm
@@ -151,13 +152,15 @@ OSM_DIR=${INPUTS_DIR}/osm
 OSM_CONF=config/osmconf.ini
 
 
-LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
+LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-complete-4326/land_polygons.shp
 LANDCOVER_SOURCE=${INPUTS_DIR}/MODIS-250/modis-250-wgs84-nulled.tif
 
 #
 # Data extracts (specific to bucket)
 #
 LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
+LANDCOVER_RAW=${DATA_DIR}/landcover/${BUCKET}-raw.shp
+LANDCOVER_BUFFERED=${DATA_DIR}/landcover/${BUCKET}-buffered.shp
 LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
 
 #
@@ -175,9 +178,9 @@ extract: landcover-extract osm-extract
 
 prepare: landmass-prepare airports-prepare lc-shapefiles-prepare osm-shapefiles-prepare 
 
-build: landmass cliffs airports layers
+build: landmass airports layers
 
-rebuild: landmass-rebuild cliffs-rebuild airports-rebuild layers-rebuild
+rebuild: landmass-rebuild airports-rebuild layers-rebuild
 
 construct: scenery
 
@@ -198,37 +201,44 @@ clip-modis:
 ########################################################################
 
 #
-# Build elevation data from the SRTM-3 DEMs
+# Build elevation data from the DEMs
 #
 
-elevations: elevations-hgtchop
+elevations: elevations-chop
 
-elevations-hgtchop:
-	for file in ${SRTM_SOURCE}/*.hgt; do \
-	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3 || exit 1; \
-	done
+#elevations-hgtchop:
+#	for file in ${SRTM_SOURCE}/*.hgt; do \
+#	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3 || exit 1; \
+#	done
 
-elevations-gdalchop:
-	mkdir -p ${WORK_DIR}/SRTM-3 \
-	&& find ${SRTM_SOURCE} -name '*.hgt' -print0 \
-	| xargs -0 gdalchop ${WORK_DIR}/SRTM-3
+# FIXME: hardcoded into buckets for now, to avoid too many open files
+elevations-chop:
+	ls ${DEM_SOURCE}/N2* | xargs gdalchop ${WORK_DIR}/FABDEM
+	ls ${DEM_SOURCE}/N3* | xargs gdalchop ${WORK_DIR}/FABDEM
+	ls ${DEM_SOURCE}/N4* | xargs gdalchop ${WORK_DIR}/FABDEM
+	ls ${DEM_SOURCE}/N5* | xargs gdalchop ${WORK_DIR}/FABDEM
+	ls ${DEM_SOURCE}/N6* | xargs gdalchop ${WORK_DIR}/FABDEM
 
 elevations-clean:
-	rm -rvf ${WORK_DIR}/SRTM-3/${BUCKET}/
+	rm -rvf ${WORK_DIR}/FABDEM/${BUCKET}/
 
 elevations-clean-all:
-	rm -rfv ${WORK_DIR}/SRTM-3/*
+	rm -rfv ${WORK_DIR}/FABDEM/*
 
 elevations-rebuild: elevations-clean elevations
 
 fit-elevations:
-	terrafit ${WORK_DIR}/SRTM-3 ${TERRAFIT_OPTS}
+	terrafit ${WORK_DIR}/FABDEM ${TERRAFIT_OPTS}
+
+
+# clean and redo a single bucket
+refit-elevations: elevations-fit-clean fit-elevations
 
 force-fit-elevations:
-	terrafit ${WORK_DIR}/SRTM-3 -f ${TERRAFIT_OPTS}
+	terrafit ${WORK_DIR}/FABDEM -f ${TERRAFIT_OPTS}
 
 elevations-fit-clean:
-	find ${WORK_DIR}/SRTM-3/${BUCKET} -name '*.fit.gz' -print0 \
+	find ${WORK_DIR}/FABDEM/${BUCKET} -name '*.fit.gz' -print0 \
 	| xargs -0 rm -v
 
 
@@ -238,7 +248,7 @@ elevations-fit-clean:
 
 airports:
 	genapts850 --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} --max-slope=0.2618 \
-	  --work=${WORK_DIR} --dem-path=SRTM-3 # can't use threads here, due to errors with .idx files
+	  --work=${WORK_DIR} --dem-path=FABDEM # can't use threads here, due to errors with .idx files; not SRTM-3
 
 airports-clean:
 	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/
@@ -327,20 +337,20 @@ single-line:
 
 
 #
-# Special handling for cliffs
+# Special handling for cliffs (this is wrong right now)
 #
 
-cliffs:
-	cliff-decode ${DECODE_OPTS} ${WORK_DIR}/SRTM-3 ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
+#cliffs:
+#	cliff-decode ${DECODE_OPTS} ${WORK_DIR}/SRTM-3 ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
 
-cliffs-clean:
-	rm -vf ${WORK_DIR}/SRTM-3/${BUCKET}/*/*.cliffs
+#cliffs-clean:
+#	rm -vf ${WORK_DIR}/SRTM-3/${BUCKET}/*/*.cliffs
 
-cliffs-rebuild: cliffs-clean cliffs
+#cliffs-rebuild: cliffs-clean cliffs
 
 # optional step (probably not worth it for non-mountainous terrain)
-rectify-cliffs:
-	rectify_height ${LATLON} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
+#rectify-cliffs:
+#	rectify_height ${LATLON} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
 
 #
 # Pull it all together and generate scenery in the output directory
@@ -350,7 +360,7 @@ scenery:
 	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
-	  Default AirportObj AirportArea SRTM-3  $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) 
+	  FABDEM Default AirportObj AirportArea $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) # not SRTM
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
@@ -411,32 +421,53 @@ landcover-extract: ${LANDCOVER}
 landcover-extract-rebuild: landcover-extract-clean landcover-extract
 
 landcover-extract-clean:
-	rm -fv ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}*
-	rm -fv ${LANDCOVER}
+	rm -fv ${LANDCOVER_RAW} ${LANDCOVER_BUFFERED} ${LANDCOVER}
 
-${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-raw.tif: ${LANDCOVER_SOURCE_DIR}/modis-250-wgs84-nulled.tif
-	gdalwarp -te ${SPAT} ${LANDCOVER_SOURCE_DIR}/modis-250-wgs84-nulled.tif $@
-	echo foo # extract rectangle
-
-${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-neighbors.tif: ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-raw.tif
-	qgis_process run grass7:r.neighbors --input=$< --output=$@ --method=2 --size=5
-
-${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-vectorized.shp: ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-neighbors.tif
-	qgis_process run grass7:r.to.vect --input=$< --type=2 --column=value ---s=true --output=$@ --GRASS_REGION_CELLSIZE_PARAMETER=.001
-
-${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-buffered.shp: ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-vectorized.shp
-	qgis_process run native:buffer --INPUT=$< --DISTANCE=0.005 --SEGMENTS=5 --END_CAP_STYLE=0 --JOIN_STYLE=0 --MITER_LIMIT=2 --OUTPUT=$@
-
-${LANDCOVER}: ${LANDCOVER_SOURCE_DIR}/work/${BUCKET}-buffered.shp ${LANDMASS}
+${LANDCOVER_RAW}: ${LANDCOVER_SOURCE_DIR}/work/north-america-buffered.shp ${LANDMASS}
 	mkdir -p ${DATA_DIR}/landcover
+	ogr2ogr -spat ${SPAT} $@ $<
+
+${LANDCOVER_BUFFERED}: ${LANDCOVER_RAW}
+	ogr2ogr -nlt MULTIPOLYGON $@ $<
+
+${LANDCOVER}: ${LANDCOVER_BUFFERED} ${LANDMASS}
 	qgis_process run native:clip --INPUT=$< --OVERLAY=${LANDMASS} --OUTPUT=$@
+
+#ogr2ogr -clipsrc ${LANDMASS} $@ $<
+
+#
+# Prepare landcover over all
+#
+#all-landcover-extract: ${DATA_DIR}/north-america.shp
+
+#all-landcover-extract-rebuild: landcover-extract-clean landcover-extract
+
+#all-landcover-extract-clean:
+#	rm -fv ${LANDCOVER_SOURCE_DIR}/work/north-america*
+#	rm -fv ${DATA_DIR}/north-america.*
+
+#${LANDCOVER_SOURCE_DIR}/work/north-america-neighbors.tif: ${LANDCOVER_SOURCE_DIR}/modis-250-wgs84-nulled.tif
+#	qgis_process run grass7:r.neighbors --input=$< --output=$@ --method=2 --size=5
+
+#${LANDCOVER_SOURCE_DIR}/work/north-america-vectorized.shp: ${LANDCOVER_SOURCE_DIR}/work/north-america-neighbors.tif
+#	qgis_process run grass7:r.to.vect --input=$< --type=2 --column=value ---s=true --output=$@ --GRASS_REGION_CELLSIZE_PARAMETER=.001
+
+#${LANDCOVER_SOURCE_DIR}/work/north-america-buffered.shp: ${LANDCOVER_SOURCE_DIR}/work/north-america-vectorized.shp
+#	qgis_process run native:buffer --INPUT=$< --DISTANCE=0.005 --SEGMENTS=5 --END_CAP_STYLE=0 --JOIN_STYLE=0 --MITER_LIMIT=2 --OUTPUT=$@
+
+#${DATA_DIR}/north-america.shp: ${LANDCOVER_SOURCE_DIR}/work/north-america-buffered.shp ${LANDMASS}
+#	mkdir -p ${DATA_DIR}/landcover
+#	qgis_process run native:clip --INPUT=$< --OVERLAY=${LANDMASS} --OUTPUT=$@
 
 #
 # Unpack downloaded SRTM-3 DEMs
 #
 
-srtm-unpack:
-	${SHELL} ${SCRIPT_DIR}/unpack-dems.sh ${SRTM_BASE}/orig ${STRM_BASE}/unpacked
+#srtm-unpack:
+#${SHELL} ${SCRIPT_DIR}/unpack-dems.sh ${SRTM_BASE}/orig ${STRM_BASE}/unpacked
+
+dem-unpack:
+	cd ${DEM_SOURCE} && (for file in ../Downloads/*.zip; do unzip -n $$file; done)
 
 #
 # Extract OSM from PBF

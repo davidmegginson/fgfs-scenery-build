@@ -9,6 +9,8 @@
 # WHERE railway in ('abandoned', 'disused', 'light_rail', 'preserved', 'rail')
 ########################################################################
 
+set -e
+
 AREA_FEATURES="aeroway amenity geological landuse military natural place sport water"
 LINE_FEATURES="highway power railway"
 

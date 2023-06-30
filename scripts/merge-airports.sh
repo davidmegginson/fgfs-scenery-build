@@ -3,6 +3,8 @@
 # Merge airports into a single file
 ########################################################################
 
+set -e
+
 BUCKET=${BUCKET:-w080n40}
 echo $BUCKET 1>&2
 

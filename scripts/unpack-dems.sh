@@ -7,6 +7,8 @@
 # Unpacked *.hgt files will be in BASE_DIR/unpacked/
 ########################################################################
 
+set -e
+
 if [ $# -ne 2 ]; then
     echo "Usage: bash $0 INPUT-DIR OUTPUT-DIR" >&2
     exit 2

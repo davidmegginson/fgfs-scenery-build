@@ -12,7 +12,7 @@ lc-grassland-temperate,yes,area,GrassCover
 lc-shrubland-polar,yes,area,HerbTundra
 lc-grassland-polar,yes,area,HerbTundra
 lc-shrubland-moss,yes,area,Scrub
-lc-wetland,no,area,Default
+lc-wetland,yes,area,Marsh
 lc-cropland,yes,area,MixedCrop
 lc-barren,yes,area,BarrenCover
 lc-urban,yes,area,Town
