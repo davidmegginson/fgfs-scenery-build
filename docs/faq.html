@@ -35,15 +35,16 @@
           Why don't I see airport buildings, osm2city details, etc?
         </dt>
         <dd>
-          In Unix-like operating systems (Linux, MacOS, you need to
+          In Unix-like operating systems (Linux, MacOS), you need to
           run the script gen-symlinks.sh to create symbolic links to
           your TerraSync scenery. You also need to have TerraSync
           enabled. In Windows, or if you have your <code>.fgfs/</code>
           directory in a non-standard location, you will need to
-          create the links manually.
+          create the links manually. There is no script yet for Windows 
+          (I don't use it), but apparently the <cmd>mklink</cmd> command
+          will create symlinks. If any Windows user cares to contribute
+          a <code>.bat</code> file, I will add it to this repo.
         </dd>
-
-        <!--
         <dt>
           Why do roads and railroads stop at rivers?
         </dt>
@@ -56,8 +57,6 @@
           segments with <code>bridge=yes</code>. Some may still
           appear, when the OSM source is not correctly tagged.
         </dd>
-        -->
-
         <dt>
           What are the long, wide grassy areas?
         </dt>
