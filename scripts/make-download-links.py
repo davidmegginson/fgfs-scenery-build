@@ -33,7 +33,7 @@ for entry in sorted(listing.entries, key=lambda entry: entry.name):
         result = re.match('^fgfs-canada-us-scenery-(w\d{3}n\d{2})-(\d{8}).tar$', entry.name)
         if result:
 
-            # extract fields form the filename
+            # extract fields from the filename
             bucket = result.group(1)
             date = result.group(2)
 
@@ -47,6 +47,7 @@ for entry in sorted(listing.entries, key=lambda entry: entry.name):
                 "name": entry.name,
                 "date": date,
                 "url": url,
+                "size": entry.size,
             }
 
 # Save the output as JSON
