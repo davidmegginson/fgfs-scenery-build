@@ -65,22 +65,21 @@ This will downgrade the file to apt.dat 1000 format, extract the airports inside
 
 This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
 
-We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/
+We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/ and save all files in the 01-inputs/MODIS-250/ directory.
+
+Preparation:
+
+- load land-polygons.shp from the land-polygons-complete package (see above)
+- run Toolbox/GDAL/Vector geoprocessing/Clip vector by extent with the Clipping extent -180,-50,15,90 (xmin, xmax, ymin, ymax), saving to land-polygons-north-america-complete.shp
 
 Run each step on the output from the previous step.
 
-Inside qgis:
-
-- go to Raster/Projections/Warp (Reproject) and reproject to EPSG:4326/WGS 84 using "Nearest neighbours" (fast) or "Mode" (slower, but maybe better; try both and see which you prefer)
-- go to Raster/Extraction/Clip Raster by Extent and clip to the desired area (min lon, max lon, min lat, max lat)
-
-In the qgis toolbox:
-
-- run the GRASS/Raster/r.null function to change value 18 (water) to null
-- run the GRASS/Raster/r.neighbours function with 3 neighbours (median, not average)
-- run the GRASS/Raster/r.neighbours function with 3 neighbours again (median, not average)
-- use GRASS r.to.vect to vectorise, selecting rounded corners
-- save the layer in ESRI Shapefile format
+- load NA_NALCMS_landcover_2010v2_250m.t.tif
+- run the Raster/Projections/Warp (Reproject) function to reproject the raster to one of the WGS84 projections, saving to modis-250-wgs84.shp
+- run the Toolbox/GRASS/Raster/r.null function to change value 18 (water) to null, saving to modis-250-wgs84-nulled.shp
+- run the Toolbox/GRASS/Raster/r.grow function with default parameters, saving to modis-250-wgs84-grow.shp (to fill into the empty water areas a bit and avoid Default slivers)
+- run the Toolbox/GRASS/Raster/r.to.vect to vectorise, selecting rounded corners and saving to modis-250-vect.shp
+- run the Vector/Geoprocessing Tools/Clip function to clip the landcover to the landmass, setting Invalid Feature Filtering to "Do not filter" with the wrench beside the input layer, land-polygons-north-america-complete as the Overlay layer, and modis-250-clipped.shp as the output file (this may take hours or days to run, and require over 10 GB of RAM)
 
 Next, generate the input polygons for FlightGear, e.g.
 

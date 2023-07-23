@@ -104,7 +104,7 @@
 ########################################################################
 
 SHELL=/bin/bash
-MAX_THREADS=4
+MAX_THREADS=1
 
 #
 # What area are we building (override on the command line)
@@ -147,21 +147,29 @@ PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 DEM_SOURCE=${INPUTS_DIR}/FABDEM/Unpacked
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
-OSM_DIR=${INPUTS_DIR}/osm
 
+OSM_DIR=${INPUTS_DIR}/osm
+OSM_SOURCE=${OSM_DIR}/north-america-latest.osm.pbf
+OSM_PBF_EXTRACTED=${OSM_DIR}/${BUCKET}.osm.pbf
+OSM_EXTRACT_FLAG=${OSM_DIR}/shapefiles/${BUCKET}/osm-extracted.flag
 OSM_CONF=config/osmconf.ini
 
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-complete-4326/land_polygons.shp
-LANDCOVER_SOURCE=${INPUTS_DIR}/MODIS-250/modis-250-wgs84-nulled.tif
+LANDCOVER_BASE=modis-250-clipped
+LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
+
+# Output dir for per-area shapefiles
+SHAPEFILES_DIR=${DATA_DIR}/shapefiles/${BUCKET}
 
 #
 # Data extracts (specific to bucket)
 #
 LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
-LANDCOVER_RAW=${DATA_DIR}/landcover/${BUCKET}-raw.shp
-LANDCOVER_BUFFERED=${DATA_DIR}/landcover/${BUCKET}-buffered.shp
 LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
+
+LANDCOVER_SHAPEFILES_FLAG=${SHAPEFILES_DIR}/lc-shapefiles-complete.flag
+OSM_SHAPEFILES_FLAG=${SHAPEFILES_DIR}/osm-shapefiles-complete.flag
 
 #
 # Python virtual environment
@@ -187,14 +195,6 @@ construct: scenery
 reconstruct: scenery-rebuild
 
 publish: archive publish-cloud
-
-# TEMP
-
-clip-modis:
-	ogrinfo -sql "create spatial index on ${BUCKET} depth 5" ${LANDCOVER_SOURCE_DIR}/${BUCKET}.shp
-	ogr2ogr -clipsrc ${LANDMASS} ${LANDCOVER_SOURCE_DIR}/${BUCKET}-clipped.shp ${LANDCOVER_SOURCE_DIR}/${BUCKET}.shp
-
-# qgis_process run native:clip --distance_units=meters --area_units=m2 --ellipsoid=PARAMETER:6370997:6370997 --INPUT=${LANDCOVER_SOURCE_DIR}/${BUCKET}.shp --OVERLAY=${LANDMASS_SOURCE} --OUTPUT=${LANDCOVER_SOURCE_DIR}/${BUCKET}-clipped.shp
 
 ########################################################################
 # Scenery building
@@ -393,10 +393,15 @@ navdata:
 # Clip OSM areas
 #
 
-osm-clip: ${OSM_DIR}/${BUCKET}.osm.pbf
+osm-clip: ${OSM_PBF_EXTRACTED}
 
-${OSM_DIR}/${BUCKET}.osm.pbf: ${OSM_DIR}/north-america-latest.osm.pbf ${OSM_DIR}/clip-osm.sh
-	cd ${OSM_DIR} && sh clip-osm.sh north-america-latest.osm.pbf ${MIN_LON} ${MIN_LAT}
+${OSM_PBF_EXTRACTED}: ${OSM_SOURCE}
+	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+
+
+
+#${OSM_DIR}/${BUCKET}.osm.pbf: ${OSM_DIR}/north-america-latest.osm.pbf ${OSM_DIR}/clip-osm.sh
+#	cd ${OSM_DIR} && sh clip-osm.sh north-america-latest.osm.pbf ${MIN_LON} ${MIN_LAT}
 
 #
 # Prepare landmass
@@ -421,43 +426,11 @@ landcover-extract: ${LANDCOVER}
 landcover-extract-rebuild: landcover-extract-clean landcover-extract
 
 landcover-extract-clean:
-	rm -fv ${LANDCOVER_RAW} ${LANDCOVER_BUFFERED} ${LANDCOVER}
+	rm -fv ${LANDCOVER}
 
-${LANDCOVER_RAW}: ${LANDCOVER_SOURCE_DIR}/work/north-america-buffered.shp ${LANDMASS}
-	mkdir -p ${DATA_DIR}/landcover
+${LANDCOVER}: ${LANDCOVER_SOURCE}
 	ogr2ogr -spat ${SPAT} $@ $<
 
-${LANDCOVER_BUFFERED}: ${LANDCOVER_RAW}
-	ogr2ogr -nlt MULTIPOLYGON $@ $<
-
-${LANDCOVER}: ${LANDCOVER_BUFFERED} ${LANDMASS}
-	qgis_process run native:clip --INPUT=$< --OVERLAY=${LANDMASS} --OUTPUT=$@
-
-#ogr2ogr -clipsrc ${LANDMASS} $@ $<
-
-#
-# Prepare landcover over all
-#
-#all-landcover-extract: ${DATA_DIR}/north-america.shp
-
-#all-landcover-extract-rebuild: landcover-extract-clean landcover-extract
-
-#all-landcover-extract-clean:
-#	rm -fv ${LANDCOVER_SOURCE_DIR}/work/north-america*
-#	rm -fv ${DATA_DIR}/north-america.*
-
-#${LANDCOVER_SOURCE_DIR}/work/north-america-neighbors.tif: ${LANDCOVER_SOURCE_DIR}/modis-250-wgs84-nulled.tif
-#	qgis_process run grass7:r.neighbors --input=$< --output=$@ --method=2 --size=5
-
-#${LANDCOVER_SOURCE_DIR}/work/north-america-vectorized.shp: ${LANDCOVER_SOURCE_DIR}/work/north-america-neighbors.tif
-#	qgis_process run grass7:r.to.vect --input=$< --type=2 --column=value ---s=true --output=$@ --GRASS_REGION_CELLSIZE_PARAMETER=.001
-
-#${LANDCOVER_SOURCE_DIR}/work/north-america-buffered.shp: ${LANDCOVER_SOURCE_DIR}/work/north-america-vectorized.shp
-#	qgis_process run native:buffer --INPUT=$< --DISTANCE=0.005 --SEGMENTS=5 --END_CAP_STYLE=0 --JOIN_STYLE=0 --MITER_LIMIT=2 --OUTPUT=$@
-
-#${DATA_DIR}/north-america.shp: ${LANDCOVER_SOURCE_DIR}/work/north-america-buffered.shp ${LANDMASS}
-#	mkdir -p ${DATA_DIR}/landcover
-#	qgis_process run native:clip --INPUT=$< --OVERLAY=${LANDMASS} --OUTPUT=$@
 
 #
 # Unpack downloaded SRTM-3 DEMs
@@ -473,8 +446,12 @@ dem-unpack:
 # Extract OSM from PBF
 #
 
-osm-extract: ${OSM_DIR}/${BUCKET}.osm.pbf
+osm-extract: ${OSM_EXTRACT_FLAG}
+
+${OSM_EXTRACT_FLAG}: ${OSM_PBF_EXTRACTED}
+	rm -f $@
 	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${CONFIG_DIR}/osmconf.ini ${BUCKET}
+	touch $@
 
 osm-extract-clean:
 	rm -rvf ${OSM_DIR}/shapefiles/${BUCKET}
@@ -496,22 +473,34 @@ airports-prepare: ${VENV}
 
 shapefiles-prepare: lc-shapefiles-prepare osm-shapefiles-prepare
 
-shapefiles-clean-bucket:
-	rm -rfv ${DATA_DIR}/shapefiles/${BUCKET}/lc-* -rfv ${DATA_DIR}/shapefiles/${BUCKET}/osm-*
+shapefiles-clean-bucket: lc-shapefiles-clean osm-shapefiles-clean
 
-lc-shapefiles-prepare:
+lc-shapefiles-clean:
+	rm -rfv ${SHAPEFILES_DIR}/lc-* ${LANDCOVER_SHAPEFILES_FLAG}
+
+osm-shapefiles-clean:
+	rm -rfv ${SHAPEFILES_DIR}/osm-* ${OSM_SHAPEFILES_FLAG}
+
+lc-shapefiles-prepare: ${DATA_DIR}/shapefiles/${BUCKET}/lc-shapefiles-complete.flag
+
+${LANDCOVER_SHAPEFILES_FLAG}: ${LANDCOVER} ${CONFIG_DIR}/lc-extracts.csv
+	rm -f $@
 	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
 	| while read -r row; do \
 	  row=$$(echo "$$row" | sed -e 's/\r//'); \
 	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
 	  dest=$$(echo "$$row" | sed -e 's/^.*,//'); \
-          dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
+          dest_dir=${SHAPEFILES_DIR}; \
 	  mkdir -p $$dest_dir; \
 	  echo "Building $$dest for ${BUCKET}..."; \
 	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER} -sql "select * from ${BUCKET} where value='$$value'" || exit 1; \
 	done
+	touch $@
 
-osm-shapefiles-prepare:
+osm-shapefiles-prepare: ${OSM_SHAPEFILES_FLAG}
+
+${OSM_SHAPEFILES_FLAG}: ${CONFIG_DIR}/osm-extracts.csv
+	rm -f $@
 	grep ',yes,' ${CONFIG_DIR}/osm-extracts.csv \
 	| while read -r row; do \
 	    row=`echo "$$row" | sed -e 's/\r//'`; \
@@ -524,6 +513,7 @@ osm-shapefiles-prepare:
 	    echo "Creating $$dest..."; \
 	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
 	  done
+	touch $@
 
 #
 # Simple target to prepare a single OSM feature (using a single attribute)
