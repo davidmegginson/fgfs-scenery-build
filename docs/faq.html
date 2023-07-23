@@ -57,6 +57,7 @@
           segments with <code>bridge=yes</code>. Some may still
           appear, when the OSM source is not correctly tagged.
         </dd>
+
         <dt>
           What are the long, wide grassy areas?
         </dt>
@@ -66,6 +67,27 @@
           the towers or lines, but you will see the cleared areas. If
           you enable osm2city, the lines and towers will usually be
           added.
+        </dd>
+
+        <dt>
+          What data sources did you use?
+        </dt>
+        <dd>
+          Elevations: 1-arcsec (30m) Copernicus GLO DEM (<a href="https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn">FABDEM</a>)<br/>
+          Landcover: <a href="http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/">MODIS-250</a> 250m raster (2010)<br/>
+          Airport data: <a href="https://gateway.x-plane.com/">X-Plane Scenery Gateway</a><br/>
+          Landmass, detailed landuse, rivers, roads, railways, and powerline rights-of-way: <a href="https://openstreetmap.org">OpenStreetMap</a>
+        </dd>
+
+        <dt>
+          Why not use a 10m landcover raster?
+        </dt>
+        <dd>
+          I'm using MODIS-250 mainly for background, with OpenStreetMap data filling in the details. Because I'm
+          converting to vector data, a 10m landcover raster,
+          processing exceeded my resources for such large areas, and the resulting scenery would probably have
+          had too many triangles for most users. To see a more-detailed raster (but less detailed rivers and other
+          water features), try the new WS3.0 scenery under development.
         </dd>
 
         <dt>
