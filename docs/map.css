@@ -2,6 +2,14 @@ body {
     font-family: Helvetica, Arial, sanserif;
 }
 
+.logo {
+    text-decoration: none;
+}
+
+.logo img {
+    height: 2ex;
+}
+
 #map {
     height: 60vh;
 }
