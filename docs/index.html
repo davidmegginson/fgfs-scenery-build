@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-     integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
-     crossorigin=""/>
+          integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+          crossorigin=""/>
     <link rel="stylesheet" href="map.css"/>
     <link rel="icon" type="image/png" href="icon.png"/>
   </head>
@@ -24,69 +24,72 @@
         <a href="faq.html">FAQ</a>
       </nav>
     </header>
-    <p>
-     Scenery for the open-source <a
-     href="https://flightgear.org">FlightGear</a> flight simulator
-     created by David Megginson.
-    </p>
-    <p>
-      [<a href="#download-map">map</a> | <a href="#links">links</a> | <a href="#sources">sources</a>]
-    </p>
-
-    <section id="download-map">
-      <h2>Download map</h2>
-      <div id="map">[Map not available]</div>
+    <main>
       <p>
-        Up-to-date scenery buckets are highlighted in green; buckets
-        from older builds are highlighted in yellow, and might not
-        match up at boundaries. Mouse over to see the bucket name, and
-        click on a bucket to download. If you have trouble using the
-        map, try the <a href="#download-links">direct download
-        links</a>.
+        Scenery for the open-source <a
+        href="https://flightgear.org">FlightGear</a> flight simulator
+        created by David Megginson.
       </p>
       <p>
-        <b>Note:</b> after downloading, run the gen-symlinks.sh script
-        to include buildings, osm2city objects, etc.
+        [<a href="#download-map">map</a> | <a href="#links">links</a> | <a href="#sources">sources</a>]
       </p>
-    </section>
 
-    <section id="download-links">
-      <h2>Download links</h2>
-      <dl id="links">
-      </dl>
-    </section>
+      <section id="download-map">
+        <h2>Download map</h2>
+        <div id="map">[Map not available]</div>
+        <p>
+          Up-to-date scenery buckets are highlighted in green; buckets
+          from older builds are highlighted in yellow, and might not
+          match up at boundaries. Mouse over to see the bucket name, and
+          click on a bucket to download. If you have trouble using the
+          map, try the <a href="#download-links">direct download
+          links</a>.
+        </p>
+        <p>
+          <b>Note:</b> after downloading, run the gen-symlinks.sh script
+          to include buildings, osm2city objects, etc.
+        </p>
+      </section>
 
-    <section id="sources">
-      <h2>Data sources</h2>
+      <section id="download-links">
+        <h2>Download links</h2>
+        <dl id="links">
+        </dl>
+      </section>
 
-      <dl>
-        <dt>Elevations</dt>
-        <dd>
-          1-arcsec (30m) Copernicus GLO DEM, with forests and
-          buildings removed (<a
-          href="https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn">FABDEM</a>)
-        </dd>
-        <dt>Background landcover</dt>
-        <dd>
-          MODIS-250 Canada/US landcover raster (nominally 250m
-          resolution) [<a
-          href="http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/">download</a>]
-        </dd>
-        <dt>Airports</dt>
-        <dd>
-          X-Plane Scenery Gateway [<a href="https://gateway.x-plane.com/airports">site</a>]
-        </dd>
-        <dt>Landmass outline, detailed landcover, roads, railroads, powerline rights-of-way, and water</dt>
-        <dd>
-          OpenStreetMap
-        </dd>
-      </dl>
+      <section id="sources">
+        <h2>Data sources</h2>
 
-    </section>
+        <dl>
+          <dt>Elevations</dt>
+          <dd>
+            1-arcsec (30m) Copernicus GLO DEM, with forests and
+            buildings removed (<a
+            href="https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn">FABDEM</a>)
+          </dd>
+          <dt>Background landcover</dt>
+          <dd>
+            MODIS-250 Canada/US landcover raster (nominally 250m
+            resolution) [<a
+            href="http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/">download</a>]
+          </dd>
+          <dt>Airports</dt>
+          <dd>
+            X-Plane Scenery Gateway [<a href="https://gateway.x-plane.com/airports">site</a>]
+          </dd>
+          <dt>Landmass outline, detailed landcover, roads, railroads, powerline rights-of-way, and water</dt>
+          <dd>
+            OpenStreetMap
+          </dd>
+        </dl>
+
+      </section>
+
+    </main>
     
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-     integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
-     crossorigin=""></script>
+            integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+            crossorigin=""></script>
     <script src="map.js"></script>
   </body>
 </html>
