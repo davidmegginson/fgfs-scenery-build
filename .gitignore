@@ -12,3 +12,4 @@
 /accumulator_fail.log
 /venv
 /config/dropbox-config.json
+/osmconvert_tempfile.*

@@ -165,6 +165,11 @@ SHAPEFILES_DIR=${DATA_DIR}/shapefiles/${BUCKET}
 #
 # Data extracts (specific to bucket)
 #
+
+FLAGS_DIR=./flags/${BUCKET}
+
+AIRPORTS_PREPARED_FLAG=${FLAGS_DIR}/airports-prepared.flag
+
 LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
 LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
 
@@ -404,13 +409,13 @@ ${OSM_PBF_EXTRACTED}: ${OSM_SOURCE}
 #	cd ${OSM_DIR} && sh clip-osm.sh north-america-latest.osm.pbf ${MIN_LON} ${MIN_LAT}
 
 #
-# Prepare landmass
+# Prepare landmass (single file; no flag needed)
 #
 
 landmass-prepare: ${LANDMASS}
 
 landmass-prepare-clean:
-	rm -rfv ${LANDMASS}
+	rm -rfv  ${LANDMASS}
 
 landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
 
@@ -419,7 +424,7 @@ ${LANDMASS}: ${LANDMASS_SOURCE}
 
 
 #
-# Prepare landcover for current bucket
+# Prepare landcover for current bucket (single file; no flag needed)
 #
 landcover-extract: ${LANDCOVER}
 
@@ -430,7 +435,6 @@ landcover-extract-clean:
 
 ${LANDCOVER}: ${LANDCOVER_SOURCE}
 	ogr2ogr -spat ${SPAT} $@ $<
-
 
 #
 # Unpack downloaded SRTM-3 DEMs
@@ -460,12 +464,16 @@ osm-extract-clean:
 # Prepare airports
 #
 
-airports-prepare: ${VENV}
+airports-prepare: ${AIRPORTS_PREPARED_FLAG}
+
+${AIRPORTS_PREPARED_FLAG}: ${VENV} ${FLAGS_DIR}
+	rm -f ${AIRPORTS_PREPARED_FLAG}
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
 	. ${VENV} && cat ${AIRPORTS_SOURCE} \
 	| python3 ${SCRIPT_DIR}/downgrade-apt.py \
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
 	> ${DATA_DIR}/airports/${BUCKET}/apt.dat
+	touch ${AIRPORTS_PREPARED_FLAG}
 
 #
 # Prepare shapefiles
@@ -527,9 +535,6 @@ OSM_PREPARE_INPUT=${OSM_DIR}/shapefiles/${BUCKET}/${OSM_PREPARE_SOURCE}.shp
 OSM_PREPARE_OUTPUT=${DATA_DIR}/shapefiles/${BUCKET}/osm-${OSM_PREPARE_FEATURE}-${OSM_PREPARE_SOURCE}.shp
 OSM_PREPARE_QUERY="select * from ${OSM_PREPARE_SOURCE} where ${OSM_PREPARE_SOURCE}='${OSM_PREPARE_FEATURE}' and OGR_GEOM_AREA > ${OSM_PREPARE_MIN_AREA}"
 
-osm-single-shapefile-prepare:
-	ogr2ogr ${OSM_PREPARE_OUTPUT} ${OSM_PREPARE_INPUT} -sql ${OSM_PREPARE_QUERY}
-
 archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
 	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
@@ -553,6 +558,9 @@ update-download-links: ${VENV}
 #
 ${VENV}: requirements.txt
 	python3 -m venv venv && . ${VENV} && pip3 install -r requirements.txt
+
+${FLAGS_DIR}:
+	mkdir -p ${FLAGS_DIR}
 
 ########################################################################
 # Test that do-make.sh is working
