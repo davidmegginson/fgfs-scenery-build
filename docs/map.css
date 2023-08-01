@@ -49,6 +49,13 @@ dl dt {
     align-items: center;
     grid-template-columns: repeat(auto-fit, minmax(512px, 1fr));
     grid-gap: 1rem;
+    padding: 1rem;
+    background: #eeeeee;
+}
+
+.gallery-image {
+    padding: 1rem;
+    background: #ffffff;
 }
 
 .gallery-image .gallery-description {
