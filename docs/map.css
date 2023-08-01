@@ -19,13 +19,29 @@ dl dt {
     margin-top: 1ex;
 }
 
-.nav {
+.primary-nav {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     font-size: 83.33333%;
     background: #eeeeff;
     padding: .75rem 0;
+}
+
+.secondary-nav {
+    display: block;
+    font-style: italic;
+}
+
+.secondary-nav::before {
+    content: "( Jump to: ";
+}
+
+.secondary-nav::after {
+    content: ")";
+}
+
+.secondary-nav a {
 }
 
 .gallery {
