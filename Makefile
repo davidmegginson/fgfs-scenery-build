@@ -218,11 +218,7 @@ elevations: elevations-chop
 
 # FIXME: hardcoded into buckets for now, to avoid too many open files
 elevations-chop:
-	ls ${DEM_SOURCE}/N2* | xargs gdalchop ${WORK_DIR}/FABDEM
-	ls ${DEM_SOURCE}/N3* | xargs gdalchop ${WORK_DIR}/FABDEM
-	ls ${DEM_SOURCE}/N4* | xargs gdalchop ${WORK_DIR}/FABDEM
-	ls ${DEM_SOURCE}/N5* | xargs gdalchop ${WORK_DIR}/FABDEM
-	ls ${DEM_SOURCE}/N6* | xargs gdalchop ${WORK_DIR}/FABDEM
+	ls ${DEM_SOURCE}/${BUCKET}/*.tif | xargs gdalchop ${WORK_DIR}/FABDEM
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/FABDEM/${BUCKET}/
