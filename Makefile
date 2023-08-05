@@ -48,7 +48,7 @@
 #
 # airports-prepare - prepare the airports file for the bucket.
 #
-# lc-shapefiles-prepare - prepare the background landcover shapefiles
+# landcover-shapefiles-prepare - prepare the background landcover shapefiles
 # for the bucket.
 #
 # osm-shapefiles-prepare - prepare the detailed OSM features for the
@@ -76,7 +76,7 @@
 # The elevation-related targets should be run rarely, and may need to
 # use an older version of TerraGear:
 #
-# elevations - build the elevation data from the *.hgt files in
+# elevations-chop - build the elevation data from the *.hgt files in
 # INPUT_DIR
 #
 # fit-elevations - fit the elevation data (may need to run across
@@ -133,27 +133,21 @@ OUTPUT_DIR=./04-output
 STATIC_DIR=./static
 HTML_DIR=./docs
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
-LANDCOVER_SOURCE_DIR=${INPUT_DIR}/MODIS-250
+LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
-TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 22500 -e 10
+TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 #
 # Data sources
 #
 
-#SRTM_BASE=${INPUTS_DIR}/SRTM-3
-#SRTM_SOURCE=${SRTM_BASE}/unpacked
-DEM_SOURCE=${INPUTS_DIR}/FABDEM/Unpacked
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
 
 OSM_DIR=${INPUTS_DIR}/osm
 OSM_SOURCE=${OSM_DIR}/north-america-latest.osm.pbf
-OSM_PBF_EXTRACTED=${OSM_DIR}/${BUCKET}.osm.pbf
-OSM_EXTRACT_FLAG=${OSM_DIR}/shapefiles/${BUCKET}/osm-extracted.flag
 OSM_CONF=config/osmconf.ini
-
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-complete-4326/land_polygons.shp
 LANDCOVER_BASE=modis-250-clipped
@@ -162,19 +156,37 @@ LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 # Output dir for per-area shapefiles
 SHAPEFILES_DIR=${DATA_DIR}/shapefiles/${BUCKET}
 
+# DEM type (SRTM-3 or FABDEM)
+DEM=FABDEM
+
 #
 # Data extracts (specific to bucket)
 #
 
-FLAGS_DIR=./flags/${BUCKET}
-
-AIRPORTS_PREPARED_FLAG=${FLAGS_DIR}/airports-prepared.flag
+OSM_PBF=${OSM_DIR}/${BUCKET}.osm.pbf
 
 LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
 LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
+AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
-LANDCOVER_SHAPEFILES_FLAG=${SHAPEFILES_DIR}/lc-shapefiles-complete.flag
-OSM_SHAPEFILES_FLAG=${SHAPEFILES_DIR}/osm-shapefiles-complete.flag
+#
+# Build flags
+#
+
+FLAGS_BASE=./flags
+FLAGS_DIR=${FLAGS_BASE}/${BUCKET}
+
+OSM_SHAPEFILES_EXTRACTED_FLAG=${FLAGS_DIR}/osm-shapefiles-extracted.flag
+
+LANDCOVER_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/landcover-shapefiles-prepared.flag
+OSM_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/osm-shapefiles-prepared.flag
+
+ELEVATIONS_FLAG=${FLAGS_DIR}/${DEM}-elevations.flag # depends on DEM as well as BUCKET
+AIRPORTS_FLAG=${FLAGS_DIR}/${DEM}-airports.flag # depends on DEM as well as BUCKET
+LANDMASS_FLAG=${FLAGS_DIR}/landmass.flag
+LANDCOVER_LAYERS_FLAG=${FLAGS_DIR}/landcover-areas.flag
+OSM_AREA_LAYERS_FLAG=${FLAGS_DIR}/osm-areas.flag
+OSM_LINE_LAYERS_FLAG=${FLAGS_DIR}/osm-lines.flag
 
 #
 # Python virtual environment
@@ -187,69 +199,175 @@ VENV=./venv/bin/activate
 
 all: prepare build construct publish
 
-extract: landcover-extract osm-extract
-
-prepare: landmass-prepare airports-prepare lc-shapefiles-prepare osm-shapefiles-prepare 
-
-build: landmass airports layers
-
-rebuild: landmass-rebuild airports-rebuild layers-rebuild
-
 construct: scenery
 
 reconstruct: scenery-rebuild
 
 publish: archive publish-cloud
 
+
 ########################################################################
-# Scenery building
+# 1. Extract
 ########################################################################
+
+extract: landcover-extract osm-extract
+
+#
+# Prepare landcover for current bucket (single file; no flag needed)
+#
+
+landcover-extract: ${LANDCOVER}
+
+landcover-extract-rebuild: landcover-extract-clean landcover-extract
+
+landcover-extract-clean:
+	rm -fv ${LANDCOVER}
+
+${LANDCOVER}: ${LANDCOVER_SOURCE}
+	ogr2ogr -spat ${SPAT} $@ $<
+
+#
+# Clip PBF to speed processing
+#
+
+osm-extract: ${OSM_SHAPEFILES_EXTRACTED_FLAG}
+
+${OSM_SHAPEFILES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_CONF} ${SCRIPT_DIR}/extract-osm-shapefiles.sh
+	rm -f $@
+	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${OSM_CONF} ${BUCKET}
+	touch $@
+
+${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
+	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+
+osm-extract-clean:
+	rm -rvf ${OSM_DIR}/shapefiles/${BUCKET} ${OSM_SHAPEFILES_EXTRACTED_FLAG}
+
+
+########################################################################
+# 2. Prepare
+########################################################################
+
+prepare: landmass-prepare airports-prepare shapefiles-prepare
+
+prepare-clean: landmass-prepare-clean airports-prepare-clean shapefiles-prepare-clean
+
+#
+# Prepare landmass (single file; no flag needed)
+#
+
+landmass-prepare: ${LANDMASS}
+
+landmass-prepare-clean:
+	rm -rfv  ${LANDMASS}
+
+landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
+
+${LANDMASS}: ${LANDMASS_SOURCE}
+	ogr2ogr -spat ${SPAT} ${LANDMASS} ${LANDMASS_SOURCE}
+
+#
+# Prepare airports
+#
+
+airports-prepare: ${AIRPORTS} # single file - no flag needed
+
+${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
+	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
+	. ${VENV} && cat ${AIRPORTS_SOURCE} \
+	| python3 ${SCRIPT_DIR}/downgrade-apt.py \
+	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
+	> $@
+
+#
+# Prepare shapefiles
+#
+
+shapefiles-prepare: landcover-shapefiles-prepare osm-shapefiles-prepare
+
+shapefiles-clean: landcover-shapefiles-clean osm-shapefiles-clean
+
+landcover-shapefiles-prepare: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
+
+${LANDCOVER_SHAPEFILES_PREPARED_FLAG}: ${LANDCOVER} ${CONFIG_DIR}/lc-extracts.csv
+	rm -f $@
+	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
+	| while read -r row; do \
+	  row=$$(echo "$$row" | sed -e 's/\r//'); \
+	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
+	  dest=$$(echo "$$row" | sed -e 's/^.*,//'); \
+          dest_dir=${SHAPEFILES_DIR}; \
+	  mkdir -p $$dest_dir; \
+	  echo "Building $$dest for ${BUCKET}..."; \
+	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER} -sql "select * from ${BUCKET} where value='$$value'" || exit 1; \
+	done
+	touch $@
+
+landcover-shapefiles-clean:
+	rm -rfv ${SHAPEFILES_DIR}/lc-* ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
+
+osm-shapefiles-prepare: ${OSM_SHAPEFILES_PREPARED_FLAG}
+
+${OSM_SHAPEFILES_PREPARED_FLAG}: ${OSM_SHAPEFILES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-extracts.csv
+	rm -f $@
+	grep ',yes,' ${CONFIG_DIR}/osm-extracts.csv \
+	| while read -r row; do \
+	    row=`echo "$$row" | sed -e 's/\r//'`; \
+	    dest=$$(echo "$$row" | sed -e 's/,.*//'); \
+	    source=$$(echo "$$row" | sed -e 's/.*,yes,//' -e 's/,.*//'); \
+	    query=$$(echo "$$row" | sed -e 's/[^"]*["]//' -e 's/["]//'); \
+	    source_dir=${OSM_DIR}/shapefiles/${BUCKET}; \
+            dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
+	    mkdir -p $$dest_dir; \
+	    echo "Creating $$dest..."; \
+	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
+	  done
+	touch $@
+
+osm-shapefiles-clean:
+	rm -rfv ${SHAPEFILES_DIR}/osm-* ${OSM_SHAPEFILES_PREPARED_FLAG}
+
+
+
+########################################################################
+# 3. Build
+########################################################################
+
+build: elevations airports landmass layers
+
+rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
+
+build-clean: elevations-clean airports-clean landmass-clean layers-clean
 
 #
 # Build elevation data from the DEMs
+# Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations: elevations-chop
-
-#elevations-hgtchop:
-#	for file in ${SRTM_SOURCE}/*.hgt; do \
-#	  hgtchop 3 $$file ${WORK_DIR}/SRTM-3 || exit 1; \
-#	done
-
-# FIXME: hardcoded into buckets for now, to avoid too many open files
-elevations-chop:
-	ls ${DEM_SOURCE}/${BUCKET}/*.tif | xargs gdalchop ${WORK_DIR}/FABDEM
-
-elevations-clean:
-	rm -rvf ${WORK_DIR}/FABDEM/${BUCKET}/
-
-elevations-clean-all:
-	rm -rfv ${WORK_DIR}/FABDEM/*
+elevations: ${ELEVATIONS_FLAG}
 
 elevations-rebuild: elevations-clean elevations
 
-fit-elevations:
-	terrafit ${WORK_DIR}/FABDEM ${TERRAFIT_OPTS}
+${ELEVATIONS_FLAG}:
+	rm -f ${ELEVATIONS_FLAG}
+	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -type f | xargs gdalchop ${WORK_DIR}/${DEM}
+	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS} # refit every time
+	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
-
-# clean and redo a single bucket
-refit-elevations: elevations-fit-clean fit-elevations
-
-force-fit-elevations:
-	terrafit ${WORK_DIR}/FABDEM -f ${TERRAFIT_OPTS}
-
-elevations-fit-clean:
-	find ${WORK_DIR}/FABDEM/${BUCKET} -name '*.fit.gz' -print0 \
-	| xargs -0 rm -v
-
+elevations-clean:
+	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG}
 
 #
 # Build the airport areas and objects
 #
 
-airports:
-	genapts850 --input=${DATA_DIR}/airports/${BUCKET}/apt.dat ${LATLON} --max-slope=0.2618 \
-	  --work=${WORK_DIR} --dem-path=FABDEM # can't use threads here, due to errors with .idx files; not SRTM-3
+airports: ${AIRPORTS_FLAG}
+
+${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
+	rm -f ${AIRPORTS_FLAG}
+	genapts850 --input=${AIRPORTS} ${LATLON} --max-slope=0.2618 \
+	  --work=${WORK_DIR} --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
+	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
 airports-clean:
 	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/
@@ -261,11 +379,15 @@ airports-rebuild: airports-clean airports
 # Build the default landmass
 #
 
-landmass:
+landmass: ${LANDMASS_FLAG}
+
+${LANDMASS_FLAG}: ${LANDMASS}
+	rm -f ${LANDMASS_FLAG}
 	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${LANDMASS}
+	mkdir -p ${FLAGS_DIR} && touch ${LANDMASS_FLAG}
 
 landmass-clean:
-	rm -rvf ${WORK_DIR}/Default/${BUCKET}/
+	rm -rvf ${WORK_DIR}/Default/${BUCKET}/ ${LANDMASS_FLAG}
 
 landmass-rebuild: landmass-clean landmass
 
@@ -279,15 +401,21 @@ layers: areas lines
 
 # Remove all layers for this bucket
 layers-clean:
-	rm -rfv ${WORK_DIR}/osm-*/${BUCKET}/ ${WORK_DIR}/lc-*/${BUCKET}/
+	rm -rfv ${WORK_DIR}/osm-*/${BUCKET}/ ${WORK_DIR}/lc-*/${BUCKET}/ ${LANDCOVER_LAYERS_FLAG} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
 # Rebuild all layers for this bucket
 layers-rebuild: layers-clean areas lines
 
 # Build area layers
-areas: lc-areas osm-areas
+areas: landcover-areas osm-areas
 
-lc-areas:
+# Build line layers
+lines: osm-lines
+
+landcover-areas: ${LANDCOVER_LAYERS_FLAG}
+
+${LANDCOVER_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
+	rm -f $@
 	for row in $$(grep lc- ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,area,' > /dev/null; then \
@@ -297,8 +425,15 @@ lc-areas:
 	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
 	  fi; \
 	done
+	mkdir -p ${FLAGS_DIR} && touch $@
 
-osm-areas:
+landcover-clean:
+	rm -rfv ${WORK_DIR}/lc-*/${BUCKET}/ ${LANDCOVER_LAYERS_FLAG}
+
+osm-areas: ${OSM_AREA_LAYERS_FLAG}
+
+${OSM_AREA_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
+	rm -rf $@
 	for row in $$(grep osm- ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,area,' > /dev/null; then \
@@ -308,16 +443,12 @@ osm-areas:
 	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
 	  fi; \
 	done
+	mkdir -p ${FLAGS_DIR} && touch $@
 
-# Single area
-AREA_MATERIAL ?= Town
-AREA_LAYER ?= lc-urban
-single-area:
-	ogr-decode ${DECODE_OPTS} --area-type ${AREA_MATERIAL} ${WORK_DIR}/${AREA_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${AREA_LAYER}.shp
+osm-lines: ${OSM_LINE_LAYERS_FLAG}
 
-
-# Build line layers
-lines:
+${OSM_LINE_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
+	rm -rf $@
 	for row in $$(grep ,line, ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
 	  if echo $$row | grep ',yes,line,' > /dev/null; then \
@@ -327,15 +458,10 @@ lines:
 	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
 	  fi; \
 	done
+	mkdir -p ${FLAGS_DIR} && touch $@
 
-# Single line
-LINE_MATERIAL ?= Road-Secondary
-LINE_LAYER ?= osm-motorway-highway
-LINE_WIDTH ?= 10
-single-line:
-	ogr-decode ${DECODE_OPTS} --texture-lines --line-width ${LINE_WIDTH} --area-type ${LINE_MATERIAL} \
-	  ${WORK_DIR}/${LINE_LAYER} ${DATA_DIR}/shapefiles/${BUCKET}/${LINE_LAYER}.shp;\
-
+osm-clean:
+	rm -rfv ${WORK_DIR}/osm-*/${BUCKET}/ ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
 #
 # Special handling for cliffs (this is wrong right now)
@@ -353,15 +479,16 @@ single-line:
 #rectify-cliffs:
 #	rectify_height ${LATLON} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
 
-#
-# Pull it all together and generate scenery in the output directory
-#
+
+########################################################################
+# 4. Construct
+########################################################################
 
-scenery:
+scenery: ${ELEVATIONS_FLAG} ${AIRPORTS_FLAG} ${LANDMASS_FLAG} ${LANDCOVER_LAYERS_FLAG} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
-	  FABDEM Default AirportObj AirportArea $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) # not SRTM
+	  ${DEM} Default AirportObj AirportArea $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) # not SRTM
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
@@ -385,139 +512,6 @@ navdata:
 	mkdir -p ${SCENERY_DIR}/NavData/apt
 	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt/${BUCKET}.dat
 
-
-########################################################################
-# Data preparation (does not require TerraGear)
-########################################################################
-
-#
-# Clip OSM areas
-#
-
-osm-clip: ${OSM_PBF_EXTRACTED}
-
-${OSM_PBF_EXTRACTED}: ${OSM_SOURCE}
-	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
-
-
-
-#${OSM_DIR}/${BUCKET}.osm.pbf: ${OSM_DIR}/north-america-latest.osm.pbf ${OSM_DIR}/clip-osm.sh
-#	cd ${OSM_DIR} && sh clip-osm.sh north-america-latest.osm.pbf ${MIN_LON} ${MIN_LAT}
-
-#
-# Prepare landmass (single file; no flag needed)
-#
-
-landmass-prepare: ${LANDMASS}
-
-landmass-prepare-clean:
-	rm -rfv  ${LANDMASS}
-
-landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
-
-${LANDMASS}: ${LANDMASS_SOURCE}
-	ogr2ogr -spat ${SPAT} ${LANDMASS} ${LANDMASS_SOURCE}
-
-
-#
-# Prepare landcover for current bucket (single file; no flag needed)
-#
-landcover-extract: ${LANDCOVER}
-
-landcover-extract-rebuild: landcover-extract-clean landcover-extract
-
-landcover-extract-clean:
-	rm -fv ${LANDCOVER}
-
-${LANDCOVER}: ${LANDCOVER_SOURCE}
-	ogr2ogr -spat ${SPAT} $@ $<
-
-#
-# Unpack downloaded SRTM-3 DEMs
-#
-
-#srtm-unpack:
-#${SHELL} ${SCRIPT_DIR}/unpack-dems.sh ${SRTM_BASE}/orig ${STRM_BASE}/unpacked
-
-dem-unpack:
-	cd ${DEM_SOURCE} && (for file in ../Downloads/*.zip; do unzip -n $$file; done)
-
-#
-# Extract OSM from PBF
-#
-
-osm-extract: ${OSM_EXTRACT_FLAG}
-
-${OSM_EXTRACT_FLAG}: ${OSM_PBF_EXTRACTED}
-	rm -f $@
-	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${CONFIG_DIR}/osmconf.ini ${BUCKET}
-	touch $@
-
-osm-extract-clean:
-	rm -rvf ${OSM_DIR}/shapefiles/${BUCKET}
-
-#
-# Prepare airports
-#
-
-airports-prepare: ${AIRPORTS_PREPARED_FLAG}
-
-${AIRPORTS_PREPARED_FLAG}: ${VENV} ${FLAGS_DIR}
-	rm -f ${AIRPORTS_PREPARED_FLAG}
-	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
-	. ${VENV} && cat ${AIRPORTS_SOURCE} \
-	| python3 ${SCRIPT_DIR}/downgrade-apt.py \
-	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
-	> ${DATA_DIR}/airports/${BUCKET}/apt.dat
-	touch ${AIRPORTS_PREPARED_FLAG}
-
-#
-# Prepare shapefiles
-#
-
-shapefiles-prepare: lc-shapefiles-prepare osm-shapefiles-prepare
-
-shapefiles-clean-bucket: lc-shapefiles-clean osm-shapefiles-clean
-
-lc-shapefiles-clean:
-	rm -rfv ${SHAPEFILES_DIR}/lc-* ${LANDCOVER_SHAPEFILES_FLAG}
-
-osm-shapefiles-clean:
-	rm -rfv ${SHAPEFILES_DIR}/osm-* ${OSM_SHAPEFILES_FLAG}
-
-lc-shapefiles-prepare: ${DATA_DIR}/shapefiles/${BUCKET}/lc-shapefiles-complete.flag
-
-${LANDCOVER_SHAPEFILES_FLAG}: ${LANDCOVER} ${CONFIG_DIR}/lc-extracts.csv
-	rm -f $@
-	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
-	| while read -r row; do \
-	  row=$$(echo "$$row" | sed -e 's/\r//'); \
-	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
-	  dest=$$(echo "$$row" | sed -e 's/^.*,//'); \
-          dest_dir=${SHAPEFILES_DIR}; \
-	  mkdir -p $$dest_dir; \
-	  echo "Building $$dest for ${BUCKET}..."; \
-	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER} -sql "select * from ${BUCKET} where value='$$value'" || exit 1; \
-	done
-	touch $@
-
-osm-shapefiles-prepare: ${OSM_SHAPEFILES_FLAG}
-
-${OSM_SHAPEFILES_FLAG}: ${CONFIG_DIR}/osm-extracts.csv
-	rm -f $@
-	grep ',yes,' ${CONFIG_DIR}/osm-extracts.csv \
-	| while read -r row; do \
-	    row=`echo "$$row" | sed -e 's/\r//'`; \
-	    dest=$$(echo "$$row" | sed -e 's/,.*//'); \
-	    source=$$(echo "$$row" | sed -e 's/.*,yes,//' -e 's/,.*//'); \
-	    query=$$(echo "$$row" | sed -e 's/[^"]*["]//' -e 's/["]//'); \
-	    source_dir=${OSM_DIR}/shapefiles/${BUCKET}; \
-            dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
-	    mkdir -p $$dest_dir; \
-	    echo "Creating $$dest..."; \
-	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
-	  done
-	touch $@
 
 #
 # Simple target to prepare a single OSM feature (using a single attribute)
@@ -543,7 +537,7 @@ publish-cloud:
 	  && mv -fv "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
 
 update-download-links: ${VENV}
-	. ${VENV} && python3 ${SCRIPT_DIR}/make-download-links.py ${CONFIG_DIR}/dropbox-config.json > ${HTML_DIR}/download-links.json
+	. ${VENV} && python3 ${SCRIPT_DIR}/make-download-links.py ${CONFIG_DIR}/dropbox-config.json ${HTML_DIR}/download-links.txt > ${HTML_DIR}/download-links.json
 	git checkout main
 	git add ${HTML_DIR}/download-links.json
 	git commit -m 'Update download links'
