@@ -10,11 +10,12 @@ Usage:
 
 import dropbox, json, re, sys
 
-if len(sys.argv) != 2:
-    print("Usage: python3 {} CONFIG.json", file=sys.stderr)
+if len(sys.argv) != 3:
+    print("Usage: python3 {} CONFIG.json LINKS_OUTPUT.txt", file=sys.stderr)
     exit(2)
 
 config_file = sys.argv[1]
+links_file = sys.argv[2]
 
 with open(config_file, 'r') as input:
     config = json.load(input)
@@ -52,6 +53,10 @@ for entry in sorted(listing.entries, key=lambda entry: entry.name):
 
 # Save the output as JSON
 print(json.dumps(downloads, indent=2))
-        
+
+with open(links_file, 'w') as output:
+    for bucket in downloads:
+        print(downloads[bucket]['url'], file=output)
+
 
 exit()

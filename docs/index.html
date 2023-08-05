@@ -28,6 +28,7 @@
       <nav class="secondary-nav">
         <a href="#download-map">map</a>
         <a href="#links">links</a>
+        <a href="#batch-download">batch download</a>
         <a href="#sources">sources</a>
       </nav>
       <p>
@@ -57,6 +58,27 @@
         <h2>Download links</h2>
         <dl id="links">
         </dl>
+      </section>
+
+      <section id="batch-download">
+        <h2>Batch download</h2>
+        <p>
+          If you want to download all of the scenery files at once,
+          you can download the file <code><a
+          href="download-links.txt">download-links.txt</a></code>,
+          which includes a single URL on each line, then use it with
+          <i>wget</i> or <i>curl</i>. Note that you will be
+          downloading over 33&nbsp;GB of data (as of 2023-08-05).
+        </p>
+        <pre>
+          $ wget -i download-links.txt
+        </pre>
+        <p>
+          …or…
+        </p>
+        <pre>
+          $ xargs -n 1 curl -O &lt; download-links.txt
+        </pre>
       </section>
 
       <section id="sources">
