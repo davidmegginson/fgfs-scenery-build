@@ -107,6 +107,7 @@ STEP       [1] number of degrees square for each build (1 [default], 2, 5, or 10
 START_LAT  [$min_lat] starting latitude (to restart after a crash, e.g. 42)
 START_LON  [$min_lon] starting longitude (to restart after a crash, e.g. -75)
 THREADS    [4] number of concurrent threads to use
+DEM        [FABDEM] the elevation model to use (SRTM-3 or FABDEM)
 
 EOF
     exit 2
@@ -122,7 +123,8 @@ TARGETS=$@
 : ${STEP:=1} # use the STEP environment variable to override
 : ${START_LAT:=$MIN_LAT} # starting latitude (for restarting)
 : ${START_LON:=$MIN_LON} # starting longitude (for restarting)
-: ${THREADS:=4} # default threads for build
+: ${THREADS:=1} # default threads for build
+: ${DEM:=FABDEM} # default DEM
 
 # ensure STEP is reasonable for a full-bucket build
 if [ $STEP -ne 1 -a $STEP -ne 2 -a $STEP -ne 5 -a $STEP -ne 10 ]; then
@@ -144,7 +146,7 @@ while [ $bucket_min_lat -lt $MAX_LAT ]; do
         bucket_max_lon=$(expr $bucket_min_lon + $STEP)
         set_bucket $bucket_min_lon $bucket_min_lat
         # advance only if the build succeeded
-        make MAX_THREADS=$THREADS BUCKET=$BUCKET MIN_LON=$bucket_min_lon MIN_LAT=$bucket_min_lat MAX_LON=$bucket_max_lon MAX_LAT=$bucket_max_lat $TARGETS \
+        make DEM=$DEM MAX_THREADS=$THREADS BUCKET=$BUCKET MIN_LON=$bucket_min_lon MIN_LAT=$bucket_min_lat MAX_LON=$bucket_max_lon MAX_LAT=$bucket_max_lat $TARGETS \
             || exit
         bucket_min_lon=$bucket_max_lon
     done
