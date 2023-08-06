@@ -146,7 +146,9 @@ while [ $bucket_min_lat -lt $MAX_LAT ]; do
         bucket_max_lon=$(expr $bucket_min_lon + $STEP)
         set_bucket $bucket_min_lon $bucket_min_lat
         # advance only if the build succeeded
-        make DEM=$DEM MAX_THREADS=$THREADS BUCKET=$BUCKET MIN_LON=$bucket_min_lon MIN_LAT=$bucket_min_lat MAX_LON=$bucket_max_lon MAX_LAT=$bucket_max_lat $TARGETS \
+        make DEM=$DEM MAX_THREADS=$THREADS BUCKET=$BUCKET \
+             MIN_LON=$bucket_min_lon MIN_LAT=$bucket_min_lat MAX_LON=$bucket_max_lon MAX_LAT=$bucket_max_lat \
+             $TARGETS \
             || exit
         bucket_min_lon=$bucket_max_lon
     done
@@ -155,4 +157,3 @@ while [ $bucket_min_lat -lt $MAX_LAT ]; do
     bucket_min_lon=$MIN_LON
     bucket_min_lat=$bucket_max_lat
 done
-
