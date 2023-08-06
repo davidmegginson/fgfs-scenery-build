@@ -235,7 +235,7 @@ osm-extract: ${OSM_SHAPEFILES_EXTRACTED_FLAG}
 ${OSM_SHAPEFILES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_CONF} ${SCRIPT_DIR}/extract-osm-shapefiles.sh
 	rm -f $@
 	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${OSM_CONF} ${BUCKET}
-	touch $@
+	mkdir -p ${FLAGS_DIR} && touch $@
 
 ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
 	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
@@ -301,7 +301,7 @@ ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}: ${LANDCOVER} ${CONFIG_DIR}/lc-extracts.cs
 	  echo "Building $$dest for ${BUCKET}..."; \
 	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER} -sql "select * from ${BUCKET} where value='$$value'" || exit 1; \
 	done
-	touch $@
+	mkdir -p ${FLAGS_DIR} && touch $@
 
 landcover-shapefiles-clean:
 	rm -rfv ${SHAPEFILES_DIR}/lc-* ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
@@ -322,7 +322,7 @@ ${OSM_SHAPEFILES_PREPARED_FLAG}: ${OSM_SHAPEFILES_EXTRACTED_FLAG} ${CONFIG_DIR}/
 	    echo "Creating $$dest..."; \
 	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
 	  done
-	touch $@
+	mkdir -p ${FLAGS_DIR} && touch $@
 
 osm-shapefiles-clean:
 	rm -rfv ${SHAPEFILES_DIR}/osm-* ${OSM_SHAPEFILES_PREPARED_FLAG}
@@ -370,7 +370,7 @@ ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
 airports-clean:
-	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/
+	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/ ${AIRPORTS_FLAG}
 
 airports-rebuild: airports-clean airports
 
