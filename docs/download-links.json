@@ -29,6 +29,12 @@
     "url": "https://www.dropbox.com/s/8d2ehdc78ezh0gx/fgfs-canada-us-scenery-w070n60-20230722.tar?dl=1",
     "size": 458106880
   },
+  "w070n70": {
+    "name": "fgfs-canada-us-scenery-w070n70-20230805.tar",
+    "date": "20230805",
+    "url": "https://www.dropbox.com/s/0847qypyk2p83bo/fgfs-canada-us-scenery-w070n70-20230805.tar?dl=1",
+    "size": 6010880
+  },
   "w080n30": {
     "name": "fgfs-canada-us-scenery-w080n30-20230720.tar",
     "date": "20230720",
@@ -106,6 +112,12 @@
     "date": "20230724",
     "url": "https://www.dropbox.com/s/vb9sirpg0zvs2zh/fgfs-canada-us-scenery-w100n50-20230724.tar?dl=1",
     "size": 665886720
+  },
+  "w100n60": {
+    "name": "fgfs-canada-us-scenery-w100n60-20230805.tar",
+    "date": "20230805",
+    "url": "https://www.dropbox.com/s/n0old1omxaqzzoz/fgfs-canada-us-scenery-w100n60-20230805.tar?dl=1",
+    "size": 195880960
   },
   "w110n20": {
     "name": "fgfs-canada-us-scenery-w110n20-20230730.tar",
