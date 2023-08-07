@@ -1,4 +1,4 @@
-########################################################################
+#######################################################################
 # Makefile to build different stages of FlightGear scenery
 #
 # For some stages, instead of using the Makefile directly, you might
@@ -182,6 +182,7 @@ LANDCOVER_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/landcover-shapefiles-prepared.fl
 OSM_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/osm-shapefiles-prepared.flag
 
 ELEVATIONS_FLAG=${FLAGS_DIR}/${DEM}-elevations.flag # depends on DEM as well as BUCKET
+ELEVATIONS_FIT_FLAG=${FLAGS_DIR}/${DEM}-elevations-fit.flag
 AIRPORTS_FLAG=${FLAGS_DIR}/${DEM}-airports.flag # depends on DEM as well as BUCKET
 LANDMASS_FLAG=${FLAGS_DIR}/landmass.flag
 LANDCOVER_LAYERS_FLAG=${FLAGS_DIR}/landcover-areas.flag
@@ -330,32 +331,44 @@ osm-shapefiles-clean:
 
 
 ########################################################################
-# 3. Build
+# 3. Build (excludes elevations; must be done manually
 ########################################################################
 
 build: elevations airports landmass layers
 
-rebuild: elevations-rebuild airports-rebuild landmass-rebuild layers-rebuild
+rebuild: airports-rebuild landmass-rebuild layers-rebuild
 
-build-clean: elevations-clean airports-clean landmass-clean layers-clean
+build-clean: airports-clean landmass-clean layers-clean
 
 #
 # Build elevation data from the DEMs
 # Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations: ${ELEVATIONS_FLAG}
+elevations: ${ELEVATIONS_FIT_FLAG}
 
-elevations-rebuild: elevations-clean elevations
+elevations-fit:
+	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
+
+elevations-fit-bucket: ${ELEVATIONS_FIT_FLAG}
 
 ${ELEVATIONS_FLAG}:
 	rm -f ${ELEVATIONS_FLAG}
 	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -type f | xargs gdalchop ${WORK_DIR}/${DEM}
-	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS} # refit every time
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
+${ELEVATIONS_FIT_FLAG}: ${ELEVATIONS_FLAG}
+	rm -f ${ELEVATIONS_FIT_FLAG}
+	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
+	mkdir -p ${FLAG_DIR} && touch ${ELEVATIONS_FIT_FLAG}
+
+elevations-rebuild: elevations-clean elevations
+
+elevations-fit-force:
+	terrafit ${WORK_DIR}/${DEM} -f ${TERRAFIT_OPTS} # refit every time
+
 elevations-clean:
-	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG}
+	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${FIT_IN_PROGRESS_FLAG}
 
 #
 # Build the airport areas and objects
@@ -363,7 +376,7 @@ elevations-clean:
 
 airports: ${AIRPORTS_FLAG}
 
-${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
+${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	rm -f ${AIRPORTS_FLAG}
 	genapts850 --input=${AIRPORTS} ${LATLON} --max-slope=0.2618 \
 	  --work=${WORK_DIR} --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
@@ -484,7 +497,7 @@ osm-clean:
 # 4. Construct
 ########################################################################
 
-scenery: ${ELEVATIONS_FLAG} ${AIRPORTS_FLAG} ${LANDMASS_FLAG} ${LANDCOVER_LAYERS_FLAG} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
+scenery: # no dependencies, because we run this in smaller batches
 	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
@@ -539,7 +552,7 @@ publish-cloud:
 update-download-links: ${VENV}
 	. ${VENV} && python3 ${SCRIPT_DIR}/make-download-links.py ${CONFIG_DIR}/dropbox-config.json ${HTML_DIR}/download-links.txt > ${HTML_DIR}/download-links.json
 	git checkout main
-	git add ${HTML_DIR}/download-links.json
+	git add ${HTML_DIR}/download-links.json ${HTML_DIR}/download-links.txt
 	git commit -m 'Update download links'
 	git push origin main
 
