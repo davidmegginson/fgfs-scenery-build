@@ -35,6 +35,12 @@
     "url": "https://www.dropbox.com/s/0847qypyk2p83bo/fgfs-canada-us-scenery-w070n70-20230805.tar?dl=1",
     "size": 6010880
   },
+  "w070n80": {
+    "name": "fgfs-canada-us-scenery-w070n80-20230807.tar",
+    "date": "20230807",
+    "url": "https://www.dropbox.com/scl/fi/94pnw5o3u79mvmi5df0es/fgfs-canada-us-scenery-w070n80-20230807.tar?rlkey=ee1g152oy6df2sfa4e6ysxesf&dl=0",
+    "size": 8417280
+  },
   "w080n30": {
     "name": "fgfs-canada-us-scenery-w080n30-20230720.tar",
     "date": "20230720",
@@ -58,6 +64,12 @@
     "date": "20230805",
     "url": "https://www.dropbox.com/s/xv5fsqjqi1zuvgp/fgfs-canada-us-scenery-w080n60-20230805.tar?dl=1",
     "size": 136417280
+  },
+  "w080n70": {
+    "name": "fgfs-canada-us-scenery-w080n70-20230807.tar",
+    "date": "20230807",
+    "url": "https://www.dropbox.com/scl/fi/zdb2hj8b9ewbmxkc4sdlh/fgfs-canada-us-scenery-w080n70-20230807.tar?rlkey=sbyrbzxpvp48sg5c9rqf182g1&dl=0",
+    "size": 107304960
   },
   "w090n20": {
     "name": "fgfs-canada-us-scenery-w090n20-20230724.tar",
@@ -143,6 +155,12 @@
     "url": "https://www.dropbox.com/s/ttxn9ptvncd4h0i/fgfs-canada-us-scenery-w110n50-20230729.tar?dl=1",
     "size": 686233600
   },
+  "w110n60": {
+    "name": "fgfs-canada-us-scenery-w110n60-20230807.tar",
+    "date": "20230807",
+    "url": "https://www.dropbox.com/scl/fi/cdcqd9qh0ulig0i8h86mc/fgfs-canada-us-scenery-w110n60-20230807.tar?rlkey=juzmjis6qmlmy90wj4em6859r&dl=0",
+    "size": 318330880
+  },
   "w110n70": {
     "name": "fgfs-canada-us-scenery-w110n70-20230805.tar",
     "date": "20230805",
@@ -178,6 +196,12 @@
     "date": "20230805",
     "url": "https://www.dropbox.com/s/mq7s65abcqlg836/fgfs-canada-us-scenery-w120n60-20230805.tar?dl=1",
     "size": 246743040
+  },
+  "w120n70": {
+    "name": "fgfs-canada-us-scenery-w120n70-20230807.tar",
+    "date": "20230807",
+    "url": "https://www.dropbox.com/scl/fi/xz4mfcxfz6l8lc0dh7keb/fgfs-canada-us-scenery-w120n70-20230807.tar?rlkey=d3zk3i74a67gocib1s0mptb3n&dl=0",
+    "size": 92897280
   },
   "w130n30": {
     "name": "fgfs-canada-us-scenery-w130n30-20230730.tar",
