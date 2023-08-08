@@ -360,7 +360,7 @@ ${ELEVATIONS_FLAG}:
 ${ELEVATIONS_FIT_FLAG}: ${ELEVATIONS_FLAG}
 	rm -f ${ELEVATIONS_FIT_FLAG}
 	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
-	mkdir -p ${FLAG_DIR} && touch ${ELEVATIONS_FIT_FLAG}
+	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FIT_FLAG}
 
 elevations-rebuild: elevations-clean elevations
 
