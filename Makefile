@@ -10,10 +10,11 @@
 #
 # 1. Important Makefile configuration variables
 #
-# BUCKET - the bucket being build (e.g. w080n40)
+# BUCKET - **required** the bucket being build (e.g. w080n40)
 #
 # MIN_LON, MIN_LAT, MAX_LON, MAX_LAT - the bottom left and top right
-# corners of the area being built (e.g. -80 40 -70 50)
+# corners of the area being built (e.g. -80 40 -70 50); default to the
+# corners of the bucket.
 #
 # MAX_THREADS - the maximum number of concurrent threads to run for
 # some processes (e.g. 8; increase to speed up the build; decrease to
@@ -105,15 +106,17 @@
 
 SHELL=/bin/bash
 MAX_THREADS=1
+SCRIPT_DIR=./scripts
 
-#
-# What area are we building (override on the command line)
-#
-#BUCKET=w080n40
-#MIN_LON=-80
-#MAX_LON=-70
-#MIN_LAT=40
-#MAX_LAT=50
+ifndef BUCKET
+$(error BUCKET is not defined)
+endif
+
+# default bounds if not overridden
+MIN_LON?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 1)
+MIN_LAT?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 2)
+MAX_LON?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 3)
+MAX_LAT?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 4)
 
 # set automatically
 SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
@@ -149,7 +152,7 @@ OSM_DIR=${INPUTS_DIR}/osm
 OSM_SOURCE=${OSM_DIR}/north-america-latest.osm.pbf
 OSM_CONF=config/osmconf.ini
 
-LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
+LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp # complete version is very slow
 LANDCOVER_BASE=modis-250-clipped
 LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 
