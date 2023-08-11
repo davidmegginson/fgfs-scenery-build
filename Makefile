@@ -30,12 +30,14 @@
 #
 # Extract raw data in INPUTS_DIR. Works at the BUCKET level.
 #
-# extract - run all extraction targets for the bucket.
+# extract
+#   run *all* extraction targets for the bucket.
 #
-# landcover-extract - extract landcover shapefile for the requested
-# bucket
+# landcover-extract
+#   extract landcover shapefile for the requested bucket
 #
-# osm-extract - extract OSM per-feature shapefiles for a bucket
+# osm-extract
+#   extract OSM per-feature shapefiles for a bucket
 #
 #
 # 2.2. Data-preparation targets
@@ -43,17 +45,20 @@
 # Process data in INPUTS_DIR and place the output in DATA_DIR. Works
 # at the BUCKET level.
 #
-# prepare - run all preparation targets for the requested bucket.
+# prepare
+#   run *all* preparation targets for the requested bucket.
 #
-# landmass-prepare - prepare the landmass mask for the bucket.
+# landmass-prepare
+#   prepare the landmass mask for the bucket.
 #
-# airports-prepare - prepare the airports file for the bucket.
+# airports-prepare
+#   prepare the airports file for the bucket.
 #
-# landcover-shapefiles-prepare - prepare the background landcover shapefiles
-# for the bucket.
+# landcover-shapefiles-prepare
+#   prepare the background landcover shapefiles for the bucket.
 #
-# osm-shapefiles-prepare - prepare the detailed OSM features for the
-# bucket.
+# osm-shapefiles-prepare
+#   prepare the detailed OSM features for the bucket.
 #
 #
 # 2.3. Data-building targets
@@ -61,28 +66,26 @@
 # Build the TerraGear input files for scenery, working at the latlon
 # level (can build an area smaller than a full bucket).
 #
-# build - run the landmass, cliffs, airports, and layers targets for
-# the requested area.
+# build
+#   run *all* build targets for the requested area.
 #
-# landmass - build the landmass mask for the requested area.
+# landmass
+#   build the landmass mask for the requested area.
 #
-# cliffs - build the cliffs metadata for the requested area (not yet
-# working).
+# airports
+#   build the airport areas and objects for the requested area.
 #
-# airports - build the airport areas and objects for the requested
-# area.
+# layers
+#   build the landcover and OSM layers for the requested area.
 #
-# layers - build the landcover and OSM layers for the requested area.
+# 2.3.1 Elevation (DEM) targets
 #
 # The elevation-related targets should be run rarely, and may need to
-# use an older version of TerraGear:
+# use an older version of TerraGear. Set the DEM Makefile variable to
+# "FABDEM" (default) or "SRTM-3" to choose the data source.
 #
-# elevations-chop - build the elevation data from the *.hgt files in
-# INPUT_DIR
-#
-# fit-elevations - fit the elevation data (may need to run across
-# buckets; run with care).
-#
+# elevations
+#   build the elevation data from the *.hgt or *.tif files in INPUT_DIR 
 #
 # 2.4. Scenery-construction targets
 #
@@ -104,10 +107,25 @@
 #
 ########################################################################
 
+# Basic setup
 SHELL=/bin/bash
 MAX_THREADS=1
-SCRIPT_DIR=./scripts
 
+# Directories
+SCENERY_NAME=fgfs-canada-us-scenery
+CONFIG_DIR=./config
+INPUTS_DIR=./01-inputs
+DATA_DIR=./02-prep
+WORK_DIR=./03-work
+OUTPUT_DIR=./04-output
+SCRIPT_DIR=./scripts
+STATIC_DIR=./static
+HTML_DIR=./docs
+SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
+LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
+PUBLISH_DIR="${HOME}/Dropbox/Downloads"
+
+# What area are we building (must be set)
 ifndef BUCKET
 $(error BUCKET is not defined)
 endif
@@ -118,28 +136,11 @@ MIN_LAT?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 2)
 MAX_LON?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 3)
 MAX_LAT?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 4)
 
-# set automatically
+# common command-line parameters
 SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
 LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
-
-#
-# Build configuration variables
-#
-
-SCENERY_NAME=fgfs-canada-us-scenery
-SCRIPT_DIR=./scripts
-CONFIG_DIR=./config
-INPUTS_DIR=./01-inputs
-DATA_DIR=./02-prep
-WORK_DIR=./03-work
-OUTPUT_DIR=./04-output
-STATIC_DIR=./static
-HTML_DIR=./docs
-SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
-LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
-PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 #
 # Data sources
@@ -159,7 +160,7 @@ LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 # Output dir for per-area shapefiles
 SHAPEFILES_DIR=${DATA_DIR}/shapefiles/${BUCKET}
 
-# DEM type (SRTM-3 or FABDEM)
+# DEM type (SRTM-3 or FABDEM); FABDEM is higher res, but goes only to 80N
 DEM=FABDEM
 
 #
@@ -350,10 +351,7 @@ build-clean: airports-clean landmass-clean layers-clean
 
 elevations: ${ELEVATIONS_FIT_FLAG}
 
-elevations-fit:
-	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
-
-elevations-fit-bucket: ${ELEVATIONS_FIT_FLAG}
+elevations-fit: ${ELEVATIONS_FIT_FLAG}
 
 ${ELEVATIONS_FLAG}:
 	rm -f ${ELEVATIONS_FLAG}
@@ -367,7 +365,10 @@ ${ELEVATIONS_FIT_FLAG}: ${ELEVATIONS_FLAG}
 
 elevations-rebuild: elevations-clean elevations
 
-elevations-fit-force:
+elevations-fit-all:
+	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
+
+elevations-fit-force-all:
 	terrafit ${WORK_DIR}/${DEM} -f ${TERRAFIT_OPTS} # refit every time
 
 elevations-clean:
