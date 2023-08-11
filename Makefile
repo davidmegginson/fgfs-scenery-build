@@ -91,14 +91,20 @@
 #
 # This can work on a 1x1 deg area or larger.
 #
-# scenery - build scenery for the requested area.
+# scenery
+#   build scenery for the requested area.
 #
 # 2.5. Publishing targets
 #
 # Publish a 10x10 deg bucket as a tarball.
 #
-# publish - prepare support files for a scenery distribution, create a
-# tarball, and copy to the publish directory.
+# publish
+#   prepare support files for a scenery distribution, create a
+#   tarball, and copy to the publish directory.
+#
+# update-download-links
+#   update the Dropbox download links and push a new version of the
+#   website (requires an access token in config/dropbox-config.json)
 #
 #
 # 3. Author
