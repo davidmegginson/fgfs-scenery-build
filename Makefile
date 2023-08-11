@@ -149,7 +149,7 @@ OSM_DIR=${INPUTS_DIR}/osm
 OSM_SOURCE=${OSM_DIR}/north-america-latest.osm.pbf
 OSM_CONF=config/osmconf.ini
 
-LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-complete-4326/land_polygons.shp
+LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp
 LANDCOVER_BASE=modis-250-clipped
 LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 
