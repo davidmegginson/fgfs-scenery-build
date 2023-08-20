@@ -384,7 +384,7 @@ elevations-clean:
 # Build the airport areas and objects
 #
 
-airports: ${AIRPORTS_FLAG}
+airports: ${AIRPORTS_FLAG} elevations
 
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	rm -f ${AIRPORTS_FLAG}
@@ -507,7 +507,7 @@ osm-clean:
 # 4. Construct
 ########################################################################
 
-scenery: # no dependencies, because we run this in smaller batches
+scenery: extract prepare build
 	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
