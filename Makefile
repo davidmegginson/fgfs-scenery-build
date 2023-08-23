@@ -180,6 +180,35 @@ LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 #
+# Build areas to include
+#
+
+DEM_AREAS=FABDEM SRTM-3
+
+AIRPORT_AREAS=AirportObj AirportArea
+
+LC_AREAS= lc-barren lc-cropland lc-forest-deciduous-temperate		\
+lc-forest-deciduous-tropical lc-forest-evergreen-tropical		\
+lc-forest-mixed lc-forest-needleleaf-taiga				\
+lc-forest-needleleaf-temperate lc-grassland-polar			\
+lc-grassland-temperate lc-grassland-tropical lc-residential-landuse	\
+lc-shrubland-barren lc-shrubland-moss lc-shrubland-polar		\
+lc-shrubland-temperate lc-shrubland-tropical lc-snow-ice lc-urban	\
+lc-wetland
+
+OSM_AREAS=osm-abandoned-railway osm-airfield-aeroway		\
+osm-airfield-military osm-cemetery-landuse osm-cliff-natural	\
+osm-desert-natural osm-glacier-natural osm-golf-sport		\
+osm-landfill-landuse osm-lava-natural osm-line-power		\
+osm-motorway-highway osm-orchard-landuse osm-primary-highway	\
+osm-quarry-landuse osm-railway-railway osm-rock-natural		\
+osm-sand-natural osm-secondary-highway osm-trunk-highway	\
+osm-vineyard-landuse osm-water-natural osm-water-water		\
+osm-wetland-natural
+
+BUILD_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
+
+#
 # Build flags
 #
 
@@ -355,7 +384,7 @@ build-clean: airports-clean landmass-clean layers-clean
 # Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations: ${ELEVATIONS_FIT_FLAG}
+elevations: ${ELEVATIONS_FLAG}
 
 elevations-fit: ${ELEVATIONS_FIT_FLAG}
 
@@ -508,10 +537,9 @@ osm-clean:
 ########################################################################
 
 scenery: extract prepare build
-	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
+#	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt \
-	  ${DEM} Default AirportObj AirportArea $$(ls ${WORK_DIR} | grep osm-) $$(ls ${WORK_DIR} | grep lc-) # not SRTM
+	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
@@ -535,18 +563,6 @@ navdata:
 	mkdir -p ${SCENERY_DIR}/NavData/apt
 	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt/${BUCKET}.dat
 
-
-#
-# Simple target to prepare a single OSM feature (using a single attribute)
-#
-OSM_PREPARE_SOURCE=natural
-OSM_PREPARE_FEATURE=forest
-OSM_PREPARE_MIN_AREA=0.0001
-
-# set automatically
-OSM_PREPARE_INPUT=${OSM_DIR}/shapefiles/${BUCKET}/${OSM_PREPARE_SOURCE}.shp
-OSM_PREPARE_OUTPUT=${DATA_DIR}/shapefiles/${BUCKET}/osm-${OSM_PREPARE_FEATURE}-${OSM_PREPARE_SOURCE}.shp
-OSM_PREPARE_QUERY="select * from ${OSM_PREPARE_SOURCE} where ${OSM_PREPARE_SOURCE}='${OSM_PREPARE_FEATURE}' and OGR_GEOM_AREA > ${OSM_PREPARE_MIN_AREA}"
 
 archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
