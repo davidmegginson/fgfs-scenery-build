@@ -3,35 +3,30 @@ North American Scenery
 
 ## Configuration
 
-A Makefile drives the process. Note these variables and their default values at the top of the Makefile:
+A Makefile drives the process. Most building happens using 10x10 buckets, and you must supply a _BUCKET_ variable to the make process, e.g.
 
 ```
-# What area are we building?
-BUCKET=w080n40
-MIN_LON=-80
-MAX_LON=-70
-MIN_LAT=40
-MAX_LAT=50
+$ make BUCKET=w090n30 prepare
 ```
 
-You can override these whenever you need to work with a different area, e.g.
-
-```
-$ make BUCKET=w090n30 MIN_LON=-95 MAX_LON=-94 MIN_LAT=35 MAX_LAT=36 scenery
-```
+Dependency management is fairly complete — if something is missing, the make process will probably try to build it before continuing.
 
 
 ## Data download and preparation
 
 The scenery requires GIS data from several sources
 
-* An elevation raster (DEM) to define the shape of the landscape. We use the 3 arc second SRTM-3 data, which includes an elevation point (nominally) every 90 metres. Higher-resolution DEMs are available, but combined with the other data, they may make the scenery too complex and slow down most graphics cards. If you're building scenery for a ground-based simulation, then the higher resolutions might be appropriate.
-* The MODIS-250 250m Canada/US landcover raster, which provides background landcover to fill in any gaps in more-detailed OSM data (see below).
-* Airport data in the [apt.dat format](http://developer.x-plane.com/wp-content/uploads/2015/11/XP-APT1000-Spec.pdf) that FlightGear shares with the commercial X-Plane simulator. This data defines the shape of runways, taxiways, etc., as well as other information.
-* OpenStreetMap (OSM) data in [PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the area where you want to build scenery. This data defines detailed landcover (like parks and forests), lakes and rivers, as well as linear features like roads, railroads, and powerlines.
-    * (Special case) OSM landmass data defining the boundaries between land and ocean (no scenery outside these polygons will be built)
+* An elevation raster (DEM) to define the shape of the landscape. The build uses two different sources, in order of preference:
+    * 1-arcsec (30m) FABDEM — Copernicus GLO DEM, with forests and buildings removed: https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn
+    * 3-arcsec (100m) SRTM-3 — Shuttle Radar Topography Mission: http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm
+* The MODIS-250 250m Canada/US landcover raster, which provides background landcover to fill in any gaps in more-detailed OSM data (requires some manual preparation in qGIS; see below): http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/
+* Airport data in the [apt.dat format](http://developer.x-plane.com/wp-content/uploads/2015/11/XP-APT1000-Spec.pdf) that FlightGear shares with the commercial X-Plane simulator. This data defines the shape of runways, taxiways, etc., as well as other information: https://gateway.x-plane.com/airports
+* OpenStreetMap (OSM) data in [PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the area where you want to build scenery. This data defines detailed landcover (like parks and forests), lakes and rivers, as well as linear features like roads, railroads, and powerlines: https://download.geofabrik.de/north-america.html
+    * (Special case) OSM landmass data defining the boundaries between land and ocean (no scenery outside these polygons will be built): https://osmdata.openstreetmap.de/data/land-polygons.html
 
-### SRTM-3 data preparation
+### SRTM-3 data preparation (out of date)
+
+(TO BE UPDATED)x
 
 Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). Place them in 01-data/SRTM-3/orig/
 
