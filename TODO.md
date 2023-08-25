@@ -4,6 +4,7 @@ North American Scenery TODO
 ## Short term
 - add 250m landcover data for remainder of North America (Greenland, Caribbean, Central America, Bermuda)
 - use OSM forest and farmland attributes to improve coverage and diversity
+- add pier and breakwater
 - automatically switch between FABDEM and SRTM-3 elevation data as needed
 - reduce reliance on shell scripts called by Makefile
 - debug, debug, debug
