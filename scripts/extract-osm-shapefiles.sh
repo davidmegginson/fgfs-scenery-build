@@ -11,13 +11,12 @@
 
 set -e
 
-AREA_FEATURES="aeroway amenity geological landuse military natural place sport water"
-LINE_FEATURES="highway power railway"
+AREA_FEATURES="aeroway amenity geological landuse man_made military natural place sport water waterway"
+LINE_FEATURES="highway man_made power railway waterway"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "$SCRIPT_DIR/utils.sh"
 
-# fixme - param should be bucket
 if [ $# -lt 4 ]; then
     fail "Usage: bash $0 <OSM-DIR> <SHAPEFILE-DIR> <CONFIG-FILE> [BUCKET...]" 2
 fi
@@ -39,15 +38,17 @@ for BUCKET in $@; do
 
     # add the area features
     for FEATURE in $AREA_FEATURES; do
-        echo "Extracting area feature $FEATURE in $BUCKET ..."
-        ogr2ogr -oo CONFIG_FILE="$CONFIG_FILE" -spat $SPAT -progress "$DEST_DIR/$FEATURE.shp" "$SOURCE" -sql "SELECT * FROM multipolygons WHERE $FEATURE IS NOT NULL" \
+        file="$DEST_DIR/${FEATURE}_areas.shp"
+        echo "Extracting area feature $FEATURE in $BUCKET to $file..."
+        ogr2ogr -oo CONFIG_FILE="$CONFIG_FILE" -spat $SPAT -progress $file "$SOURCE" -sql "SELECT * FROM multipolygons WHERE $FEATURE IS NOT NULL" \
                 || (rm -rf "$DEST_DIR/$FEATURE".* && fail "Failed to build area $FEATURE" $?)
     done
 
     # add the line features
     for FEATURE in $LINE_FEATURES; do
-        echo "Extracting line feature $FEATURE in $BUCKET ..."
-        ogr2ogr -oo CONFIG_FILE="$CONFIG_FILE" -spat $SPAT -progress "$DEST_DIR/$FEATURE.shp" "$SOURCE" -sql "SELECT * FROM lines WHERE $FEATURE IS NOT NULL" \
+        file="$DEST_DIR/${FEATURE}_lines.shp"
+        echo "Extracting line feature $FEATURE in $BUCKET to $file..."
+        ogr2ogr -oo CONFIG_FILE="$CONFIG_FILE" -spat $SPAT -progress $file "$SOURCE" -sql "SELECT * FROM lines WHERE $FEATURE IS NOT NULL" \
                 || (rm -rf "$DEST_DIR/$FEATURE".* && fail "Failed to build line $FEATURE" $?)
     done
 done

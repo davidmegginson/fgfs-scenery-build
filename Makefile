@@ -319,13 +319,16 @@ ${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
 	> $@
 
+airports-prepare-clean:
+	rm -f ${AIRPORTS}
+
 #
 # Prepare shapefiles
 #
 
 shapefiles-prepare: landcover-shapefiles-prepare osm-shapefiles-prepare
 
-shapefiles-clean: landcover-shapefiles-clean osm-shapefiles-clean
+shapefiles-prepare-clean: landcover-shapefiles-clean osm-shapefiles-clean
 
 landcover-shapefiles-prepare: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
 
@@ -466,7 +469,7 @@ lines: osm-lines
 
 landcover-areas: ${LANDCOVER_LAYERS_FLAG}
 
-${LANDCOVER_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
+${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG} ${CONFIG_DIR}/layers.csv
 	rm -f $@
 	for row in $$(grep lc- ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
@@ -484,7 +487,7 @@ landcover-clean:
 
 osm-areas: ${OSM_AREA_LAYERS_FLAG}
 
-${OSM_AREA_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
+${OSM_AREA_LAYERS_FLAG}: ${OSM_SHAPEFILES_PREPARED_FLAG} ${CONFIG_DIR}/layers.csv
 	rm -rf $@
 	for row in $$(grep osm- ${CONFIG_DIR}/layers.csv); do \
 	  row=`echo $$row | sed -e 's/\r//'`; \
