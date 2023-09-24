@@ -38,7 +38,6 @@ Ocean			ocean
 Estuary			ocean
 Fishing			other
 Construction		other
-Industrial		other
 Port			other
 Dump			other	# Dump Site
 FloodLand		other	# Land subject to flooding
@@ -79,14 +78,14 @@ Scrub			other
 ShrubGrassCover		other	# Mixed Shrubland/Grassland
 SavannaCover		other	# Savanna
 Orchard			other	# Orchard
-MixedForest		other	# Mixed Forest
-MixedCrop		other	# Mixed Dryland/Irrigated Cropland and Pasture
 BuiltUpCover		other	# Urban and Built-Up Land
 DeciduousForest		other	# Deciduous Forest
 DeciduousBroadCover	other	# Deciduous Forest
 EvergreenForest		other	# Evergreen Forest
 EvergreenBroadCover	other	# Evergreen Forest
 RainForest		other	# Rain Forest
+MixedForest		other	# Mixed Forest
+MixedCrop		other	# Mixed Dryland/Irrigated Cropland and Pasture
 BarrenCover		other	# Barren or Sparsely Vegetated
 HerbTundra		other	# Herbaceous Tundra
 Sclerophyllous		other
@@ -95,9 +94,10 @@ Burnt			other
 SnowCover		other	# Snow or Ice
 
 # Moved down so that urban forests can pop
-Urban			other	# Densely-populated city or large town
-SubUrban		other	# Densely-populated city or large town
+Industrial		other
 Town                    other	# Urban and Built-Up Land
+SubUrban		other	# Densely-populated city or large town
+Urban			other	# Densely-populated city or large town
 
 Island			island	# any island area not covered otherwise
 Default			landmass # any land area not covered otherwise

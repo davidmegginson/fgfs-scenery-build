@@ -1,6 +1,15 @@
 North American Scenery
 ======================
 
+## Goals
+
+Build FlightGear scenery that
+
+1. has full North American coverage (so far, just CAN/USA/MEX).
+2. is suitable for low-altitude VFR navigation, even without osm2city and 3D models enabled.
+3. is compatible with stable versions of FlightGear, not just the _next_ branch.
+4. includes detailed and accurate lakes, rivers, wetlands, and coastlines.
+
 ## Configuration
 
 A Makefile drives the process. Most building happens using 10x10 buckets, and you must supply a _BUCKET_ variable to the make process, e.g.

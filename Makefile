@@ -136,15 +136,21 @@ ifndef BUCKET
 $(error BUCKET is not defined)
 endif
 
-# default bounds if not overridden
-MIN_LON?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 1)
-MIN_LAT?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 2)
-MAX_LON?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 3)
-MAX_LAT?=$(shell ${SHELL} ${SCRIPT_DIR}/bucket.sh ${BUCKET} | cut -d ' ' -f 4)
+# Extract coords from the bucket name
+MIN_LON:=$(shell echo ${BUCKET} | sed -e 's/^w0*/-/' -e 's/^e0*//' -e 's/[ns].*$$//')
+MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n0*//')
+MAX_LON:=$(shell expr ${MIN_LON} + 10)
+MAX_LAT:=$(shell expr ${MIN_LAT} + 10)
+
+#
+# Clip extents
+# Raster extent is padded one degree in each direction, for more-consistent polygons
+#
+RASTER_CLIP_EXTENT=$(shell expr ${MIN_LON} - 1) $(shell expr ${MAX_LAT} + 1) $(shell expr ${MAX_LON} + 1)  $(shell expr ${MIN_LAT} - 1)
+SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
+LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
 # common command-line parameters
-SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
-LATLON=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
 TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 
@@ -292,6 +298,8 @@ prepare: landmass-prepare airports-prepare shapefiles-prepare
 
 prepare-clean: landmass-prepare-clean airports-prepare-clean shapefiles-prepare-clean
 
+prepare-rebuild: landmass-prepare-rebuild airports-prepare-rebuild shapefiles-prepare-rebuild
+
 #
 # Prepare landmass (single file; no flag needed)
 #
@@ -322,6 +330,8 @@ ${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
 airports-prepare-clean:
 	rm -f ${AIRPORTS}
 
+airports-prepare-rebuild: airports-prepare-clean airports-prepare
+
 #
 # Prepare shapefiles
 #
@@ -329,6 +339,8 @@ airports-prepare-clean:
 shapefiles-prepare: landcover-shapefiles-prepare osm-shapefiles-prepare
 
 shapefiles-prepare-clean: landcover-shapefiles-clean osm-shapefiles-clean
+
+shapefiles-prepare-rebuild: shapefiles-prepare-clean shapefiles-prepare
 
 landcover-shapefiles-prepare: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
 
@@ -362,7 +374,7 @@ ${OSM_SHAPEFILES_PREPARED_FLAG}: ${OSM_SHAPEFILES_EXTRACTED_FLAG} ${CONFIG_DIR}/
 	    source_dir=${OSM_DIR}/shapefiles/${BUCKET}; \
             dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
 	    mkdir -p $$dest_dir; \
-	    echo "Creating $$dest..."; \
+	    echo "Creating $$dest in ${BUCKET}..."; \
 	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
 	  done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -420,7 +432,7 @@ airports: ${AIRPORTS_FLAG} elevations
 
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	rm -f ${AIRPORTS_FLAG}
-	genapts850 --input=${AIRPORTS} ${LATLON} --max-slope=0.2618 \
+	genapts850 --input=${AIRPORTS} ${LATLON_OPTS} --max-slope=0.2618 \
 	  --work=${WORK_DIR} --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
@@ -532,7 +544,7 @@ osm-clean:
 
 # optional step (probably not worth it for non-mountainous terrain)
 #rectify-cliffs:
-#	rectify_height ${LATLON} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
+#	rectify_height ${LATLON_OPTS} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
 
 
 ########################################################################
@@ -542,7 +554,7 @@ osm-clean:
 scenery: extract prepare build
 #	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
+	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
@@ -594,9 +606,15 @@ ${VENV}: requirements.txt
 ${FLAGS_DIR}:
 	mkdir -p ${FLAGS_DIR}
 
+#
+# Make sure BUCKET is defined (when needed)
+#
+bucket-defined:
+	test "${BUCKET}" == "" && echo BUCKET not defined. &>2 && exit 2
+
 ########################################################################
 # Test that do-make.sh is working
 ########################################################################
 
 echo:
-	echo -- BUCKET=${BUCKET} ${LATLON}
+	echo -- BUCKET=${BUCKET} ${LATLON_OPTS}
