@@ -1,10 +1,4 @@
-/02-data/SRTM-3
-/02-data/airports
-/02-data/airports/modified.apt.dat
-/02-data/airports/split
-/02-data/land-polygons-split-4326
-/02-data/landmass
-/02-data/shapefiles
+/01-inputs
 /02-prep
 /03-work
 /04-output
