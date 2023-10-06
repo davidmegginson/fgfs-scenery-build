@@ -316,6 +316,8 @@ To remove the links, run
   
 Because the elevations are not exactly identical with the default scenery, there will be occasional issues: buildings may occasionally appear partly submerged, and road segments will occasionally disappear underground, but for the most part, it works well as a short-term hack. I will learn how to include those features properly in the future.
 
+(There is also a file ``gen-symlinks.bat``, but I haven't tested it.)
+
 ## Sources
 
 The scenery uses the following open sources:
