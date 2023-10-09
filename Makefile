@@ -128,7 +128,6 @@ SCRIPT_DIR=./scripts
 STATIC_DIR=./static
 HTML_DIR=./docs
 SCENERY_DIR=${OUTPUT_DIR}/${SCENERY_NAME}
-LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
 PUBLISH_DIR="${HOME}/Dropbox/Downloads"
 
 # What area are we building (must be set)
@@ -159,14 +158,14 @@ TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 #
 
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
-LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/MODIS-250
+LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/global-landcover
 
 OSM_DIR=${INPUTS_DIR}/osm
 OSM_SOURCE=${OSM_DIR}/north-america-latest.osm.pbf
-OSM_CONF=config/osmconf.ini
+OSM_PBF_CONF=config/osmconf.ini
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp # complete version is very slow
-LANDCOVER_BASE=modis-250-clipped
+LANDCOVER_BASE=landcover-nw-clipped
 LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 
 # Output dir for per-area shapefiles
@@ -181,8 +180,10 @@ DEM=FABDEM
 
 OSM_PBF=${OSM_DIR}/${BUCKET}.osm.pbf
 
-LANDMASS=${DATA_DIR}/landmass/${BUCKET}.shp
-LANDCOVER=${DATA_DIR}/landcover/${BUCKET}.shp
+LANDMASS_SHAPEFILE=${DATA_DIR}/landmass/${BUCKET}.shp
+LANDCOVER_SHAPEFILE=${DATA_DIR}/landcover/${BUCKET}.shp
+OSM_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}.shp
+
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 #
@@ -259,35 +260,36 @@ publish: archive publish-cloud
 extract: landcover-extract osm-extract
 
 #
-# Prepare landcover for current bucket (single file; no flag needed)
+# Extract background landcover for current bucket
 #
 
-landcover-extract: ${LANDCOVER}
+landcover-extract: ${LANDCOVER_SHAPEFILE}
 
 landcover-extract-rebuild: landcover-extract-clean landcover-extract
 
 landcover-extract-clean:
-	rm -fv ${LANDCOVER}
+	rm -fv ${LANDCOVER_SHAPEFILE}
 
-${LANDCOVER}: ${LANDCOVER_SOURCE}
-	ogr2ogr -spat ${SPAT} $@ $<
+${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
+	@echo "\nExtracting background landcover for ${BUCKET}..."
+	ogr2ogr -spat ${SPAT} $@ $< -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry,* FROM '${LANDCOVER_BASE}'"
+	@echo "\nCreating index for $@..."
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
 
 #
-# Clip PBF to speed processing
+# Extract OSM foreground features for current bucket
 #
 
-osm-extract: ${OSM_SHAPEFILES_EXTRACTED_FLAG}
-
-${OSM_SHAPEFILES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_CONF} ${SCRIPT_DIR}/extract-osm-shapefiles.sh
-	rm -f $@
-	${SHELL} ${SCRIPT_DIR}/extract-osm-shapefiles.sh ${OSM_DIR} ${OSM_DIR}/shapefiles ${OSM_CONF} ${BUCKET}
-	mkdir -p ${FLAGS_DIR} && touch $@
-
-${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
-	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+osm-extract: ${OSM_SHAPEFILE}
 
 osm-extract-clean:
-	rm -rvf ${OSM_DIR}/shapefiles/${BUCKET} ${OSM_SHAPEFILES_EXTRACTED_FLAG}
+	rm -rf ${OSM_SHAPEFILE}
+
+${OSM_SHAPEFILE}: ${OSM_SOURCE} ${OSM_PBF_CONF}
+	@echo "\nExtracting foreground OSM features for ${BUCKET}..."
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons"
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
+
 
 
 ########################################################################
@@ -304,15 +306,15 @@ prepare-rebuild: landmass-prepare-rebuild airports-prepare-rebuild shapefiles-pr
 # Prepare landmass (single file; no flag needed)
 #
 
-landmass-prepare: ${LANDMASS}
+landmass-prepare: ${LANDMASS_SHAPEFILE}
 
 landmass-prepare-clean:
-	rm -rfv  ${LANDMASS}
+	rm -rfv  ${LANDMASS_SHAPEFILE}
 
 landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
 
-${LANDMASS}: ${LANDMASS_SOURCE}
-	ogr2ogr -spat ${SPAT} ${LANDMASS} ${LANDMASS_SOURCE}
+${LANDMASS_SHAPEFILE}: ${LANDMASS_SOURCE}
+	ogr2ogr -spat ${SPAT} ${LANDMASS_SHAPEFILE} ${LANDMASS_SOURCE}
 
 #
 # Prepare airports
@@ -344,18 +346,13 @@ shapefiles-prepare-rebuild: shapefiles-prepare-clean shapefiles-prepare
 
 landcover-shapefiles-prepare: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
 
-${LANDCOVER_SHAPEFILES_PREPARED_FLAG}: ${LANDCOVER} ${CONFIG_DIR}/lc-extracts.csv
+${LANDCOVER_SHAPEFILES_PREPARED_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/osm-layers.csv
 	rm -f $@
 	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
 	| while read -r row; do \
-	  row=$$(echo "$$row" | sed -e 's/\r//'); \
-	  value=$$(echo "$$row" | sed -e 's/,.*$$//'); \
-	  dest=$$(echo "$$row" | sed -e 's/^.*,//'); \
-          dest_dir=${SHAPEFILES_DIR}; \
-	  mkdir -p $$dest_dir; \
-	  echo "Building $$dest for ${BUCKET}..."; \
-	  ogr2ogr $$dest_dir/$$dest ${LANDCOVER} -sql "select * from ${BUCKET} where value='$$value'" || exit 1; \
-	done
+		readarray -d ',' -t F <<< $$row; \
+		ogr-decode ${DECODE_OPTS} --area-type $${F[3]} ${WORK_DIR}/$${F[0]} ${LANDCOVER_SHAPEFILE} || exit 1; \
+	  done
 	mkdir -p ${FLAGS_DIR} && touch $@
 
 landcover-shapefiles-clean:
@@ -448,9 +445,9 @@ airports-rebuild: airports-clean airports
 
 landmass: ${LANDMASS_FLAG}
 
-${LANDMASS_FLAG}: ${LANDMASS}
+${LANDMASS_FLAG}: ${LANDMASS_SHAPEFILE}
 	rm -f ${LANDMASS_FLAG}
-	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${LANDMASS}
+	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${LANDMASS_SHAPEFILE}
 	mkdir -p ${FLAGS_DIR} && touch ${LANDMASS_FLAG}
 
 landmass-clean:
