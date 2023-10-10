@@ -40,27 +40,6 @@
 #   extract OSM per-feature shapefiles for a bucket
 #
 #
-# 2.2. Data-preparation targets
-#
-# Process data in INPUTS_DIR and place the output in DATA_DIR. Works
-# at the BUCKET level.
-#
-# prepare
-#   run *all* preparation targets for the requested bucket.
-#
-# landmass-prepare
-#   prepare the landmass mask for the bucket.
-#
-# airports-prepare
-#   prepare the airports file for the bucket.
-#
-# landcover-shapefiles-prepare
-#   prepare the background landcover shapefiles for the bucket.
-#
-# osm-shapefiles-prepare
-#   prepare the detailed OSM features for the bucket.
-#
-#
 # 2.3. Data-building targets
 #
 # Build the TerraGear input files for scenery, working at the latlon
@@ -178,10 +157,9 @@ DEM=FABDEM
 # Data extracts (specific to bucket)
 #
 
-OSM_PBF=${OSM_DIR}/${BUCKET}.osm.pbf
-
 LANDMASS_SHAPEFILE=${DATA_DIR}/landmass/${BUCKET}.shp
 LANDCOVER_SHAPEFILE=${DATA_DIR}/landcover/${BUCKET}.shp
+OSM_PBF=${DATA_DIR}/osm/${BUCKET}.osm.pbf
 OSM_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}.shp
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
@@ -244,7 +222,7 @@ VENV=./venv/bin/activate
 # Top-level targets (assume elevations are already in place)
 #
 
-all: prepare build construct publish
+all: extract build construct publish
 
 construct: scenery
 
@@ -257,7 +235,21 @@ publish: archive publish-cloud
 # 1. Extract
 ########################################################################
 
-extract: landcover-extract osm-extract
+extract: landmass-extract landcover-extract osm-extract airports-extract
+
+#
+# Extract landmass (single file; no flag needed)
+#
+
+landmass-extract: ${LANDMASS_SHAPEFILE}
+
+landmass-extract-clean:
+	rm -rfv  ${LANDMASS_SHAPEFILE}
+
+landmass-extract-rebuild: landmass-prepare-clean landmass-prepare
+
+${LANDMASS_SHAPEFILE}: ${LANDMASS_SOURCE}
+	ogr2ogr -spat ${SPAT} ${LANDMASS_SHAPEFILE} ${LANDMASS_SOURCE}
 
 #
 # Extract background landcover for current bucket
@@ -271,9 +263,9 @@ landcover-extract-clean:
 	rm -fv ${LANDCOVER_SHAPEFILE}
 
 ${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
-	@echo "\nExtracting background landcover for ${BUCKET}..."
+	@echo -e "\nExtracting background landcover for ${BUCKET}..."
 	ogr2ogr -spat ${SPAT} $@ $< -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry,* FROM '${LANDCOVER_BASE}'"
-	@echo "\nCreating index for $@..."
+	@echo -e "\nCreating index for $@..."
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
 
 #
@@ -285,42 +277,20 @@ osm-extract: ${OSM_SHAPEFILE}
 osm-extract-clean:
 	rm -rf ${OSM_SHAPEFILE}
 
-${OSM_SHAPEFILE}: ${OSM_SOURCE} ${OSM_PBF_CONF}
-	@echo "\nExtracting foreground OSM features for ${BUCKET}..."
+${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
+	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
+	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+
+${OSM_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
+	@echo -e "\nExtracting foreground OSM features for ${BUCKET}..."
 	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons"
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
 
-
-
-########################################################################
-# 2. Prepare
-########################################################################
-
-prepare: landmass-prepare airports-prepare shapefiles-prepare
-
-prepare-clean: landmass-prepare-clean airports-prepare-clean shapefiles-prepare-clean
-
-prepare-rebuild: landmass-prepare-rebuild airports-prepare-rebuild shapefiles-prepare-rebuild
-
 #
-# Prepare landmass (single file; no flag needed)
+# Extract airports
 #
 
-landmass-prepare: ${LANDMASS_SHAPEFILE}
-
-landmass-prepare-clean:
-	rm -rfv  ${LANDMASS_SHAPEFILE}
-
-landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
-
-${LANDMASS_SHAPEFILE}: ${LANDMASS_SOURCE}
-	ogr2ogr -spat ${SPAT} ${LANDMASS_SHAPEFILE} ${LANDMASS_SOURCE}
-
-#
-# Prepare airports
-#
-
-airports-prepare: ${AIRPORTS} # single file - no flag needed
+airports-extract: ${AIRPORTS} # single file - no flag needed
 
 ${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
@@ -329,60 +299,15 @@ ${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
 	> $@
 
-airports-prepare-clean:
+airports-extract-clean:
 	rm -f ${AIRPORTS}
 
-airports-prepare-rebuild: airports-prepare-clean airports-prepare
-
-#
-# Prepare shapefiles
-#
-
-shapefiles-prepare: landcover-shapefiles-prepare osm-shapefiles-prepare
-
-shapefiles-prepare-clean: landcover-shapefiles-clean osm-shapefiles-clean
-
-shapefiles-prepare-rebuild: shapefiles-prepare-clean shapefiles-prepare
-
-landcover-shapefiles-prepare: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
-
-${LANDCOVER_SHAPEFILES_PREPARED_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/osm-layers.csv
-	rm -f $@
-	grep ',yes,' ${CONFIG_DIR}/lc-extracts.csv \
-	| while read -r row; do \
-		readarray -d ',' -t F <<< $$row; \
-		ogr-decode ${DECODE_OPTS} --area-type $${F[3]} ${WORK_DIR}/$${F[0]} ${LANDCOVER_SHAPEFILE} || exit 1; \
-	  done
-	mkdir -p ${FLAGS_DIR} && touch $@
-
-landcover-shapefiles-clean:
-	rm -rfv ${SHAPEFILES_DIR}/lc-* ${LANDCOVER_SHAPEFILES_PREPARED_FLAG}
-
-osm-shapefiles-prepare: ${OSM_SHAPEFILES_PREPARED_FLAG}
-
-${OSM_SHAPEFILES_PREPARED_FLAG}: ${OSM_SHAPEFILES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-extracts.csv
-	rm -f $@
-	grep ',yes,' ${CONFIG_DIR}/osm-extracts.csv \
-	| while read -r row; do \
-	    row=`echo "$$row" | sed -e 's/\r//'`; \
-	    dest=$$(echo "$$row" | sed -e 's/,.*//'); \
-	    source=$$(echo "$$row" | sed -e 's/.*,yes,//' -e 's/,.*//'); \
-	    query=$$(echo "$$row" | sed -e 's/[^"]*["]//' -e 's/["]//'); \
-	    source_dir=${OSM_DIR}/shapefiles/${BUCKET}; \
-            dest_dir=${DATA_DIR}/shapefiles/${BUCKET}; \
-	    mkdir -p $$dest_dir; \
-	    echo "Creating $$dest in ${BUCKET}..."; \
-	    ogr2ogr $$dest_dir/$$dest $$source_dir/$$source -sql "$$query" || exit 1; \
-	  done
-	mkdir -p ${FLAGS_DIR} && touch $@
-
-osm-shapefiles-clean:
-	rm -rfv ${SHAPEFILES_DIR}/osm-* ${OSM_SHAPEFILES_PREPARED_FLAG}
+airports-extract-rebuild: airports-extract-clean airports-extract
 
 
 
 ########################################################################
-# 3. Build (excludes elevations; must be done manually
+# 2. Build (excludes elevations; must be done manually
 ########################################################################
 
 build: elevations airports landmass layers
@@ -478,15 +403,14 @@ lines: osm-lines
 
 landcover-areas: ${LANDCOVER_LAYERS_FLAG}
 
-${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILES_PREPARED_FLAG} ${CONFIG_DIR}/layers.csv
+${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.tsv
 	rm -f $@
-	for row in $$(grep lc- ${CONFIG_DIR}/layers.csv); do \
-	  row=`echo $$row | sed -e 's/\r//'`; \
-	  if echo $$row | grep ',yes,area,' > /dev/null; then \
-	    readarray -d ',' -t F <<< $$row; \
-	    echo Trying $${F[0]}; \
-	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
+	@echo -e "\nBuilding landcover area layers...\n"
+	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
+          if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
+	    echo -e "\nTrying $$name..."; \
+	    ogr-decode ${DECODE_OPTS} --area-type $$type --where "$$query" \
+	      ${WORK_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -496,15 +420,14 @@ landcover-clean:
 
 osm-areas: ${OSM_AREA_LAYERS_FLAG}
 
-${OSM_AREA_LAYERS_FLAG}: ${OSM_SHAPEFILES_PREPARED_FLAG} ${CONFIG_DIR}/layers.csv
-	rm -rf $@
-	for row in $$(grep osm- ${CONFIG_DIR}/layers.csv); do \
-	  row=`echo $$row | sed -e 's/\r//'`; \
-	  if echo $$row | grep ',yes,area,' > /dev/null; then \
-	    readarray -d ',' -t F <<< $$row; \
-	    echo Trying $${F[0]}; \
-	    ogr-decode ${DECODE_OPTS} --area-type $${F[3]} \
-	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
+${OSM_AREAS_LAYERS_FLAG}: ${OSM_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+	rm -f $@
+	@echo -e "\nBuilding OSM area layers...\n"
+	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
+          if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
+	    echo -e "\nTrying $$name..."; \
+	    ogr-decode ${DECODE_OPTS} --area-type $$type --where "$$query" \
+	      ${WORK_DIR}/$$name ${OSM_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -512,14 +435,13 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_SHAPEFILES_PREPARED_FLAG} ${CONFIG_DIR}/layers.cs
 osm-lines: ${OSM_LINE_LAYERS_FLAG}
 
 ${OSM_LINE_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
-	rm -rf $@
-	for row in $$(grep ,line, ${CONFIG_DIR}/layers.csv); do \
-	  row=`echo $$row | sed -e 's/\r//'`; \
-	  if echo $$row | grep ',yes,line,' > /dev/null; then \
-	    readarray -d ',' -t F <<< $$row; \
-	    echo Trying $${F[0]}; \
-	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $${F[4]} --area-type $${F[3]} \
-	      ${WORK_DIR}/$${F[0]} ${DATA_DIR}/shapefiles/${BUCKET}/$${F[0]}.shp || exit 1;\
+	rm -f $@
+	@echo -e "\nBuilding OSM line layers...\n"
+	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
+          if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
+	    echo -e "\nTrying $$name..."; \
+	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$type --where "$$query" \
+	      ${WORK_DIR}/$$name ${OSM_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
