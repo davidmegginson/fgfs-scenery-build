@@ -415,7 +415,7 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    ogr-decode ${DECODE_OPTS} --area-type $$type --where "$$query" \
+	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${WORK_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
@@ -432,7 +432,7 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    ogr-decode ${DECODE_OPTS} --area-type $$type --where "$$query" \
+	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${WORK_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
@@ -444,9 +444,9 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
 	@echo -e "\nBuilding OSM line layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
-          if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
+          if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$type --where "$$query" \
+	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
 	      ${WORK_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
@@ -476,7 +476,7 @@ osm-clean:
 # 4. Construct
 ########################################################################
 
-scenery: extract prepare build
+scenery: extract build
 #	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
 	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
