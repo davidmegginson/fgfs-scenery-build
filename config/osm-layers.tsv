@@ -33,31 +33,31 @@ osm-lock-gate-waterway-lines	yes	line	BarrenCover	3	waterway='lock_gate'
 osm-meadow-landuse	yes	area	CropGrass		(landuse='meadow' or crop in ('grass', 'hay', 'native_pasture', 'forage'))
 osm-mine-man_made	yes	area	OpenMining		man_made='mine'
 osm-motorway-highway	no	line	ShrubGrassCover	30	highway in ('motorway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-motorway-highway	yes	line	Freeway	10	landuse='orchard'
-osm-orchard-landuse	yes	area	Orchard		leisure='park'
-osm-park-leisure	yes	area	Greenspace		man_made='pier'
+osm-motorway-highway	yes	line	Freeway	10	highway in ('motorway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-orchard-landuse	yes	area	Orchard		landuse='orchard'
+osm-park-leisure	yes	area	Greenspace		leisure='park'
 osm-pier-man_made-areas	yes	line	BarrenCover	10	man_made='pier'
-osm-pier-man_made-lines	yes	area	BarrenCover		highway in ('primary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-primary-highway	no	line	ShrubGrassCover	30	landuse='quarry'
-osm-primary-highway	yes	line	Road-Primary	10	railway in ('rail', 'light_rail', 'subway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
-osm-quarry-landuse	yes	area	OpenMining		landuse='recreation_ground'
-osm-railway-railway	no	line	ShrubGrassCover	9	landuse='residential'
-osm-railway-railway	yes	line	Railroad	3	landuse='retail'
-osm-recreation-ground-landuse	yes	area	Greenspace		natural in('bare_rock', 'scree', 'stone')
-osm-residential-landuse	yes	area	Town		natural in('beach', 'dune', 'sand')
-osm-retail-landuse	yes	area	Urban		natural in('fell', 'heath', 'moor', 'scrub')
-osm-rock-natural	yes	area	Rock		highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-sand-natural	yes	area	Sand		natural in('stream', 'stream_pool')
-osm-scrub-natural	yes	area	Scrub		highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-secondary-highway	no	line	ShrubGrassCover	16	natural in('tundra')
-osm-secondary-highway	yes	line	Road-Secondary	8	landuse='vineyard'
-osm-trunk-highway	no	line	ShrubGrassCover	30	natural in('bay', 'strait', 'shoal', 'water')
-osm-trunk-highway	yes	line	Road-Trunk	10	water in('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater')
-osm-tundra-natural	yes	area	HerbTundra		natural='wetland'
-osm-vineyard-landuse	yes	area	Vineyard		natural='wood' and leaf_type='deciduous'
-osm-water-natural	yes	area	Lake		natural='wood' and leaf_type='evergreen'
-osm-water-water	yes	area	Lake		natural='wood' and leaf_type='mixed'
-osm-wetland-natural	yes	area	Marsh		
-osm-wood-natural-deciduous	yes	area	DeciduousForest		
-osm-wood-natural-evergreen	yes	area	EvergreenForest		
-osm-wood-natural-mixed	yes	area	MixedForest		
+osm-pier-man_made-lines	yes	area	BarrenCover		man_made='pier'
+osm-primary-highway	no	line	ShrubGrassCover	30	highway in ('primary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-primary-highway	yes	line	Road-Primary	10	highway in ('primary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-quarry-landuse	yes	area	OpenMining		landuse='quarry'
+osm-railway-railway	no	line	ShrubGrassCover	9	railway in ('rail') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
+osm-railway-railway	yes	line	Railroad	3	railway in ('rail') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
+osm-recreation-ground-landuse	yes	area	Greenspace		landuse='recreation_ground'
+osm-residential-landuse	yes	area	Town		landuse='residential'
+osm-retail-landuse	yes	area	Urban		landuse='retail'
+osm-rock-natural	yes	area	Rock		natural in('bare_rock', 'scree', 'stone')
+osm-sand-natural	yes	area	Sand		natural in('beach', 'dune', 'sand')
+osm-scrub-natural	yes	area	Scrub		natural in('fell', 'heath', 'moor', 'scrub')
+osm-secondary-highway	no	line	ShrubGrassCover	16	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-secondary-highway	yes	line	Road-Secondary	8	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-trunk-highway	no	line	ShrubGrassCover	30	natural in('stream', 'stream_pool')
+osm-trunk-highway	yes	line	Road-Trunk	10	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-tundra-natural	yes	area	HerbTundra		natural in('tundra')
+osm-vineyard-landuse	yes	area	Vineyard		landuse='vineyard'
+osm-water-natural	yes	area	Lake		natural in('bay', 'strait', 'shoal', 'water')
+osm-water-water	yes	area	Lake		water in('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater')
+osm-wetland-natural	yes	area	Marsh		natural='wetland'
+osm-wood-natural-deciduous	yes	area	DeciduousForest		natural='wood' and leaf_type='deciduous'
+osm-wood-natural-evergreen	yes	area	EvergreenForest		natural='wood' and leaf_type='evergreen'
+osm-wood-natural-mixed	yes	area	MixedForest		natural='wood' and leaf_type='mixed'
