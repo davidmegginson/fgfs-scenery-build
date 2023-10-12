@@ -51,7 +51,7 @@ osm-sand-natural	yes	area	Sand		natural in('beach', 'dune', 'sand')
 osm-scrub-natural	yes	area	Scrub		natural in('fell', 'heath', 'moor', 'scrub')
 osm-secondary-highway	no	line	ShrubGrassCover	16	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-secondary-highway	yes	line	Road-Secondary	8	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-trunk-highway	no	line	ShrubGrassCover	30	natural in('stream', 'stream_pool')
+osm-trunk-highway	no	line	ShrubGrassCover	30	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-trunk-highway	yes	line	Road-Trunk	10	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-tundra-natural	yes	area	HerbTundra		natural in('tundra')
 osm-vineyard-landuse	yes	area	Vineyard		landuse='vineyard'
