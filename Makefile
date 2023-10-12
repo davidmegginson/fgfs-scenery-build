@@ -289,7 +289,7 @@ ${OSM_LINES_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
 
 ${OSM_AREAS_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM area features for ${BUCKET}..."
-	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons WHERE OGR_GEOM_AREA > ${MIN_FEATURE_AREA}0.00001"
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons WHERE OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}"
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
 
 #
