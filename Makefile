@@ -120,6 +120,8 @@ MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n0*//')
 MAX_LON:=$(shell expr ${MIN_LON} + 10)
 MAX_LAT:=$(shell expr ${MIN_LAT} + 10)
 
+MIN_FEATURE_AREA=0.00001 # 100m x 100m (for landcover and OSM area features)
+
 #
 # Clip extents
 # Raster extent is padded one degree in each direction, for more-consistent polygons
@@ -160,7 +162,8 @@ DEM=FABDEM
 LANDMASS_SHAPEFILE=${DATA_DIR}/landmass/${BUCKET}.shp
 LANDCOVER_SHAPEFILE=${DATA_DIR}/landcover/${BUCKET}.shp
 OSM_PBF=${DATA_DIR}/osm/${BUCKET}.osm.pbf
-OSM_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}.shp
+OSM_LINES_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-lines.shp
+OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
@@ -172,14 +175,12 @@ DEM_AREAS=FABDEM SRTM-3
 
 AIRPORT_AREAS=AirportObj AirportArea
 
-LC_AREAS= lc-barren lc-cropland lc-forest-deciduous-temperate		\
-lc-forest-deciduous-tropical lc-forest-evergreen-tropical		\
-lc-forest-mixed lc-forest-needleleaf-taiga				\
-lc-forest-needleleaf-temperate lc-grassland-polar			\
-lc-grassland-temperate lc-grassland-tropical lc-residential-landuse	\
-lc-shrubland-barren lc-shrubland-moss lc-shrubland-polar		\
-lc-shrubland-temperate lc-shrubland-tropical lc-snow-ice lc-urban	\
-lc-wetland
+LC_AREAS=lc-broadleaf-evergreen-forest lc-broadleaf-deciduous-forest	\
+lc-needleleaf-evergreen-forest lc-needleleaf-deciduous-forest		\
+lc-mixed-forest lc-tree-open lc-shrub lc-herbaceous			\
+lc-herbaceous-tree-shrub lc-sparse-vegetation lc-cropland		\
+lc-paddy-field lc-cropland-other-vegetation lc-mangrove lc-wetland	\
+lc-gravel-rock lc-sand lc-urban lc-snow-ice
 
 OSM_AREAS=osm-abandoned-railway osm-airfield-aeroway		\
 osm-airfield-military osm-cemetery-landuse osm-cliff-natural	\
@@ -272,18 +273,23 @@ ${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
 # Extract OSM foreground features for current bucket
 #
 
-osm-extract: ${OSM_SHAPEFILE}
+osm-extract: ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE}
 
 osm-extract-clean:
-	rm -rf ${OSM_SHAPEFILE}
+	rm -rf ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE}
 
 ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
 	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
 	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
 
-${OSM_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
-	@echo -e "\nExtracting foreground OSM features for ${BUCKET}..."
-	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons"
+${OSM_LINES_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
+	@echo -e "\nExtracting foreground OSM line features for ${BUCKET}..."
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM lines"
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
+
+${OSM_AREAS_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
+	@echo -e "\nExtracting foreground OSM area features for ${BUCKET}..."
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons WHERE OGR_GEOM_AREA > ${MIN_FEATURE_AREA}0.00001"
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
 
 #
@@ -420,28 +426,28 @@ landcover-clean:
 
 osm-areas: ${OSM_AREA_LAYERS_FLAG}
 
-${OSM_AREAS_LAYERS_FLAG}: ${OSM_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
 	@echo -e "\nBuilding OSM area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$type --where "$$query" \
-	      ${WORK_DIR}/$$name ${OSM_SHAPEFILE} || exit 1;\
+	      ${WORK_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
 
 osm-lines: ${OSM_LINE_LAYERS_FLAG}
 
-${OSM_LINE_LAYERS_FLAG}: ${CONFIG_DIR}/layers.csv
+${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
 	@echo -e "\nBuilding OSM line layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$type --where "$$query" \
-	      ${WORK_DIR}/$$name ${OSM_SHAPEFILE} || exit 1;\
+	      ${WORK_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
