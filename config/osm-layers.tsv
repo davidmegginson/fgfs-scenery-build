@@ -6,19 +6,19 @@ osm-breakwater-man_made-areas	yes	area	BarrenCover		man_made='breakwater'
 osm-breakwater-man_made-lines	yes	line	BarrenCover	10	man_made='breakwater'
 osm-brownfield-landuse	yes	area	ShrubGrassCover		landuse='brownfield'
 osm-cemetery-landuse	yes	area	Cemetery		landuse='cemetery'
-osm-cliff-natural	yes	area	Cliffs		natural in('cliff', 'gully')
+osm-cliff-natural	yes	area	Cliffs		natural in ('cliff', 'gully')
 osm-commercial-landuse	yes	area	Urban		landuse='commercial'
 osm-construction-landuse	yes	area	ShrubGrassCover		landuse='construction'
 osm-dam-waterway-areas	yes	area	BarrenCover		waterway='dam'
 osm-dam-waterway-lines	yes	line	BarrenCover	10	waterway='dam'
-osm-desert-natural	yes	area	Dirt		natural in('desert')
-osm-dirt-natural	yes	area	Dirt		natural in('mud')
+osm-desert-natural	yes	area	Dirt		natural in ('desert')
+osm-dirt-natural	yes	area	Dirt		natural in ('mud')
 osm-education-landuse	yes	area	Greenspace		landuse='education'
-osm-farmland-landuse	yes	area	MixedCrop		landuse in('farmland', 'farmyard')
+osm-farmland-landuse	yes	area	MixedCrop		landuse in ('farmland', 'farmyard')
 osm-forest-landuse-deciduous	yes	area	DeciduousForest		landuse='forest' and leaf_type='deciduous'
 osm-forest-landuse-evergreen	yes	area	EvergreenForest		landuse='wood' and leaf_type='evergreen'
 osm-forest-landuse-mixed	yes	area	MixedForest		landuse='forest' and leaf_type='mixed'
-osm-glacier-natural	yes	area	Glacier		natural in('crevasse', 'glacier')
+osm-glacier-natural	yes	area	Glacier		natural in ('crevasse', 'glacier')
 osm-golf-sport	yes	area	GolfCourse		sport='golf'
 osm-grass-landuse	yes	area	Greenspace		landuse='grass'
 osm-grassland-natural	yes	area	Grassland		natural='grassland'
@@ -26,7 +26,7 @@ osm-greenfield-landuse	yes	area	Greenspace		landuse='greenfield'
 osm-industrial-landuse	yes	area	Industrial		landuse='industrial'
 osm-institutional-landuse	yes	area	ShrubGrassCover		landuse='institutional'
 osm-landfill-landuse	yes	area	Dump		landuse='landfill'
-osm-lava-natural	yes	area	Lava		natural in('volcano')
+osm-lava-natural	yes	area	Lava		natural in ('volcano')
 osm-line-power	yes	line	ShrubGrassCover	10	power in ('line')
 osm-lock-gate-waterway-areas	yes	area	BarrenCover		waterway='lock_gate'
 osm-lock-gate-waterway-lines	yes	line	BarrenCover	3	waterway='lock_gate'
@@ -46,17 +46,17 @@ osm-railway-railway	yes	line	Railroad	3	railway in ('rail') and (tunnel is null 
 osm-recreation-ground-landuse	yes	area	Greenspace		landuse='recreation_ground'
 osm-residential-landuse	yes	area	Town		landuse='residential'
 osm-retail-landuse	yes	area	Urban		landuse='retail'
-osm-rock-natural	yes	area	Rock		natural in('bare_rock', 'scree', 'stone')
-osm-sand-natural	yes	area	Sand		natural in('beach', 'dune', 'sand')
-osm-scrub-natural	yes	area	Scrub		natural in('fell', 'heath', 'moor', 'scrub')
+osm-rock-natural	yes	area	Rock		natural in ('bare_rock', 'scree', 'stone')
+osm-sand-natural	yes	area	Sand		natural in ('beach', 'dune', 'sand')
+osm-scrub-natural	yes	area	Scrub		natural in ('fell', 'heath', 'moor', 'scrub')
 osm-secondary-highway	no	line	ShrubGrassCover	16	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-secondary-highway	yes	line	Road-Secondary	8	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-trunk-highway	no	line	ShrubGrassCover	30	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-trunk-highway	yes	line	Road-Trunk	10	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-tundra-natural	yes	area	HerbTundra		natural in('tundra')
+osm-tundra-natural	yes	area	HerbTundra		natural in ('tundra')
 osm-vineyard-landuse	yes	area	Vineyard		landuse='vineyard'
-osm-water-natural	yes	area	Lake		natural in('bay', 'strait', 'shoal', 'water')
-osm-water-water	yes	area	Lake		water in('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater')
+osm-water-natural	yes	area	Lake		natural in ('bay', 'strait', 'shoal', 'water')
+osm-water-water	yes	area	Lake		water in ('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater')
 osm-wetland-natural	yes	area	Marsh		natural='wetland'
 osm-wood-natural-deciduous	yes	area	DeciduousForest		natural='wood' and leaf_type='deciduous'
 osm-wood-natural-evergreen	yes	area	EvergreenForest		natural='wood' and leaf_type='evergreen'
