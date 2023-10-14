@@ -44,6 +44,8 @@ osm-quarry-landuse	yes	area	OpenMining	-	landuse='quarry'
 osm-railway-railway	no	line	ShrubGrassCover	9	railway in ('rail') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
 osm-railway-railway	yes	line	Railroad	3	railway in ('rail') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
 osm-recreation-ground-landuse	yes	area	Greenspace	-	landuse='recreation_ground'
+osm-reef-natural-areas	yes	area	Stream	-	natural='reef'
+osm-reef-natural-lines	yes	line	Stream	30	natural='reef'
 osm-residential-landuse	yes	area	Town	-	landuse='residential'
 osm-retail-landuse	yes	area	Urban	-	landuse='retail'
 osm-rock-natural	yes	area	Rock	-	natural in ('bare_rock', 'scree', 'stone')
