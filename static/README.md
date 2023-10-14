@@ -175,10 +175,10 @@ Northwestern Ontario and southern Manitoba (forest, Canadian Shield)
 
 ### w090n20
 
-Eastern Gulf Coast
+Eastern Gulf Coast, western Cuba
 
 * Cancún, ROO, MEX
-* Havana, 03, CUB (note: landcover in Cuba is limited)
+* Havana, CUB
 * Key West, FL, USA
 * Miami, FL, USA
 * Mérida, YUC, MEX
@@ -231,6 +231,17 @@ Western James Bay
 * Fort Severn, ON, CAN
 * Moosonee, ON, CAN
 
+### w080n20
+
+Bahamas, Eastern Cuba, Turks and Caicos Islands
+
+* Holguín, CU
+* Las Tunas, CU
+* Nassau, BHS
+* Providenciales, TCA
+* Santa Clara, CU
+
+
 ### w080n30
 
 US Mid Atlantic Seaboard (many U.S. Civil War battlefields)
@@ -267,6 +278,12 @@ Eastern James Bay
 * Inukjuak, QC, CAN
 * La Grande Rivière, QC, CAN
 * Umiujaq, NU, CAN
+
+### w070n30
+
+Bermuda
+
+* St George's, BMU
 
 ### w070n40
 
