@@ -116,7 +116,7 @@ endif
 
 # Extract coords from the bucket name
 MIN_LON:=$(shell echo ${BUCKET} | sed -e 's/^w0*/-/' -e 's/^e0*//' -e 's/[ns].*$$//')
-MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n0*//')
+MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n//')
 MAX_LON:=$(shell expr ${MIN_LON} + 10)
 MAX_LAT:=$(shell expr ${MIN_LAT} + 10)
 
@@ -153,7 +153,11 @@ LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 SHAPEFILES_DIR=${DATA_DIR}/shapefiles/${BUCKET}
 
 # DEM type (SRTM-3 or FABDEM); FABDEM is higher res, but goes only to 80N
+ifeq ($(MIN_LAT), 80)
+DEM=SRTM-3
+else
 DEM=FABDEM
+endif
 
 #
 # Data extracts (specific to bucket)
@@ -477,8 +481,7 @@ osm-clean:
 ########################################################################
 
 scenery: extract build
-#	mkdir -p ${SCENERY_DIR}/Terrain/${BUCKET}
-	tg-construct --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	tg-construct --ignore-landmass --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
 
 scenery-clean:

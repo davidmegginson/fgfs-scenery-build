@@ -305,6 +305,12 @@ Labrador and northeastern Quebec
 * Goose Bay, NL, CAN
 * Sept-Îles, QC, CAN
 
+### w060n10
+
+Barbados
+
+* Bridgetown, BRB
+
 ### w060n40
 
 Newfoundland and St Pierre-Miquelon (France)
