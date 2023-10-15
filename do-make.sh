@@ -123,8 +123,19 @@ TARGETS=$@
 : ${STEP:=1} # use the STEP environment variable to override
 : ${START_LAT:=$MIN_LAT} # starting latitude (for restarting)
 : ${START_LON:=$MIN_LON} # starting longitude (for restarting)
-: ${THREADS:=1} # default threads for build
-: ${DEM:=FABDEM} # default DEM
+
+if [ -z "$DEM" ]; then
+    DEM_ARG=""
+else
+    DEM_ARG="DEM=$DEM"
+fi
+
+if [ -z "$THREADS" ]; then
+    THREADS_ARG=""
+else
+    THREADS_ARG="MAX_THREADS=$THREADS"
+fi
+
 
 # ensure STEP is reasonable for a full-bucket build
 if [ $STEP -ne 1 -a $STEP -ne 2 -a $STEP -ne 5 -a $STEP -ne 10 ]; then
@@ -146,7 +157,7 @@ while [ $bucket_min_lat -lt $MAX_LAT ]; do
         bucket_max_lon=$(expr $bucket_min_lon + $STEP)
         set_bucket $bucket_min_lon $bucket_min_lat
         # advance only if the build succeeded
-        make DEM=$DEM MAX_THREADS=$THREADS BUCKET=$BUCKET \
+        make $DEM_ARG $THREADS_ARG BUCKET=$BUCKET \
              MIN_LON=$bucket_min_lon MIN_LAT=$bucket_min_lat MAX_LON=$bucket_max_lon MAX_LAT=$bucket_max_lat \
              $TARGETS \
             || exit
