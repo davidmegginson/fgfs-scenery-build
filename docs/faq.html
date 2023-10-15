@@ -28,11 +28,11 @@
           What countries are covered?
         </dt>
         <dd>
-          Currently just Canada, the U.S., and Mexico have full
-          landcover; there is some overlap into other areas
-          (e.g. Greenland, Cuba), but they won't have the same
-          landcover detail. They should still have roads, airports,
-          etc.
+          All of North America, including Canada, the U.S., Mexico,
+          Greenland, Bermuda, Central America, and the Caribbean. The
+          scenery overlaps slightly into South America, including
+          parts of Colombia (including Bogotá and Medellín), Venezuela
+          (including Caracas) and Ecuador.
         </dd>
 
         <dt>
@@ -59,10 +59,8 @@
           your TerraSync scenery. You also need to have TerraSync
           enabled. In Windows, or if you have your <code>.fgfs/</code>
           directory in a non-standard location, you will need to
-          create the links manually. There is no script yet for Windows 
-          (I don't use it), but apparently the <cmd>mklink</cmd> command
-          will create symlinks. If any Windows user cares to contribute
-          a <code>.bat</code> file, I will add it to this repo.
+          create the links manually. There is a .bat script for
+          Windows, but it is not tested.
         </dd>
         <dt>
           Why do roads and railroads stop at rivers?
@@ -96,14 +94,18 @@
         </dd>
 
         <dt>
-          Why not use a 10m landcover raster?
+          Why not use a higher-resolution landcover raster?
         </dt>
         <dd>
-          I'm using MODIS-250 mainly for background, with OpenStreetMap data filling in the details. Because I'm
-          converting to vector data, a 10m landcover raster,
-          processing exceeded my resources for such large areas, and the resulting scenery would probably have
-          had too many triangles for most users. To see a more-detailed raster (but less detailed rivers and other
-          water features), try the new WS3.0 scenery under development.
+          I'm using a 500m global landcover raster mainly for
+          background, with OpenStreetMap data filling in the
+          details. Because I'm converting to vector data, processing a
+          10m landcover raster exceeded my resources for such large
+          areas, and the resulting scenery would probably have had too
+          many triangles for most users' graphics cards. To see a
+          more-detailed raster (but less-detailed rivers and other
+          water features), try the new WS3.0 scenery under
+          development.
         </dd>
 
         <dt>
