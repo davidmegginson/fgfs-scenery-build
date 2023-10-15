@@ -175,7 +175,7 @@ AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 # Build areas to include
 #
 
-DEM_AREAS=FABDEM SRTM-3
+DEM_AREAS=${DEM}
 
 AIRPORT_AREAS=AirportObj AirportArea
 
@@ -331,9 +331,7 @@ build-clean: airports-clean landmass-clean layers-clean
 # Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations: ${ELEVATIONS_FLAG}
-
-elevations-fit: ${ELEVATIONS_FIT_FLAG}
+elevations: ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
 
 ${ELEVATIONS_FLAG}:
 	rm -f ${ELEVATIONS_FLAG}
@@ -354,7 +352,7 @@ elevations-fit-force-all:
 	terrafit ${WORK_DIR}/${DEM} -f ${TERRAFIT_OPTS} # refit every time
 
 elevations-clean:
-	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${FIT_IN_PROGRESS_FLAG}
+	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
 
 #
 # Build the airport areas and objects
