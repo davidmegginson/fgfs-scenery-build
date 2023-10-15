@@ -266,7 +266,7 @@ Eastern Panama, Darién Gap, northwestern South America (north of the Equator)
 
 ### w080n10
 
-Central Caribbean, western Spanish Main
+Central West Indies, western Spanish Main
 
 * Barranquilla, COL
 * Cartagena de Indias, COL
@@ -328,7 +328,7 @@ Eastern James Bay
 
 ### w070n10
 
-Eastern Caribbean, eastern Spanish Main
+Eastern West Indies, eastern Spanish Main
 
 * Basseterre, KNA
 * Brades, MSR
