@@ -173,9 +173,31 @@ Northwestern Ontario and southern Manitoba (forest, Canadian Shield)
 * Thompson, MB, CAN
 * Winnipeg, MB, CAN
 
+### w090n00
+
+Southern Central America
+
+* San José, CRI
+* Santiago, PAN
+
+### w090n10
+
+Western Central America and Cayman Islands
+
+* Belize City, BLZ
+* Belmopan, BLZ
+* Chetumal, MEX
+* George Town, CYM
+* Liberia, CRI
+* Puerto Barrios, GTM
+* Managua, NIC
+* San Andrés, COL
+* San Salvador, SLV
+* Tegucigalpa, HND
+
 ### w090n20
 
-Eastern Gulf Coast, western Cuba
+Eastern U.S. Gulf Coast, western Cuba
 
 * Cancún, ROO, MEX
 * Havana, CUB
@@ -187,7 +209,7 @@ Eastern Gulf Coast, western Cuba
 
 ### w090n30
 
-US South
+U.S. South
 
 * Atlanta, GA, USA
 * Birmingham, AL, USA
@@ -231,15 +253,40 @@ Western James Bay
 * Fort Severn, ON, CAN
 * Moosonee, ON, CAN
 
+### w080n00
+
+Eastern Panama, Darién Gap, northwestern South America (north of the Equator)
+
+* Barinas, VEN
+* Bogotá, COL
+* Colón, PAN
+* Esmeraldas, ECU
+* Medellín, COL
+* Panama City, PAN
+
+### w080n10
+
+Central Caribbean, western Spanish Main
+
+* Barranquilla, COL
+* Cartagena de Indias, COL
+* Guantánamo Bay, CUB (U.S. naval base)
+* Kingston, JAM
+* La Vega, DOM
+* Montego Bay, JAM
+* Port-au-Prince, HTI
+* Santa Marta, COL
+* Santiago, DOM
+
 ### w080n20
 
 Bahamas, Eastern Cuba, Turks and Caicos Islands
 
-* Holguín, CU
-* Las Tunas, CU
+* Holguín, CUB
+* Las Tunas, CUB
 * Nassau, BHS
 * Providenciales, TCA
-* Santa Clara, CU
+* Santa Clara, CUB
 
 
 ### w080n30
@@ -278,6 +325,31 @@ Eastern James Bay
 * Inukjuak, QC, CAN
 * La Grande Rivière, QC, CAN
 * Umiujaq, NU, CAN
+
+### w070n10
+
+Eastern Caribbean, eastern Spanish Main
+
+* Basseterre, KNA
+* Brades, MSR
+* Caracas, VEN
+* Castries, LCA
+* Charlotte Amalie, VIR
+* Fort-de-France, MTQ
+* Gustavia, BLM
+* Kingstown, VCT
+* Marigot, MAF
+* Oranjestad, ABW
+* Philipsburg, SXM
+* Pointe-à-Pitre, GLP
+* Road Town, VGB
+* Roseau, DMA
+* San Fernando, TTO
+* San Juan, PRI
+* St. George's, GRD
+* St. John's, ATG
+* Santo Domingo, DOM
+* The Valley, AIA
 
 ### w070n30
 
