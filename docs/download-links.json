@@ -1,4 +1,10 @@
 {
+  "w020n60": {
+    "name": "fgfs-canada-us-scenery-w020n60-20231018.tar",
+    "date": "20231018",
+    "url": "https://www.dropbox.com/scl/fi/lh8hjawq6sm2k8azdb09i/fgfs-canada-us-scenery-w020n60-20231018.tar?rlkey=0bajzx40gb6y9o302yfh6tgy4&dl=0",
+    "size": 128972800
+  },
   "w030n60": {
     "name": "fgfs-canada-us-scenery-w030n60-20231017.tar",
     "date": "20231017",
@@ -10,6 +16,12 @@
     "date": "20231017",
     "url": "https://www.dropbox.com/scl/fi/7bioax1f950nz1bri2sdp/fgfs-canada-us-scenery-w030n70-20231017.tar?rlkey=fy0660q6fymo1x140seh7m0er&dl=0",
     "size": 251822080
+  },
+  "w030n80": {
+    "name": "fgfs-canada-us-scenery-w030n80-20231018.tar",
+    "date": "20231018",
+    "url": "https://www.dropbox.com/scl/fi/twx3s8kpb0aodz2c2zwn3/fgfs-canada-us-scenery-w030n80-20231018.tar?rlkey=0mmgsfgyx6bhlv3q2uqw4tt14&dl=0",
+    "size": 24739840
   },
   "w040n60": {
     "name": "fgfs-canada-us-scenery-w040n60-20231015.tar",
@@ -210,10 +222,10 @@
     "size": 3190968320
   },
   "w090n40": {
-    "name": "fgfs-canada-us-scenery-w090n40-20230720.tar",
-    "date": "20230720",
-    "url": "https://www.dropbox.com/s/f69o0r4haeuuj2o/fgfs-canada-us-scenery-w090n40-20230720.tar?dl=1",
-    "size": 2397603840
+    "name": "fgfs-canada-us-scenery-w090n40-20231018.tar",
+    "date": "20231018",
+    "url": "https://www.dropbox.com/scl/fi/ejdby5lc83072wriro2wn/fgfs-canada-us-scenery-w090n40-20231018.tar?rlkey=ifsd8mezjf9gidkjlz717yydr&dl=0",
+    "size": 1687490560
   },
   "w090n50": {
     "name": "fgfs-canada-us-scenery-w090n50-20230720.tar",
@@ -252,10 +264,10 @@
     "size": 530606080
   },
   "w100n30": {
-    "name": "fgfs-canada-us-scenery-w100n30-20230725.tar",
-    "date": "20230725",
-    "url": "https://www.dropbox.com/s/kmhianr0ayas9sz/fgfs-canada-us-scenery-w100n30-20230725.tar?dl=1",
-    "size": 2328719360
+    "name": "fgfs-canada-us-scenery-w100n30-20231018.tar",
+    "date": "20231018",
+    "url": "https://www.dropbox.com/scl/fi/nuaghwmkflvh01bef90lu/fgfs-canada-us-scenery-w100n30-20231018.tar?rlkey=bgnjztcv2d3bd1vetdu30htu8&dl=0",
+    "size": 1521592320
   },
   "w100n40": {
     "name": "fgfs-canada-us-scenery-w100n40-20230722.tar",
