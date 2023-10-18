@@ -141,8 +141,10 @@ TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/global-landcover
 
+# Change OSM_SOURCE_NAME to "planet" for non-North-American builds
 OSM_DIR=${INPUTS_DIR}/osm
-OSM_SOURCE=${OSM_DIR}/north-america-latest.osm.pbf
+OSM_SOURCE_NAME=north-america
+OSM_SOURCE=${OSM_DIR}/${OSM_SOURCE_NAME}-latest.osm.pbf
 OSM_PBF_CONF=config/osmconf.ini
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp # complete version is very slow
@@ -227,7 +229,7 @@ VENV=./venv/bin/activate
 # Top-level targets (assume elevations are already in place)
 #
 
-all: extract build construct publish
+all: extract build
 
 construct: scenery
 
@@ -333,7 +335,7 @@ build-clean: airports-clean landmass-clean layers-clean
 
 elevations: ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
 
-${ELEVATIONS_FLAG}:
+${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET}
 	rm -f ${ELEVATIONS_FLAG}
 	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -type f | xargs gdalchop ${WORK_DIR}/${DEM}
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
@@ -353,6 +355,11 @@ elevations-fit-force-all:
 
 elevations-clean:
 	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
+
+#${INPUTS_DIR}/FABDEM/Unpacked/${BUCKET}:
+#	wget -P ${INPUTS_DIR}/FABDEM/Downloads/ "https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/N60W030-N70W020_FABDEM_V1-2.zip"
+# work in progress
+
 
 #
 # Build the airport areas and objects

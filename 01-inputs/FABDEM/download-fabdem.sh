@@ -21,7 +21,7 @@ TEMPLATE='https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/N%02dW%03d-
 MIN_LAT=0
 MIN_LON=-180
 MAX_LAT=90
-MAX_LON=-30
+MAX_LON=-0
 
 lat=$MIN_LAT
 lon=$MIN_LON

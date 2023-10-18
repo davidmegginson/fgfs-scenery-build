@@ -17,9 +17,9 @@ Scenery download areas from west to east, south to north, with notable locations
 
 ### w140n50
 
-* Haida Gwaii, BC, CAN
+* Haida Gwaii, BC, Canada
 * Juneau, AK, USA
-* Prince Rupert, BC, CAN
+* Prince Rupert, BC, Canada
 
 ### w130n30
 
@@ -35,16 +35,29 @@ US Pacific Northwest and southern British Columbia
 
 * Portland, OR, USA
 * Seattle, WA, USA
-* Vancouver, BC, CAN
-* Victoria, BC, CAN
+* Vancouver, BC, Canada
+* Victoria, BC, Canada
 
 ### w130n50
 
 Northern British Columbia
 
-* Kamloops, BC, CAN
-* Prince George, BC, CAN
-* Terrance, BC, CAN
+* Kamloops, BC, Canada
+* Prince George, BC, Canada
+* Terrance, BC, Canada
+
+### w120n10
+
+Isla Socorro and surrounding islands
+
+* Isla Socorro, Mexico
+
+### w120n20
+
+Southern Baja Peninsula
+
+* Ciudad Constitución, BCS, Mexico
+* La Paz, BCS, Mexico
 
 ### w120n30
 
@@ -53,11 +66,11 @@ Grand Canyon, northern Baja California, and Southern California
 * Fresno, CA, USA
 * Las Vegas, NV, USA
 * Los Angeles, CA, USA
-* Mexicali, BCN, MEX
+* Mexicali, BCN, Mexico
 * Phoenix, AZ, USA
 * Reno, NV, USA
 * San Diego, CA, USA
-* Tijuana, BCN, MEX
+* Tijuana, BCN, Mexico
 * Tucson, AZ, USA
 
 ### w120n40
@@ -66,10 +79,10 @@ Southern Great Plains and US Rockies
 
 * Boise, ID, USA
 * Coeur D'Alene, ID, USA
-* Cranbrook, BC, CAN
+* Cranbrook, BC, Canada
 * Helena, MT, USA
-* Kelowna, BC, CAN
-* Lethbridge, AB, CAN
+* Kelowna, BC, Canada
+* Lethbridge, AB, Canada
 * Salt Lake City, UT, USA
 * Spokane, WA, USA
 
@@ -77,30 +90,30 @@ Southern Great Plains and US Rockies
 
 Alberta and the Canadian Rockies
 
-* Banff, AB, CAN
-* Calgary, AB, CAN
-* Edmonton, AB, CAN
-* Fort McMurray, AB, CAN
-* Jasper, AB, CAN
-* Vernon, BC, CAN
+* Banff, AB, Canada
+* Calgary, AB, Canada
+* Edmonton, AB, Canada
+* Fort McMurray, AB, Canada
+* Jasper, AB, Canada
+* Vernon, BC, Canada
 
 ### w110n20
 
-* Chihuahua, CHH, USA
+* Chihuahua, CHH, Mexico
 * Del Rio, TX, USA
-* Durango, DUR, MEX
-* Guadalajara, JAL, MEX
-* Mazatlán, SIN, MEX
-* Monterrey, NLE, MEX
-* Puerto Vallarta, JAL, MEX
-* Saltillo, COA, MEX
+* Durango, DUR, Mexico
+* Guadalajara, JAL, Mexico
+* Mazatlán, SIN, Mexico
+* Monterrey, NLE, Mexico
+* Puerto Vallarta, JAL, Mexico
+* Saltillo, COA, Mexico
 
 ### w110n30
 
 Eastern US/Mexican border, southern US Rockies
 
 * Albuquerque, NM, USA
-* Ciudad Juárez, CHH, MEX
+* Ciudad Juárez, CHH, Mexico
 * Denver, CO, USA
 * Dodge City, KS
 * El Paso, TX, USA
@@ -113,16 +126,26 @@ Cattle country
 * Billings, MT, USA
 * Bismarck, ND, USA
 * Cheyenne, WY, USA
-* Esteven, SK, CAN
+* Esteven, SK, Canada
 * Rapid City, SD, USA
 
 ### w110n50
 
 Canadian prairies (Great Plains)
 
-* Prince Albert, SK, CAN
-* Regina, SK, CAN
-* Saskatoon, SK, CAN
+* Prince Albert, SK, Canada
+* Regina, SK, Canada
+* Saskatoon, SK, Canada
+
+### w100n10
+
+Southern Mexico, western Guatemala
+
+* Acapulco, GRO, Mexico
+* Ciudad de Guatemala, Guatemala
+* Mexico City, MEX, Mexico
+* Tuxtla Gutiérrez, CHP, Mexico
+* Veracruz, VER, Mexico
 
 ### w100n20
 
@@ -130,9 +153,9 @@ Western Gulf Coast
 
 * Galveston, TX, USA
 * Houston TX, USA
-* Matamoros, TAM, MEX
+* Matamoros, TAM, Mexico
 * New Orleans, LA, USA
-* Reynosa, TAM, MEX
+* Reynosa, TAM, Mexico
 * San Antonio, TX, USA
 
 ### w100n30
@@ -157,53 +180,53 @@ US northern Great Plains, Lake Superior, and western Canadian Shield
 
 * Des Moines, IA, USA
 * Fargo, ND, USA
-* Kenora, ON, CAN
+* Kenora, ON, Canada
 * Minneapolis-Saint Paul, MN, USA
 * Omaha, NE, USA
 * Sioux Falls, SD, USA
-* Winnipeg, MB, CAN
+* Winnipeg, MB, Canada
 
 ### w100n50
 
 Northwestern Ontario and southern Manitoba (forest, Canadian Shield)
 
-* Churchill, MB, CAN
-* Gimli, MB, CAN
-* Sioux Lookout, ON, CAN
-* Thompson, MB, CAN
-* Winnipeg, MB, CAN
+* Churchill, MB, Canada
+* Gimli, MB, Canada
+* Sioux Lookout, ON, Canada
+* Thompson, MB, Canada
+* Winnipeg, MB, Canada
 
 ### w090n00
 
 Southern Central America
 
-* San José, CRI
-* Santiago, PAN
+* San José, Costa Rica
+* Santiago, Panama
 
 ### w090n10
 
 Western Central America and Cayman Islands
 
-* Belize City, BLZ
-* Belmopan, BLZ
-* Chetumal, MEX
-* George Town, CYM
-* Liberia, CRI
-* Puerto Barrios, GTM
-* Managua, NIC
-* San Andrés, COL
-* San Salvador, SLV
-* Tegucigalpa, HND
+* Belize City, Belize
+* Belmopan, Belize
+* Chetumal, Mexico
+* George Town, Cayman Islands
+* Liberia, Costa Rica
+* Puerto Barrios, Guatemala
+* Managua, Nicaragua
+* San Andrés, Colombia
+* San Salvador, El Salvador
+* Tegucigalpa, Honduras
 
 ### w090n20
 
 Eastern U.S. Gulf Coast, western Cuba
 
-* Cancún, ROO, MEX
-* Havana, CUB
+* Cancún, ROO, Mexico
+* Havana, Cuba
 * Key West, FL, USA
 * Miami, FL, USA
-* Mérida, YUC, MEX
+* Mérida, YUC, Mexico
 * Orlando, FL, USA
 * Tampa, FL, USA
 
@@ -232,61 +255,61 @@ Central Great Lakes, US Rust Belt (home of Oshkosh!)
 * Cleveland, OH, USA
 * Detroit, MI, USA
 * Green Bay, WI, USA
-* London, ON, CAN
+* London, ON, Canada
 * Madison, WI, USA
 * Marquette, MI, USA
 * Milwaukee, WI, USA
 * Oshkosh, WI, USA
 * Pittsburgh, PA, USA
-* Sudbury, ON, CAN
-* Thunder Bay, ON, CAN
-* Timmins, ON, CAN
-* Windsor, ON, CAN
+* Sudbury, ON, Canada
+* Thunder Bay, ON, Canada
+* Timmins, ON, Canada
+* Windsor, ON, Canada
 
 ### w090n50
 
 Western James Bay
 
-* Armstrong, ON, CAN
-* Attawapiskat, ON, CAN
-* Fort Albany, ON, CAN
-* Fort Severn, ON, CAN
-* Moosonee, ON, CAN
+* Armstrong, ON, Canada
+* Attawapiskat, ON, Canada
+* Fort Albany, ON, Canada
+* Fort Severn, ON, Canada
+* Moosonee, ON, Canada
 
 ### w080n00
 
 Eastern Panama, Darién Gap, northwestern South America (north of the Equator)
 
-* Barinas, VEN
-* Bogotá, COL
-* Colón, PAN
-* Esmeraldas, ECU
-* Medellín, COL
-* Panama City, PAN
+* Barinas, Venezuela
+* Bogotá, Colombia
+* Colón, Panama
+* Esmeraldas, Ecuador
+* Medellín, Colombia
+* Panama City, Panama
 
 ### w080n10
 
 Central West Indies, western Spanish Main
 
-* Barranquilla, COL
-* Cartagena de Indias, COL
-* Guantánamo Bay, CUB (U.S. naval base)
-* Kingston, JAM
-* La Vega, DOM
-* Montego Bay, JAM
-* Port-au-Prince, HTI
-* Santa Marta, COL
-* Santiago, DOM
+* Barranquilla, Colombia
+* Cartagena de Indias, Colombia
+* Guantánamo Bay, Cuba (U.S. naval base)
+* Kingston, Jamaica
+* La Vega, Dominican Republic
+* Montego Bay, Jamaica
+* Port-au-Prince, Haiti
+* Santa Marta, Colombia
+* Santiago, Dominican Republic
 
 ### w080n20
 
 Bahamas, Eastern Cuba, Turks and Caicos Islands
 
-* Holguín, CUB
-* Las Tunas, CUB
-* Nassau, BHS
-* Providenciales, TCA
-* Santa Clara, CUB
+* Holguín, Cuba
+* Las Tunas, Cuba
+* Nassau, Bahamas
+* Providenciales, Turks and Caicos Islands
+* Santa Clara, Cuba
 
 
 ### w080n30
@@ -298,7 +321,7 @@ US Mid Atlantic Seaboard (many U.S. Civil War battlefields)
 * Philadelphia, PA, USA
 * Raleigh, NC, USA
 * Richmond, VA, USA
-* Washington, DC, USA (Capital of the US)
+* Washington, DC, USA
 * Wilmington, DE, USA
 
 ### w080n40
@@ -308,96 +331,132 @@ US North Atlantic Seaboard, lower Great Lakes, St Lawrence River
 * Boston, MA, USA
 * Burlington, VT, USA
 * Hartford, CT, USA
-* Montreal, QC, CAN
+* Montreal, QC, Canada
 * Newark, NJ, USA
 * New York, NY, USA
-* Ottawa, ON, CAN (Capital of Canada)
+* Ottawa, ON, Canada
 * Pittsburgh, PA, USA (shared with w090n40)
 * Portland, ME, USA
 * Providence, RI, USA
-* Quebec, QC, CAN
-* Toronto, ON, CAN
+* Quebec, QC, Canada
+* Toronto, ON, Canada
 
 ### w080n50
 
 Eastern James Bay
 
-* Inukjuak, QC, CAN
-* La Grande Rivière, QC, CAN
-* Umiujaq, NU, CAN
+* Inukjuak, QC, Canada
+* La Grande Rivière, QC, Canada
+* Umiujaq, NU, Canada
 
 ### w070n10
 
 Eastern West Indies, eastern Spanish Main
 
-* Basseterre, KNA
-* Brades, MSR
-* Caracas, VEN
-* Castries, LCA
-* Charlotte Amalie, VIR
-* Fort-de-France, MTQ
-* Gustavia, BLM
-* Kingstown, VCT
-* Marigot, MAF
-* Oranjestad, ABW
-* Philipsburg, SXM
-* Pointe-à-Pitre, GLP
-* Road Town, VGB
-* Roseau, DMA
-* San Fernando, TTO
-* San Juan, PRI
-* St. George's, GRD
-* St. John's, ATG
-* Santo Domingo, DOM
-* The Valley, AIA
+* Basseterre, St. Kitts and Nevis
+* Brades, Montserrat
+* Caracas, Venezuela
+* Castries, St. Lucia
+* Charlotte Amalie, U.S. Virgin Islands
+* Fort-de-France, Martinique
+* Gustavia, Saint Barthélemy
+* Kingstown, St. Vincent and the Grenadines
+* Marigot, Saint Martin
+* Oranjestad, Aruba
+* Philipsburg, Sint Maarten
+* Pointe-à-Pitre, Guadeloupe
+* Road Town, British Virgin Islands
+* Roseau, Dominica
+* San Fernando, Trinidad and Tobego
+* San Juan, Puerto Rico
+* St. George's, Grenada
+* St. John's, Antiga and Barbuda
+* Santo Domingo, Dominican Republic
+* The Valley, Anguila
 
 ### w070n30
 
 Bermuda
 
-* St George's, BMU
+* St George's, Bermuda
 
 ### w070n40
 
 Maine and Canadian Maritimes
 
 * Bangor, ME, USA
-* Charlottetown, PE, CAN
-* Fredericton, NB, CAN
-* Gaspé, QC, CAN
-* Halifax, NS, CAN
-* Moncton, NB, CAN
-* Sydney, NS, CAN
+* Charlottetown, PE, Canada
+* Fredericton, NB, Canada
+* Gaspé, QC, Canada
+* Halifax, NS, Canada
+* Moncton, NB, Canada
+* Sydney, NS, Canada
 
 ### w070n50
 
 Labrador and northeastern Quebec
 
-* Churchill Falls, NL, CAN
-* Goose Bay, NL, CAN
-* Sept-Îles, QC, CAN
+* Churchill Falls, NL, Canada
+* Goose Bay, NL, Canada
+* Sept-Îles, QC, Canada
 
 ### w060n10
 
 Barbados
 
-* Bridgetown, BRB
+* Bridgetown, Barbados
 
 ### w060n40
 
 Newfoundland and St Pierre-Miquelon (France)
 
-* Gander, NL, CAN
-* St. John's, NL, CAN
-* Saint-Pierre, PM, FRA
+* Gander, NL, Canada
+* St. John's, NL, Canada
+* Saint-Pierre and Miquelon, France
 
 ### w060n50
 
 Northern Newfoundland and eastern Labrador
 
-* Cartwright, NL, CAN
-* Fox Harbour, NL, CAN
-* Lourdes-de-Blanc-Sablon, QC, CAN
+* Cartwright, NL, Canada
+* Fox Harbour, NL, Canada
+* Lourdes-de-Blanc-Sablon, QC, Canada
+
+### w060n60
+
+Southwestern Greenland
+
+* Aasiaat, Greenland
+* Ilulissat, Greenland
+* Maniitsoq, Greenland
+* Nuuk, Greenland
+* Kangerlussuaq, Greenland
+* Sisimiut, Greenland
+
+### w050n60
+
+Southern Greenland
+
+* Narsarsuaq, Greenland
+* Paamiut, Greenland
+
+### w050n50
+
+Southern tip of Greenland
+
+### w040n60
+
+Southeastern Greenland
+
+* Kulusuk, Greenland
+
+### w030n60
+
+Southeastern Greenland and western Iceland
+
+* Ísafjörður, Iceland
+* Reykjavik, Iceland
+
 
 ## Scenery models and osm2city
 
