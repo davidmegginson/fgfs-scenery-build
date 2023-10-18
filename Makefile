@@ -141,10 +141,8 @@ TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/global-landcover
 
-# Change OSM_SOURCE_NAME to "planet" for non-North-American builds
 OSM_DIR=${INPUTS_DIR}/osm
-OSM_SOURCE_NAME=north-america
-OSM_SOURCE=${OSM_DIR}/${OSM_SOURCE_NAME}-latest.osm.pbf
+OSM_SOURCE=${OSM_DIR}/planet-latest.osm.pbf
 OSM_PBF_CONF=config/osmconf.ini
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp # complete version is very slow
@@ -281,8 +279,10 @@ ${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
 
 osm-extract: ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE}
 
+osm-extract-rebuild: osm-extract-clean osm-extract
+
 osm-extract-clean:
-	rm -rf ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE}
+	rm -rf ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE} ${OSM_PBF}
 
 ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
 	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
