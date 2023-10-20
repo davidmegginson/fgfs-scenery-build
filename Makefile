@@ -126,6 +126,7 @@ MIN_FEATURE_AREA=0.00001 # 100m x 100m (for landcover and OSM area features)
 # Clip extents
 # Raster extent is padded one degree in each direction, for more-consistent polygons
 #
+QUADRANT_EXTENT=-180,0,0,90
 RASTER_CLIP_EXTENT=$(shell expr ${MIN_LON} - 1) $(shell expr ${MAX_LAT} + 1) $(shell expr ${MAX_LON} + 1)  $(shell expr ${MIN_LAT} - 1)
 SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
 LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
@@ -142,7 +143,8 @@ AIRPORTS_SOURCE=${INPUTS_DIR}/airports/apt.dat
 LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/global-landcover
 
 OSM_DIR=${INPUTS_DIR}/osm
-OSM_SOURCE=${OSM_DIR}/planet-latest.osm.pbf
+OSM_PLANET=${OSM_DIR}/planet-latest.osm.pbf
+OSM_SOURCE=${OSM_DIR}/hemisphere-nw.osm.pbf
 OSM_PBF_CONF=config/osmconf.ini
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp # complete version is very slow
@@ -205,6 +207,8 @@ BUILD_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
 FLAGS_BASE=./flags
 FLAGS_DIR=${FLAGS_BASE}/${BUCKET}
 
+NUDGE=0
+
 OSM_SHAPEFILES_EXTRACTED_FLAG=${FLAGS_DIR}/osm-shapefiles-extracted.flag
 
 LANDCOVER_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/landcover-shapefiles-prepared.flag
@@ -229,6 +233,8 @@ VENV=./venv/bin/activate
 
 all: extract build
 
+all-rebuild: extract-rebuild rebuild scenery-rebuild
+
 construct: scenery
 
 reconstruct: scenery-rebuild
@@ -242,6 +248,10 @@ publish: archive publish-cloud
 
 extract: landmass-extract landcover-extract osm-extract airports-extract
 
+extract-clean: landmass-extract-clean landcover-extract-clean osm-extract-clean airports-extract-clean
+
+extract-rebuild: extract-clean extract
+
 #
 # Extract landmass (single file; no flag needed)
 #
@@ -251,7 +261,7 @@ landmass-extract: ${LANDMASS_SHAPEFILE}
 landmass-extract-clean:
 	rm -rfv  ${LANDMASS_SHAPEFILE}
 
-landmass-extract-rebuild: landmass-prepare-clean landmass-prepare
+landmass-extract-rebuild: landmass-extract-clean landmass-extract
 
 ${LANDMASS_SHAPEFILE}: ${LANDMASS_SOURCE}
 	ogr2ogr -spat ${SPAT} ${LANDMASS_SHAPEFILE} ${LANDMASS_SOURCE}
@@ -283,6 +293,13 @@ osm-extract-rebuild: osm-extract-clean osm-extract
 
 osm-extract-clean:
 	rm -rf ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE} ${OSM_PBF}
+
+osm-quadrant: ${OSM_SOURCE}
+
+# extract the quadrant (e.g. north half of western hemisphere) to speed things up
+${OSM_SOURCE}: ${OSM_PLANET}
+	@echo -e "\nExtracting OSM PBF for quadrant ${QUADRANT_EXTENT}..."
+	osmconvert $< -v -b=${QUADRANT_EXTENT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
 
 ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
 	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
@@ -486,7 +503,7 @@ osm-clean:
 ########################################################################
 
 scenery: extract build
-	tg-construct --ignore-landmass --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
 
 scenery-clean:
