@@ -10,7 +10,7 @@
 #
 # 1. Important Makefile configuration variables
 #
-# BUCKET - **required** the bucket being build (e.g. w080n40)
+# BUCKET - **required** the bucket being built (e.g. w080n40)
 #
 # MIN_LON, MIN_LAT, MAX_LON, MAX_LAT - the bottom left and top right
 # corners of the area being built (e.g. -80 40 -70 50); default to the
@@ -40,40 +40,41 @@
 #   extract OSM per-feature shapefiles for a bucket
 #
 #
-# 2.3. Data-building targets
+# 2.2. Data-preparation targets
 #
 # Build the TerraGear input files for scenery, working at the latlon
 # level (can build an area smaller than a full bucket).
 #
-# build
-#   run *all* build targets for the requested area.
+# Set the DEM Makefile variable to "FABDEM" (default) or "SRTM-3" to
+# choose the data source (default is SRTM-3 north of 80N; FABDEM
+# otherwise).
 #
-# landmass
-#   build the landmass mask for the requested area.
+# prepare
+#   run *all* prepare targets for the requested area.
 #
-# airports
-#   build the airport areas and objects for the requested area.
+# elevations-prepare
+#   prepare the elevation data from the *.hgt or *.tif files in INPUT_DIR 
 #
-# layers
-#   build the landcover and OSM layers for the requested area.
+# landmass-prepare
+#   prepare the landmass mask for the requested area.
 #
-# 2.3.1 Elevation (DEM) targets
+# airports-prepare
+#   prepare the airport areas and objects for the requested area.
 #
-# The elevation-related targets should be run rarely, and may need to
-# use an older version of TerraGear. Set the DEM Makefile variable to
-# "FABDEM" (default) or "SRTM-3" to choose the data source.
+# landcover-prepare
+#   prepare the background landcover layers for the requested area.
 #
-# elevations
-#   build the elevation data from the *.hgt or *.tif files in INPUT_DIR 
+# osm-prepare
+#   prepare the foreground OpenStreetMap layers for the requested area.
 #
-# 2.4. Scenery-construction targets
+# 2.3. Scenery-construction targets
 #
 # This can work on a 1x1 deg area or larger.
 #
 # scenery
 #   build scenery for the requested area.
 #
-# 2.5. Publishing targets
+# 2.4. Publishing targets
 #
 # Publish a 10x10 deg bucket as a tarball.
 #
@@ -174,7 +175,7 @@ OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 #
-# Build areas to include
+# Prepare areas to include
 #
 
 DEM_AREAS=${DEM}
@@ -198,7 +199,7 @@ osm-sand-natural osm-secondary-highway osm-trunk-highway	\
 osm-vineyard-landuse osm-water-natural osm-water-water		\
 osm-wetland-natural
 
-BUILD_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
+PREPARE_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
 
 #
 # Build flags
@@ -231,9 +232,9 @@ VENV=./venv/bin/activate
 # Top-level targets (assume elevations are already in place)
 #
 
-all: extract build
+all: extract prepare
 
-all-rebuild: extract-rebuild rebuild scenery-rebuild
+all-rebuild: extract-rebuild prepare-rebuild scenery-rebuild
 
 construct: scenery
 
@@ -272,10 +273,10 @@ ${LANDMASS_SHAPEFILE}: ${LANDMASS_SOURCE}
 
 landcover-extract: ${LANDCOVER_SHAPEFILE}
 
-landcover-extract-rebuild: landcover-extract-clean landcover-extract
-
 landcover-extract-clean:
 	rm -fv ${LANDCOVER_SHAPEFILE}
+
+landcover-extract-rebuild: landcover-extract-clean landcover-extract
 
 ${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
 	@echo -e "\nExtracting background landcover for ${BUCKET}..."
@@ -289,11 +290,12 @@ ${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
 
 osm-extract: ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE}
 
-osm-extract-rebuild: osm-extract-clean osm-extract
-
 osm-extract-clean:
 	rm -rf ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE} ${OSM_PBF}
 
+osm-extract-rebuild: osm-extract-clean osm-extract
+
+# convenience target for testing
 osm-quadrant: ${OSM_SOURCE}
 
 # extract the quadrant (e.g. north half of western hemisphere) to speed things up
@@ -336,21 +338,26 @@ airports-extract-rebuild: airports-extract-clean airports-extract
 
 
 ########################################################################
-# 2. Build (excludes elevations; must be done manually
+# 2. Prepare
 ########################################################################
 
-build: elevations airports landmass layers
+prepare: elevations-prepare airports-prepare landmass-prepare landcover-prepare osm-prepare
 
-rebuild: airports-rebuild landmass-rebuild layers-rebuild
+prepare-clean: elevations-prepare-clean airports-prepare-clean landmass-prepare-clean landcover-prepare-clean osm-prepare-clean
 
-build-clean: airports-clean landmass-clean layers-clean
+prepare-rebuild: prepare-clean prepare
 
 #
-# Build elevation data from the DEMs
+# Prepare elevation data from the DEMs
 # Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations: ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
+elevations-prepare: ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
+
+elevations-prepare-clean:
+	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
+
+elevations-prepare-rebuild: elevations-prepare-clean elevations-prepare
 
 ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET}
 	rm -f ${ELEVATIONS_FLAG}
@@ -362,27 +369,16 @@ ${ELEVATIONS_FIT_FLAG}: ${ELEVATIONS_FLAG}
 	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FIT_FLAG}
 
-elevations-rebuild: elevations-clean elevations
-
-elevations-fit-all:
-	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
-
-elevations-fit-force-all:
-	terrafit ${WORK_DIR}/${DEM} -f ${TERRAFIT_OPTS} # refit every time
-
-elevations-clean:
-	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
-
-#${INPUTS_DIR}/FABDEM/Unpacked/${BUCKET}:
-#	wget -P ${INPUTS_DIR}/FABDEM/Downloads/ "https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/N60W030-N70W020_FABDEM_V1-2.zip"
-# work in progress
-
-
 #
-# Build the airport areas and objects
+# Prepare the airport areas and objects
 #
 
-airports: ${AIRPORTS_FLAG} elevations
+airports-prepare: ${AIRPORTS_FLAG} elevations-prepare
+
+airports-prepare-clean:
+	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/ ${AIRPORTS_FLAG}
+
+airports-prepare-rebuild: airports-prepare-clean airports-prepare
 
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	rm -f ${AIRPORTS_FLAG}
@@ -390,54 +386,36 @@ ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	  --work=${WORK_DIR} --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
-airports-clean:
-	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/ ${AIRPORTS_FLAG}
-
-airports-rebuild: airports-clean airports
-
-
 #
-# Build the default landmass
+# Prepare the default landmass
 #
 
-landmass: ${LANDMASS_FLAG}
+landmass-prepare: ${LANDMASS_FLAG}
+
+landmass-prepare-clean:
+	rm -rvf ${WORK_DIR}/Default/${BUCKET}/ ${LANDMASS_FLAG}
+
+landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
 
 ${LANDMASS_FLAG}: ${LANDMASS_SHAPEFILE}
 	rm -f ${LANDMASS_FLAG}
 	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${LANDMASS_SHAPEFILE}
 	mkdir -p ${FLAGS_DIR} && touch ${LANDMASS_FLAG}
 
-landmass-clean:
-	rm -rvf ${WORK_DIR}/Default/${BUCKET}/ ${LANDMASS_FLAG}
-
-landmass-rebuild: landmass-clean landmass
-
 #
-# OSM and landcover layers
-# The configuration for these is in layers.csv
+# Prepare the background landcover layers
 #
 
-# Build any layers that don't exist for this bucket
-layers: areas lines
+landcover-prepare: ${LANDCOVER_LAYERS_FLAG}
 
-# Remove all layers for this bucket
-layers-clean:
-	rm -rfv ${WORK_DIR}/osm-*/${BUCKET}/ ${WORK_DIR}/lc-*/${BUCKET}/ ${LANDCOVER_LAYERS_FLAG} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
+landcover-prepare-clean:
+	rm -rfv ${WORK_DIR}/lc-*/${BUCKET}/ ${LANDCOVER_LAYERS_FLAG}
 
-# Rebuild all layers for this bucket
-layers-rebuild: layers-clean areas lines
-
-# Build area layers
-areas: landcover-areas osm-areas
-
-# Build line layers
-lines: osm-lines
-
-landcover-areas: ${LANDCOVER_LAYERS_FLAG}
+landcover-prepare-rebuild: landcover-prepare-clean landcover-prepare
 
 ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.tsv
 	rm -f $@
-	@echo -e "\nBuilding landcover area layers...\n"
+	@echo -e "\nPrepareing landcover area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
@@ -447,14 +425,22 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
 
-landcover-clean:
-	rm -rfv ${WORK_DIR}/lc-*/${BUCKET}/ ${LANDCOVER_LAYERS_FLAG}
+#
+# Prepare the foreground OSM layers
+#
 
-osm-areas: ${OSM_AREA_LAYERS_FLAG}
+osm-prepare: ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
+
+osm-prepare-clean:
+	rm -rfv ${WORK_DIR}/osm-*/${BUCKET} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
+
+osm-prepare-rebuild: osm-prepare-clean osm-prepare
+
+osm-areas-prepare: ${OSM_AREA_LAYERS_FLAG}
 
 ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
-	@echo -e "\nBuilding OSM area layers...\n"
+	@echo -e "\nPrepareing OSM area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
@@ -464,11 +450,11 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
 
-osm-lines: ${OSM_LINE_LAYERS_FLAG}
+osm-lines-prepare: ${OSM_LINE_LAYERS_FLAG}
 
 ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
-	@echo -e "\nBuilding OSM line layers...\n"
+	@echo -e "\nPrepareing OSM line layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
 	    echo -e "\nTrying $$name..."; \
@@ -481,30 +467,14 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 osm-clean:
 	rm -rfv ${WORK_DIR}/osm-*/${BUCKET} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
-#
-# Special handling for cliffs (this is wrong right now)
-#
-
-#cliffs:
-#	cliff-decode ${DECODE_OPTS} ${WORK_DIR}/SRTM-3 ${DATA_DIR}/shapefiles/${BUCKET}/osm-cliff-natural.shp
-
-#cliffs-clean:
-#	rm -vf ${WORK_DIR}/SRTM-3/${BUCKET}/*/*.cliffs
-
-#cliffs-rebuild: cliffs-clean cliffs
-
-# optional step (probably not worth it for non-mountainous terrain)
-#rectify-cliffs:
-#	rectify_height ${LATLON_OPTS} --work-dir=${WORK_DIR} --height-dir=SRTM-3 --min-dist=100
-
 
 ########################################################################
-# 4. Construct
+# 3. Construct
 ########################################################################
 
-scenery: extract build
+scenery: extract prepare
 	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${BUILD_AREAS}
+	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
@@ -513,6 +483,12 @@ scenery-rebuild: scenery-clean scenery
 
 static-files:
 	cp -v ${STATIC_DIR}/* ${SCENERY_DIR}
+
+
+
+########################################################################
+# 4. Publish
+########################################################################
 
 #
 # Generate custom threshold and navdata files for modified airports
