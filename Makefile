@@ -174,6 +174,8 @@ OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
+echo2: ${OSM_PBF}
+
 #
 # Prepare areas to include
 #
@@ -295,8 +297,12 @@ osm-extract-clean:
 
 osm-extract-rebuild: osm-extract-clean osm-extract
 
-# convenience target for testing
+# convenience targets for testing
 osm-quadrant: ${OSM_SOURCE}
+
+osm-pbf: ${OSM_PBF}
+
+osm-areas-shapefile: ${OSM_AREAS_SHAPEFILE}
 
 # extract the quadrant (e.g. north half of western hemisphere) to speed things up
 ${OSM_SOURCE}: ${OSM_PLANET}
