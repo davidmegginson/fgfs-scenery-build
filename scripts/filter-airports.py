@@ -1,5 +1,5 @@
 """ Filter airports in one or more apt.dat-format files for a specific bucket
-
+n
 Example:
 
     zcat apt.dat.gz | python3 filter-airports.py w080n40 > w080n40/apt.dat
@@ -20,6 +20,8 @@ def filter_airports(bounds, input, output):
 
     """
 
+    airports_seen = set()
+
     current_airport = ""
     in_bounds = False
 
@@ -36,7 +38,6 @@ def filter_airports(bounds, input, output):
             if (bounds[0] <= lon <= bounds[2]) and (bounds[1] <= lat <= bounds[3]):
                 in_bounds = True
 
-
     for i, line in enumerate(input):
 
         tokens = re.split(r'\s+', line)
@@ -47,14 +48,16 @@ def filter_airports(bounds, input, output):
             print(line, end='', file=output)
             continue
 
-        elif i == 1 and type in ('1000',):
+        elif i <= 1 and type in ('1000',):
             print(line, end='', file=output)
             continue
 
         # new airport
         elif type in ('1', '16', '17'):
-            if in_bounds and current_airport:
+            ident = tokens[4]
+            if in_bounds and current_airport and ident not in airports_seen:
                 print(current_airport, end='', file=output)
+                airports_seen.add(ident)
             current_airport = ''
             in_bounds = False
 

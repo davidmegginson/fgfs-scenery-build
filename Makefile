@@ -331,8 +331,7 @@ airports-extract: ${AIRPORTS} # single file - no flag needed
 
 ${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
-	. ${VENV} && cat ${AIRPORTS_SOURCE} \
-	| python3 ${SCRIPT_DIR}/downgrade-apt.py \
+	. ${VENV} && python3 ${SCRIPT_DIR}/downgrade-apt.py  ${INPUTS_DIR}/airports/custom/*.dat ${AIRPORTS_SOURCE} \
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
 	> $@
 
