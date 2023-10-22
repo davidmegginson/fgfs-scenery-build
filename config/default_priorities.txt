@@ -5,17 +5,6 @@ Ocean    # Second, the sliver type
 Hole			hole	# Leave area completely empty
 Freeway			road
 Road			road
-Road-Motorway       road
-Road-Trunk          road
-Road-Residential	road
-Road-Primary	    road
-Road-Secondary	    road
-Road-Tertiary	    road
-Road-Service	    road
-Road-Pedestrian	    road
-Road-Steps          road
-Road-Unclassified   road
-
 Railroad		road
 Asphalt			road
 Airport			other
@@ -25,7 +14,6 @@ DryLake			lake
 Reservoir		lake
 IntermittentLake	lake
 Stream			stream
-River			stream
 IntermittentStream	stream
 Watercourse		stream
 Canal			stream
@@ -36,7 +24,6 @@ PackIce			other	# Water with ice packs
 PolarIce		other
 Ocean			ocean
 Estuary			ocean
-Fishing			other
 Construction		other
 Port			other
 Dump			other	# Dump Site
