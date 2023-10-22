@@ -39,7 +39,7 @@ osm-park-leisure	yes	area	Greenspace	-	leisure='park'
 osm-pier-man_made-areas	yes	line	BarrenCover	10	man_made='pier'
 osm-pier-man_made-lines	yes	area	BarrenCover	-	man_made='pier'
 osm-primary-highway	no	line	ShrubGrassCover	30	highway in ('primary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-primary-highway	yes	line	Road-Primary	10	highway in ('primary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-primary-highway	yes	line	Road	10	highway in ('primary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-quarry-landuse	yes	area	OpenMining	-	landuse='quarry'
 osm-railway-railway	no	line	ShrubGrassCover	9	railway in ('rail') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
 osm-railway-railway	yes	line	Railroad	3	railway in ('rail') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes') and usage in ('main', 'branch')
@@ -52,9 +52,9 @@ osm-rock-natural	yes	area	Rock	-	natural in ('bare_rock', 'scree', 'stone')
 osm-sand-natural	yes	area	Sand	-	natural in ('beach', 'dune', 'sand')
 osm-scrub-natural	yes	area	Scrub	-	natural in ('fell', 'heath', 'moor', 'scrub')
 osm-secondary-highway	no	line	ShrubGrassCover	16	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-secondary-highway	yes	line	Road-Secondary	8	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-secondary-highway	yes	line	Road	8	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-trunk-highway	no	line	ShrubGrassCover	30	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-trunk-highway	yes	line	Road-Trunk	10	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-trunk-highway	yes	line	Road	10	highway in ('trunk') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-tundra-natural	yes	area	HerbTundra	-	natural in ('tundra')
 osm-vineyard-landuse	yes	area	Vineyard	-	landuse='vineyard'
 osm-water-natural	yes	area	Lake	-	natural in ('bay', 'strait', 'shoal', 'water')
