@@ -1,7 +1,5 @@
 Name	Include	Type	Material	Line width	Query
 osm-abandoned-railway	yes	line	ShrubGrassCover	9	railway in ('abandoned') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-airfield-aeroway	yes	area	Airport	-	aeroway='airfield'
-osm-airfield-military	yes	area	Airport	-	military='airfield'
 osm-breakwater-man_made-areas	yes	area	BarrenCover	-	man_made='breakwater'
 osm-breakwater-man_made-lines	yes	line	BarrenCover	10	man_made='breakwater'
 osm-brownfield-landuse	yes	area	ShrubGrassCover	-	landuse='brownfield'
