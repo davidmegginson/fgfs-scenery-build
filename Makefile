@@ -357,7 +357,7 @@ prepare-rebuild: prepare-clean prepare
 # Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations-prepare: ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
+elevations-prepare: ${ELEVATIONS_FIT_FLAG}
 
 elevations-prepare-clean:
 	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
@@ -366,7 +366,7 @@ elevations-prepare-rebuild: elevations-prepare-clean elevations-prepare
 
 ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET}
 	rm -f ${ELEVATIONS_FLAG}
-	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -type f | xargs gdalchop ${WORK_DIR}/${DEM}
+	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -name '*.tif' -o -name '*.hgt' | xargs gdalchop ${WORK_DIR}/${DEM}
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
 ${ELEVATIONS_FIT_FLAG}: ${ELEVATIONS_FLAG}
