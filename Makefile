@@ -329,7 +329,7 @@ ${OSM_AREAS_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
 
 airports-extract: ${AIRPORTS} # single file - no flag needed
 
-${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}
+${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}  $(wildcard ${INPUTS_DIR}/airports/custom/*.dat) ${SCRIPT_DIR}/downgrade-apt.py ${SCRIPT_DIR}/filter-airports.py
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
 	. ${VENV} && python3 ${SCRIPT_DIR}/downgrade-apt.py  ${INPUTS_DIR}/airports/custom/*.dat ${AIRPORTS_SOURCE} \
 	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
@@ -499,15 +499,17 @@ static-files:
 # Generate custom threshold and navdata files for modified airports
 #
 
-thresholds: ${VENV}
+thresholds: ${VENV} ${AIRPORTS}
 	. ${VENV} && python3 ${SCRIPT_DIR}/gen-thresholds.py ${SCENERY_DIR}/Airports ${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 thresholds-clean:
 	rm -rf ${SCENERY_DIR}/Airports
 
-navdata:
+navdata: ${SCENERY_DIR}/NavData/apt/${BUCKET}.apt
+
+${SCENERY_DIR}/NavData/apt/${BUCKET}.apt: ${AIRPORTS}
 	mkdir -p ${SCENERY_DIR}/NavData/apt
-	cp -v ${DATA_DIR}/airports/${BUCKET}/apt.dat ${SCENERY_DIR}/NavData/apt/${BUCKET}.dat
+	cp -v ${AIRPORTS} ${SCENERY_DIR}/NavData/apt/${BUCKET}.dat
 
 
 archive: static-files navdata thresholds-clean thresholds
