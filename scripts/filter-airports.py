@@ -48,7 +48,7 @@ def filter_airports(bounds, input, output):
             print(line, end='', file=output)
             continue
 
-        elif i <= 1 and type in ('1000',):
+        elif i <= 2 and type in ('1000',):
             print(line, end='', file=output)
             continue
 

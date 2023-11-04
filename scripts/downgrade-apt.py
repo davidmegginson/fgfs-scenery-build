@@ -2,12 +2,15 @@
 
 import re, sys
 
+OPENING = """I"""
+
 VERSION = """1000 version (downgraded) - Copyright © 2013, Robin A. Peel (robin@x-plane.com).   This data is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.  You should have received a copy of the GNU General Public License along with this program ("AptNavGNULicence.txt"); if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA."""
 
 END = """99"""
 
 
 def start_apt(output):
+    print(OPENING, file=output)
     print(VERSION, file=output)
 
 def end_apt(output):
@@ -27,7 +30,7 @@ def process_apt_file(input, output):
 
         # computer type
         if i == 0 and type in ('I', 'A',):
-            pass
+            continue
 
         # version and copyright
         elif i == 1 and type in ('1000', '1050', '1100',):
