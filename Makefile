@@ -191,15 +191,29 @@ lc-herbaceous-tree-shrub lc-sparse-vegetation lc-cropland		\
 lc-paddy-field lc-cropland-other-vegetation lc-mangrove lc-wetland	\
 lc-gravel-rock lc-sand lc-urban lc-snow-ice
 
-OSM_AREAS=osm-abandoned-railway osm-airfield-aeroway		\
-osm-airfield-military osm-cemetery-landuse osm-cliff-natural	\
-osm-desert-natural osm-glacier-natural osm-golf-sport		\
-osm-landfill-landuse osm-lava-natural osm-line-power		\
-osm-motorway-highway osm-orchard-landuse osm-primary-highway	\
-osm-quarry-landuse osm-railway-railway osm-rock-natural		\
-osm-sand-natural osm-secondary-highway osm-trunk-highway	\
-osm-vineyard-landuse osm-water-natural osm-water-water		\
-osm-wetland-natural
+OSM_AREAS=osm-abandoned-railway osm-breakwater-man_made-areas		\
+osm-breakwater-man_made-lines osm-brownfield-landuse			\
+osm-cemetery-landuse osm-cliff-natural osm-commercial-landuse		\
+osm-construction-landuse osm-dam-waterway-areas				\
+osm-dam-waterway-lines osm-desert-natural osm-dirt-natural		\
+osm-farmland-landuse osm-forest-landuse-deciduous			\
+osm-forest-landuse-evergreen osm-forest-landuse-mixed			\
+osm-glacier-natural osm-golf-leisure osm-golf-sport osm-grass-landuse	\
+osm-grassland-natural osm-greenfield-landuse osm-industrial-landuse	\
+osm-institutional-landuse osm-landfill-landuse osm-lava-natural		\
+osm-line-power osm-lock-gate-waterway-areas				\
+osm-lock-gate-waterway-lines osm-meadow-landuse osm-mine-man_made	\
+osm-motorway-highway osm-nature_reserve-leisure osm-orchard-landuse	\
+osm-park-leisure osm-pier-man_made-areas osm-pier-man_made-lines	\
+osm-primary-highway osm-quarry-landuse osm-railway-railway		\
+osm-recreation-ground-landuse osm-reef-natural-areas			\
+osm-reef-natural-lines osm-residential-landuse osm-retail-landuse	\
+osm-rock-natural osm-sand-natural osm-scrub-natural			\
+osm-secondary-highway osm-trunk-highway osm-tundra-natural		\
+osm-vineyard-landuse osm-water-natural osm-water-water			\
+osm-wetland-natural osm-wood-natural-deciduous				\
+osm-wood-natural-evergreen osm-wood-natural-mixed			\
+osm-wood-natural-unspecified
 
 PREPARE_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
 
