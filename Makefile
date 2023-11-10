@@ -121,7 +121,7 @@ MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n//')
 MAX_LON:=$(shell expr ${MIN_LON} + 10)
 MAX_LAT:=$(shell expr ${MIN_LAT} + 10)
 
-MIN_FEATURE_AREA=0.00001 # 100m x 100m (for landcover and OSM area features)
+MIN_FEATURE_AREA=0.00000004 # 100m x 100m (for landcover and OSM area features)
 
 #
 # Clip extents
@@ -320,7 +320,7 @@ ${OSM_LINES_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
 
 ${OSM_AREAS_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM area features for ${BUCKET}..."
-	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTIPOLYGON -sql "SELECT * FROM multipolygons WHERE OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}"
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -sql "SELECT * FROM multipolygons WHERE OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}"
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-areas" $@
 
 #
@@ -436,12 +436,25 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.
 
 osm-prepare: ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
+# for building smaller areas than a 10x10 bucket
+osm-prepare-noflag: osm-areas-prepare-noflag osm-lines-prepare-noflag
+
 osm-prepare-clean:
 	rm -rfv ${WORK_DIR}/osm-*/${BUCKET} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
 osm-prepare-rebuild: osm-prepare-clean osm-prepare
 
 osm-areas-prepare: ${OSM_AREA_LAYERS_FLAG}
+
+# for building smaller areas than a 10x10 bucket
+osm-areas-prepare-noflag: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
+          if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
+	    echo -e "\nTrying $$name for ${SPAT}..."; \
+	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
+	      ${WORK_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
+	  fi; \
+	done
 
 ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
@@ -456,6 +469,16 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	mkdir -p ${FLAGS_DIR} && touch $@
 
 osm-lines-prepare: ${OSM_LINE_LAYERS_FLAG}
+
+# for building smaller areas than a 10x10 bucket
+osm-lines-prepare-noflag: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
+          if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
+	    echo -e "\nTrying $$name for ${SPAT}..."; \
+	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
+	      ${WORK_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
+	  fi; \
+	done
 
 ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
