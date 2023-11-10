@@ -65,7 +65,6 @@ Scrub			other
 ShrubGrassCover		other	# Mixed Shrubland/Grassland
 SavannaCover		other	# Savanna
 Orchard			other	# Orchard
-BuiltUpCover		other	# Urban and Built-Up Land
 DeciduousForest		other	# Deciduous Forest
 DeciduousBroadCover	other	# Deciduous Forest
 EvergreenForest		other	# Evergreen Forest
@@ -85,6 +84,7 @@ Industrial		other
 Town                    other	# Urban and Built-Up Land
 SubUrban		other	# Densely-populated city or large town
 Urban			other	# Densely-populated city or large town
+BuiltUpCover		other	# Urban and Built-Up Land
 
 Island			island	# any island area not covered otherwise
 Default			landmass # any land area not covered otherwise
