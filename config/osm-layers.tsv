@@ -11,12 +11,14 @@ osm-dam-waterway-areas	yes	area	BarrenCover	-	waterway='dam'
 osm-dam-waterway-lines	yes	line	BarrenCover	10	waterway='dam'
 osm-desert-natural	yes	area	Dirt	-	natural in ('desert')
 osm-dirt-natural	yes	area	Dirt	-	natural in ('mud')
-osm-education-landuse	yes	area	Greenspace	-	landuse='education'
+osm-education-amenity	no	area	Greenspace	-	amenity in ('school', 'college', 'university')
+osm-education-landuse	no	area	Greenspace	-	landuse='education'
 osm-farmland-landuse	yes	area	MixedCrop	-	landuse in ('farmland', 'farmyard')
 osm-forest-landuse-deciduous	yes	area	DeciduousForest	-	landuse='forest' and leaf_type='deciduous'
 osm-forest-landuse-evergreen	yes	area	EvergreenForest	-	landuse='wood' and leaf_type='evergreen'
 osm-forest-landuse-mixed	yes	area	MixedForest	-	landuse='forest' and leaf_type='mixed'
 osm-glacier-natural	yes	area	Glacier	-	natural in ('crevasse', 'glacier')
+osm-golf-leisure	yes	area	GolfCourse	-	leisure='golf_course'
 osm-golf-sport	yes	area	GolfCourse	-	sport='golf'
 osm-grass-landuse	yes	area	Greenspace	-	landuse='grass'
 osm-grassland-natural	yes	area	Grassland	-	natural='grassland'
@@ -32,6 +34,7 @@ osm-meadow-landuse	yes	area	CropGrass	-	(landuse='meadow' or crop in ('grass', '
 osm-mine-man_made	yes	area	OpenMining	-	man_made='mine'
 osm-motorway-highway	no	line	ShrubGrassCover	30	highway in ('motorway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-motorway-highway	yes	line	Freeway	10	highway in ('motorway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
+osm-nature_reserve-leisure	yes	area	Greenspace	-	leisure='nature_reserve'
 osm-orchard-landuse	yes	area	Orchard	-	landuse='orchard'
 osm-park-leisure	yes	area	Greenspace	-	leisure='park'
 osm-pier-man_made-areas	yes	line	BarrenCover	10	man_made='pier'
@@ -61,3 +64,4 @@ osm-wetland-natural	yes	area	Marsh	-	natural='wetland'
 osm-wood-natural-deciduous	yes	area	DeciduousForest	-	natural='wood' and leaf_type='deciduous'
 osm-wood-natural-evergreen	yes	area	EvergreenForest	-	natural='wood' and leaf_type='evergreen'
 osm-wood-natural-mixed	yes	area	MixedForest	-	natural='wood' and leaf_type='mixed'
+osm-wood-natural-unspecified	yes	area	MixedForest	-	natural='wood' and leaf_type is null
