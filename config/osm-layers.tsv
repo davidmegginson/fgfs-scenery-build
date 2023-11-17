@@ -11,8 +11,8 @@ osm-dam-waterway-areas	yes	area	BarrenCover	-	waterway='dam'
 osm-dam-waterway-lines	yes	line	BarrenCover	10	waterway='dam'
 osm-desert-natural	yes	area	Dirt	-	natural in ('desert')
 osm-dirt-natural	yes	area	Dirt	-	natural in ('mud')
-osm-education-amenity	no	area	Greenspace	-	amenity in ('school', 'college', 'university')
-osm-education-landuse	no	area	Greenspace	-	landuse='education'
+osm-education-amenity	yes	area	Greenspace	-	amenity in ('school', 'college', 'university')
+osm-education-landuse	yes	area	Greenspace	-	landuse='education'
 osm-farmland-landuse	yes	area	MixedCrop	-	landuse in ('farmland', 'farmyard')
 osm-forest-landuse-deciduous	yes	area	DeciduousForest	-	landuse='forest' and leaf_type='deciduous'
 osm-forest-landuse-evergreen	yes	area	EvergreenForest	-	landuse='wood' and leaf_type='evergreen'

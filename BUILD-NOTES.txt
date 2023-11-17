@@ -1,0 +1,4 @@
+
+w080n40:
+- after building bucket, rebuild w74n40 (Manhattan) with SRTM-3, because FABDEM fails to filter out the skyscrapers
+- note also some missing textures in Queens west of KLGA

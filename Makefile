@@ -121,7 +121,7 @@ MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n//')
 MAX_LON:=$(shell expr ${MIN_LON} + 10)
 MAX_LAT:=$(shell expr ${MIN_LAT} + 10)
 
-MIN_FEATURE_AREA=0.00000004 # 100m x 100m (for landcover and OSM area features)
+MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features)
 
 #
 # Clip extents
@@ -172,6 +172,11 @@ OSM_PBF=${DATA_DIR}/osm/${BUCKET}.osm.pbf
 OSM_LINES_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-lines.shp
 OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 
+# Queries for creating intermediate shapefiles from the OSM PBF
+# TODO this duplicates info in config/osm-layers.tsv; we need it all in one place
+OSM_LINES_QUERY=(highway IN ('motorway', 'primary', 'secondary', 'trunk') OR man_made IN ('breakwater', 'pier') OR natural IN ('reef') OR power IN ('line') OR railway IN ('abandoned', 'rail') OR waterway IN ('dam', 'lock_gate'))
+OSM_AREAS_QUERY=(amenity IN ('college', 'school', 'university') OR landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', 'forest', 'grass', 'greenfield', 'industrial', 'institutional', 'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', 'residential', 'retail', 'vineyard', 'wood') OR leisure IN ('golf_course', 'nature_reserve', 'park') OR man_made IN ('breakwater', 'mine', 'pier') OR natural IN ('grassland', 'reef', 'wetland', 'wood') OR sport IN ('golf') OR water IN ('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater') OR waterway IN ('dam', 'lock_gate')) AND OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}
+
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
 echo2: ${OSM_PBF}
@@ -196,10 +201,11 @@ osm-breakwater-man_made-lines osm-brownfield-landuse			\
 osm-cemetery-landuse osm-cliff-natural osm-commercial-landuse		\
 osm-construction-landuse osm-dam-waterway-areas				\
 osm-dam-waterway-lines osm-desert-natural osm-dirt-natural		\
-osm-farmland-landuse osm-forest-landuse-deciduous			\
-osm-forest-landuse-evergreen osm-forest-landuse-mixed			\
-osm-glacier-natural osm-golf-leisure osm-golf-sport osm-grass-landuse	\
-osm-grassland-natural osm-greenfield-landuse osm-industrial-landuse	\
+osm-education-amenity osm-education-landuse osm-farmland-landuse	\
+osm-forest-landuse-deciduous osm-forest-landuse-evergreen		\
+osm-forest-landuse-mixed osm-glacier-natural osm-golf-leisure		\
+osm-golf-sport osm-grass-landuse osm-grassland-natural			\
+osm-greenfield-landuse osm-industrial-landuse				\
 osm-institutional-landuse osm-landfill-landuse osm-lava-natural		\
 osm-line-power osm-lock-gate-waterway-areas				\
 osm-lock-gate-waterway-lines osm-meadow-landuse osm-mine-man_made	\
@@ -226,10 +232,10 @@ FLAGS_DIR=${FLAGS_BASE}/${BUCKET}
 
 NUDGE=0
 
-OSM_SHAPEFILES_EXTRACTED_FLAG=${FLAGS_DIR}/osm-shapefiles-extracted.flag
+OSM_AREAS_EXTRACTED_FLAG=${FLAGS_DIR}/osm-areas-extracted.flag
+OSM_LINES_EXTRACTED_FLAG=${FLAGS_DIR}/osm-lines-extracted.flag
 
 LANDCOVER_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/landcover-shapefiles-prepared.flag
-OSM_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/osm-shapefiles-prepared.flag
 
 ELEVATIONS_FLAG=${FLAGS_DIR}/${DEM}-elevations.flag # depends on DEM as well as BUCKET
 ELEVATIONS_FIT_FLAG=${FLAGS_DIR}/${DEM}-elevations-fit.flag
@@ -304,10 +310,13 @@ ${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
 # Extract OSM foreground features for current bucket
 #
 
-osm-extract: ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE}
+osm-extract: ${OSM_AREAS_EXTRACTED_FLAG} ${OSM_LINES_EXTRACTED_FLAG}
+
+osm-extract-clean-all: osm-extract-clean
+	rm -rf  ${OSM_PBF}
 
 osm-extract-clean:
-	rm -rf ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_SHAPEFILE} ${OSM_PBF}
+	rm -rf ${OSM_AREAS_EXTRACTED_FLAG} ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_EXTRACTED_FLAG} ${OSM_LINES_SHAPEFILE}
 
 osm-extract-rebuild: osm-extract-clean osm-extract
 
@@ -327,15 +336,22 @@ ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient
 	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
 	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
 
-${OSM_LINES_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
+${OSM_LINES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM line features for ${BUCKET}..."
-	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -nlt MULTILINESTRING -sql "SELECT * FROM lines"
-	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-lines" $@
+	@rm -f $@ ${OSM_LINES_SHAPEFILE}
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress ${OSM_LINES_SHAPEFILE} ${OSM_PBF} -sql "SELECT * FROM lines WHERE ${OSM_LINES_QUERY}"
+	@echo Creating spatial index...
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-lines" ${OSM_LINES_SHAPEFILE}
+	@touch $@
 
-${OSM_AREAS_SHAPEFILE}: ${OSM_PBF} ${OSM_PBF_CONF}
+${OSM_AREAS_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM area features for ${BUCKET}..."
-	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress $@ $< -sql "SELECT * FROM multipolygons WHERE OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}"
-	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-areas" $@
+	@rm -f $@ ${OSM_AREAS_SHAPEFILE}
+	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress ${OSM_AREAS_SHAPEFILE} ${OSM_PBF} -sql "SELECT * FROM multipolygons WHERE ${OSM_AREAS_QUERY}"
+	@echo Creating spatial index...
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-areas" ${OSM_AREAS_SHAPEFILE}
+	@touch $@
+
 
 #
 # Extract airports
@@ -380,6 +396,7 @@ elevations-prepare-rebuild: elevations-prepare-clean elevations-prepare
 
 ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET}
 	rm -f ${ELEVATIONS_FLAG}
+	rm -rf ${WORK_DIR}/${DEM}/${BUCKET}
 	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -name '*.tif' -o -name '*.hgt' | xargs gdalchop ${WORK_DIR}/${DEM}
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
@@ -401,6 +418,7 @@ airports-prepare-rebuild: airports-prepare-clean airports-prepare
 
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	rm -f ${AIRPORTS_FLAG}
+	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
 	genapts850 --input=${AIRPORTS} ${LATLON_OPTS} --max-slope=0.2618 \
 	  --work=${WORK_DIR} --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
@@ -418,6 +436,7 @@ landmass-prepare-rebuild: landmass-prepare-clean landmass-prepare
 
 ${LANDMASS_FLAG}: ${LANDMASS_SHAPEFILE}
 	rm -f ${LANDMASS_FLAG}
+	rm -rf ${WORK_DIR}/Default/${BUCKET}
 	ogr-decode ${DECODE_OPTS} --area-type Default ${WORK_DIR}/Default ${LANDMASS_SHAPEFILE}
 	mkdir -p ${FLAGS_DIR} && touch ${LANDMASS_FLAG}
 
@@ -438,6 +457,7 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
+	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${WORK_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
 	  fi; \
@@ -450,9 +470,6 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.
 
 osm-prepare: ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
-# for building smaller areas than a 10x10 bucket
-osm-prepare-noflag: osm-areas-prepare-noflag osm-lines-prepare-noflag
-
 osm-prepare-clean:
 	rm -rfv ${WORK_DIR}/osm-*/${BUCKET} ${OSM_AREA_LAYERS_FLAG} ${OSM_LINE_LAYERS_FLAG}
 
@@ -460,15 +477,15 @@ osm-prepare-rebuild: osm-prepare-clean osm-prepare
 
 osm-areas-prepare: ${OSM_AREA_LAYERS_FLAG}
 
-# for building smaller areas than a 10x10 bucket
-osm-areas-prepare-noflag: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+osm-areas-prepare-clean:
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
-          if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
-	    echo -e "\nTrying $$name for ${SPAT}..."; \
-	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
-	      ${WORK_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
+          if [ "$$type" = 'area' ]; then \
+	    d=${WORK_DIR}/$$name/${BUCKET}; \
+            echo Removing $$d ...; \
+	    rm -rf $$d; \
 	  fi; \
 	done
+	rm -fv ${OSM_AREA_LAYERS_FLAG}
 
 ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
@@ -476,6 +493,7 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
+	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${WORK_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
 	  fi; \
@@ -484,15 +502,15 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 
 osm-lines-prepare: ${OSM_LINE_LAYERS_FLAG}
 
-# for building smaller areas than a 10x10 bucket
-osm-lines-prepare-noflag: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+osm-lines-prepare-clean:
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
-          if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
-	    echo -e "\nTrying $$name for ${SPAT}..."; \
-	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
-	      ${WORK_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
+          if [ "$$type" = 'line' ]; then \
+	    d=${WORK_DIR}/$$name/${BUCKET}; \
+            echo Removing $$d ...; \
+	    rm -rf $$d; \
 	  fi; \
 	done
+	rm -fv ${OSM_LINE_LAYERS_FLAG}
 
 ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
@@ -500,6 +518,7 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
 	    echo -e "\nTrying $$name..."; \
+	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
 	      ${WORK_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
 	  fi; \

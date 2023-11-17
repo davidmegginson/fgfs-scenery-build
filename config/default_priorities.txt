@@ -43,7 +43,6 @@ Greenspace		other
 # USGS Land Covers
 # These are low-priority, since known polygons should always win.
 
-Transport		other	# Transport
 Cemetery		other	# Cemetery
 DryCrop			other	# Dryland Cropland and Pasture
 IrrCrop			other	# Irrigated Cropland and Pasture
@@ -84,6 +83,7 @@ Industrial		other
 Town                    other	# Urban and Built-Up Land
 SubUrban		other	# Densely-populated city or large town
 Urban			other	# Densely-populated city or large town
+Transport		other	# Transport
 BuiltUpCover		other	# Urban and Built-Up Land
 
 Island			island	# any island area not covered otherwise
