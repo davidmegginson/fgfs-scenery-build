@@ -59,7 +59,7 @@ osm-trunk-highway	yes	line	Road	10	highway in ('trunk') and (tunnel is null or t
 osm-tundra-natural	yes	area	HerbTundra	-	natural in ('tundra')
 osm-vineyard-landuse	yes	area	Vineyard	-	landuse='vineyard'
 osm-water-natural	yes	area	Lake	-	natural in ('bay', 'strait', 'shoal', 'water')
-osm-water-water	yes	area	Lake	-	water in ('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater')
+osm-water-water	yes	area	Lake	-	water in ('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'pond', 'reservoir', 'wastewater', 'stream', 'stream_pool')
 osm-wetland-natural	yes	area	Marsh	-	natural='wetland'
 osm-wood-natural-deciduous	yes	area	DeciduousForest	-	natural='wood' and leaf_type='deciduous'
 osm-wood-natural-evergreen	yes	area	EvergreenForest	-	natural='wood' and leaf_type='evergreen'

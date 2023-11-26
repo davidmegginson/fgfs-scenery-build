@@ -174,8 +174,8 @@ OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 
 # Queries for creating intermediate shapefiles from the OSM PBF
 # TODO this duplicates info in config/osm-layers.tsv; we need it all in one place
-OSM_LINES_QUERY=(highway IN ('motorway', 'primary', 'secondary', 'trunk') OR man_made IN ('breakwater', 'pier') OR natural IN ('reef') OR power IN ('line') OR railway IN ('abandoned', 'rail') OR waterway IN ('dam', 'lock_gate'))
-OSM_AREAS_QUERY=(amenity IN ('college', 'school', 'university') OR landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', 'forest', 'grass', 'greenfield', 'industrial', 'institutional', 'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', 'residential', 'retail', 'vineyard', 'wood') OR leisure IN ('golf_course', 'nature_reserve', 'park') OR man_made IN ('breakwater', 'mine', 'pier') OR natural IN ('grassland', 'reef', 'wetland', 'wood') OR sport IN ('golf') OR water IN ('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'reservoir', 'wastewater') OR waterway IN ('dam', 'lock_gate')) AND OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}
+OSM_LINES_QUERY=(highway IN ('motorway', 'primary', 'secondary', 'tertiary', 'trunk') OR man_made IN ('breakwater', 'pier') OR natural IN ('reef') OR power IN ('line') OR railway IN ('abandoned', 'rail') OR waterway IN ('dam', 'lock_gate'))
+OSM_AREAS_QUERY=((amenity IN ('college', 'school', 'university') OR landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', 'forest', 'grass', 'greenfield', 'industrial', 'institutional', 'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', 'residential', 'retail', 'vineyard', 'wood') OR leisure IN ('golf_course', 'nature_reserve', 'park') OR man_made IN ('mine') OR natural IN ('grassland', 'reef', 'wetland', 'wood') OR sport IN ('golf') OR water IS NOT NULL) AND OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}) OR (water IS NOT NULL) OR (made_made IN ('breakwater', 'pier')) OR (waterway IN ('dam', 'lock_gate'))
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
@@ -533,9 +533,19 @@ osm-clean:
 # 3. Construct
 ########################################################################
 
+#scenery: extract prepare
+#	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+#	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
+
+# Build the scenery in 1x1 deg areas (will replace scenery target soon)
 scenery: extract prepare
-	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
+	for lat in $$(seq ${MIN_LAT} $$(expr ${MAX_LAT} - 1)); do \
+	  for lon in $$(seq ${MIN_LON} $$(expr ${MAX_LON} - 1)); do \
+	    tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	      --min-lat=$$lat --min-lon=$$lon --max-lat=$$(expr $$lat + 1) --max-lon=$$(expr $$lon + 1) \
+	      --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS};\
+	  done; \
+	done
 
 scenery-clean:
 	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
