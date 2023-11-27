@@ -13,6 +13,12 @@ Expects apt.dat version 1000. Use downgrade-apt.py to downgrade if needed.
 import re, sys
 
 
+OPENING = """I"""
+
+VERSION = """1200 version - Copyright © 2013, Robin A. Peel (robin@x-plane.com).   This data is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.  You should have received a copy of the GNU General Public License along with this program ("AptNavGNULicence.txt"); if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA."""
+
+END = """99"""
+
 def filter_airports(bounds, input, output):
     """ Filter to dump only airports that appear in the specified boundaries.
 
@@ -45,11 +51,9 @@ def filter_airports(bounds, input, output):
         type = tokens[0]
 
         if i == 0 and type in ('I', 'A',):
-            print(line, end='', file=output)
             continue
 
-        elif i <= 2 and type in ('1000',):
-            print(line, end='', file=output)
+        elif i <= 2 and type in ('1000', '1100', '1200',):
             continue
 
         # new airport
@@ -83,6 +87,9 @@ def filter_airports(bounds, input, output):
         elif type in ('14', '15', '18', '19', '20', '21', '1201', '1300',):
             check_bounds(tokens, 1, 2)
 
+        elif type in ('99'):
+            continue
+
         current_airport += line
 
     # print final airport
@@ -115,13 +122,17 @@ def parse_bucket(bucket):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 2:
-        print("Usage: {} <bucket> < source.apt > dest.apt".format(sys.argv[0]), file=sys.stderr)
+    if len(sys.argv) < 3:
+        print("Usage: {} <bucket> <file> [file...] > dest.apt".format(sys.argv[0]), file=sys.stderr)
         sys.exit(2)
-        
+
     bounds = parse_bucket(sys.argv[1])
 
-    with open(sys.stdin.fileno(), 'r', encoding='latin1') as input:
-        with open(sys.stdout.fileno(), 'w', encoding='latin1') as output:
-            filter_airports(bounds, input, output)
+    with open(sys.stdout.fileno(), 'w', encoding='latin1') as output:
+        print(OPENING, file=output)
+        print(VERSION, file=output)
+        for file in sys.argv[2:]:
+            with open(file, 'r', encoding='latin1') as input:
+                filter_airports(bounds, input, output)
+        print(END, file=output)
 

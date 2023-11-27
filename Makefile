@@ -175,7 +175,7 @@ OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 # Queries for creating intermediate shapefiles from the OSM PBF
 # TODO this duplicates info in config/osm-layers.tsv; we need it all in one place
 OSM_LINES_QUERY=(highway IN ('motorway', 'primary', 'secondary', 'tertiary', 'trunk') OR man_made IN ('breakwater', 'pier') OR natural IN ('reef') OR power IN ('line') OR railway IN ('abandoned', 'rail') OR waterway IN ('dam', 'lock_gate'))
-OSM_AREAS_QUERY=((amenity IN ('college', 'school', 'university') OR landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', 'forest', 'grass', 'greenfield', 'industrial', 'institutional', 'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', 'residential', 'retail', 'vineyard', 'wood') OR leisure IN ('golf_course', 'nature_reserve', 'park') OR man_made IN ('mine') OR natural IN ('grassland', 'reef', 'wetland', 'wood') OR sport IN ('golf') OR water IS NOT NULL) AND OGR_GEOM_AREA >= ${MIN_FEATURE_AREA}) OR (water IS NOT NULL) OR (made_made IN ('breakwater', 'pier')) OR (waterway IN ('dam', 'lock_gate'))
+OSM_AREAS_QUERY=man_made IN ('breakwater', 'pier') OR water IS NOT NULL OR waterway IN ('dam', 'lock_gate') OR (OGR_GEOM_AREA >= ${MIN_FEATURE_AREA} AND (amenity IN ('college', 'school', 'university') OR landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', 'forest', 'grass', 'greenfield', 'industrial', 'institutional', 'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', 'residential', 'retail', 'vineyard', 'wood') OR leisure IN ('golf_course', 'nature_reserve', 'park') OR man_made IN ('mine') OR natural IN ('grassland', 'reef', 'wetland', 'wood') OR sport IN ('golf') OR water IS NOT NULL))
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
@@ -359,11 +359,12 @@ ${OSM_AREAS_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 
 airports-extract: ${AIRPORTS} # single file - no flag needed
 
-${AIRPORTS}: ${VENV} ${AIRPORTS_SOURCE}  $(wildcard ${INPUTS_DIR}/airports/custom/*.dat) ${SCRIPT_DIR}/downgrade-apt.py ${SCRIPT_DIR}/filter-airports.py
+${AIRPORTS}: ${AIRPORTS_SOURCE} $(wildcard ${INPUTS_DIR}/airports/custom/*.dat) ${SCRIPT_DIR}/downgrade-apt.py ${SCRIPT_DIR}/filter-airports.py ${VENV}
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
-	. ${VENV} && python3 ${SCRIPT_DIR}/downgrade-apt.py  ${INPUTS_DIR}/airports/custom/*.dat ${AIRPORTS_SOURCE} \
-	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
-	> $@
+	. ${VENV} && python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} ${INPUTS_DIR}/airports/custom/*.dat $< > $@
+#	. ${VENV} && python3 ${SCRIPT_DIR}/downgrade-apt.py  ${INPUTS_DIR}/airports/custom/*.dat ${AIRPORTS_SOURCE} \
+#	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
+#	> $@
 
 airports-extract-clean:
 	rm -f ${AIRPORTS}
@@ -419,8 +420,8 @@ airports-prepare-rebuild: airports-prepare-clean airports-prepare
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
 	rm -f ${AIRPORTS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
-	genapts850 --input=${AIRPORTS} ${LATLON_OPTS} --max-slope=0.2618 \
-	  --work=${WORK_DIR} --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
+	genapts --input=$< ${LATLON_OPTS} --max-slope=0.2618 \
+	  --work=${WORK_DIR} --clear-dem-path --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
 #

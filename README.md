@@ -5,7 +5,7 @@ North American Scenery
 
 Build FlightGear scenery that
 
-1. has full North American coverage (so far, just CAN/USA/MEX).
+1. has full North American coverage (also includes some of South America)
 2. is suitable for low-altitude VFR navigation, even without osm2city and 3D models enabled.
 3. is compatible with stable versions of FlightGear, not just the _next_ branch.
 4. includes detailed and accurate lakes, rivers, wetlands, and coastlines.
@@ -27,43 +27,49 @@ The scenery requires GIS data from several sources
 
 * An elevation raster (DEM) to define the shape of the landscape. The build uses two different sources, in order of preference:
     * 1-arcsec (30m) FABDEM — Copernicus GLO DEM, with forests and buildings removed: https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn
-    * 3-arcsec (100m) SRTM-3 — Shuttle Radar Topography Mission: http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm
+    * 3-arcsec (100m) SRTM-3 — Shuttle Radar Topography Mission: http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm (used automatically north of 80N)
 * Global Land Cover by National Mapping Organizations (GLCNMO) at 15 arcsec (nominally 250m) resolution, which provides background landcover to fill in any gaps in more-detailed OSM data (requires some manual preparation in qGIS; see below): https://globalmaps.github.io/glcnmo.html
 * Airport data in the [apt.dat format](http://developer.x-plane.com/wp-content/uploads/2015/11/XP-APT1000-Spec.pdf) that FlightGear shares with the commercial X-Plane simulator. This data defines the shape of runways, taxiways, etc., as well as other information: https://gateway.x-plane.com/airports
 * OpenStreetMap (OSM) data in [PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the area where you want to build scenery. This data defines detailed landcover (like parks and forests), lakes and rivers, as well as linear features like roads, railroads, and powerlines: https://download.geofabrik.de/north-america.html
     * (Special case) OSM landmass data defining the boundaries between land and ocean (no scenery outside these polygons will be built): https://osmdata.openstreetmap.de/data/land-polygons.html
+    
+### FABDEM elevation data preparation
 
-### SRTM-3 data preparation (out of date)
+FABDEM is the preferred elevation source. Download the 1-arcsecond Copernicus GLO DEM, with forests and buildings removed (FABDEM) from https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn for all of the areas that you want to build. Place the files in 01-data/FABDEM/Downloads/
 
-(TO BE UPDATED)x
+If you are missing *.tif files for any of the areas you're building, you will end up with flat scenery all at sea level.
 
-Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). Place them in 01-data/SRTM-3/orig/
-
-To unpack the files, run
+Next, use the following commands to unpack the downloaded files and sort them into bucket subdirectories:
 
 ```
-$ make srtm-unpack
+$ cd 01-data/FABDEM/Unpacked
+$ for file in ../Downloads/*.zip; do unzip $file; done
+$ cd ..
+$ sh sort-buckets.sh
 ```
 
-Unzip and place all of the *.hgt files together in ``02-data/SRTM-3/``
+### SRTM-3 elevation data preparation
+
+Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). Place them in 01-data/SRTM-3/Downloads/
+
 
 If you are missing *.hgt files for any of the areas you're building, you will end up with flat scenery all at sea level.
 
 
+```
+$ cd 01-data/FABDEM/Unpacked
+$ for file in ../Downloads/*.zip; do unzip $file; done
+$ cd ..
+$ sh sort-buckets.sh
+```
+
 ### Airport data preparation
 
-Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav 02-data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
+Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.ws3.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav 02-data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
 
 Uncompress the file (if needed) and rename to ``01-inputs/airports/apt.dat``
 
-This file can be very large, depending on where you source it from. The next step is to extract the areas you need into buckets under ``02-data/airports/`` using the ``./downgrade-airports.py`` (if you're using an apt.dat format after 1000) and ``./filter-airports.py`` Python3 scripts, or simply run ``make airports-prepare`` defining the bucket you need. Example:
-
-```
-$ make BUCKET=w090n40 airports-prepare
-```
-
-This will downgrade the file to apt.dat 1000 format, extract the airports inside the 10x10 deg w090n40 area, and place the result in ``02-data/airports/w090n40/apt.dat``
-
+You may also place any custom airport .dat files in 01-inputs/airports/custom/ and they will be added to the build.
 
 ### MODIS-250 landcover raster preparation
 
