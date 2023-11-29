@@ -31,6 +31,7 @@
         <a href="#links">links</a>
         <a href="#batch-download">batch download</a>
         <a href="#sources">sources</a>
+        <a href="#changes">changes</a>
       </nav>
       <p>
         Improved North American scenery for the open-source <a
@@ -127,6 +128,29 @@
           </dd>
         </dl>
 
+      </section>
+
+      <section id="changes">
+        <h2>Major changes</h2>
+
+        <section id="changes-20231129">
+          <h3>2023-11-29</h3>
+          <ul>
+            <li>Fixed elevation issue with airports that caused them to appear above or below scenery (was picking up SRTM-3 even when the scenery was using FABDEM)</li>
+            <li>Tweak OSM filter to pick up smaller areas for piers, lock gates, and breakwaters (normal cutoff is about 100x100m)</li>
+            <li>Add tertiary roads back into the scenery</li>
+          </ul>
+        </section>
+
+        <section id="changes-20231116">
+          <h3>2023-11-16</h3>
+          <ul>
+            <li>Add significantly-improved urban detail, including parks, recreation areas, educational areas, urban forests, etc (BuiltUpArea had previously had too high a priority)</li>
+          </ul>
+        </section>
+
+        <p>(I may try to reconstruct earlier changes later)</p>
+        
       </section>
 
     </main>
