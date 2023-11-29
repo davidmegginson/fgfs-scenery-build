@@ -11,6 +11,9 @@ const STALE_CUTOFF = '20231129'; // buckets before this are considered stale
  */
 window.onload = async function () {
 
+    // display the cutoff date for the current build cycle
+    show_cutoff(STALE_CUTOFF);
+
     // download the config file
     response = await fetch('download-links.json');
     config = await response.json();
@@ -28,6 +31,14 @@ window.onload = async function () {
     //
     // Top-level functions
     //
+
+    /**
+     * Display the cutoff date
+     */
+    function show_cutoff (date) {
+        let node = document.getElementById("cutoff-date");
+        node.appendChild(document.createTextNode(format_date(date)));
+    }
     
     /**
      * Create interactive map.
