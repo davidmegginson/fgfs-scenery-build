@@ -359,12 +359,9 @@ ${OSM_AREAS_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 
 airports-extract: ${AIRPORTS} # single file - no flag needed
 
-${AIRPORTS}: ${AIRPORTS_SOURCE} $(wildcard ${INPUTS_DIR}/airports/custom/*.dat) ${SCRIPT_DIR}/downgrade-apt.py ${SCRIPT_DIR}/filter-airports.py ${VENV}
+${AIRPORTS}: ${AIRPORTS_SOURCE} $(wildcard ${INPUTS_DIR}/airports/custom/*.dat) ${SCRIPT_DIR}/filter-airports.py ${VENV}
 	mkdir -p ${DATA_DIR}/airports/${BUCKET}/
 	. ${VENV} && python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} ${INPUTS_DIR}/airports/custom/*.dat $< > $@
-#	. ${VENV} && python3 ${SCRIPT_DIR}/downgrade-apt.py  ${INPUTS_DIR}/airports/custom/*.dat ${AIRPORTS_SOURCE} \
-#	| python3 ${SCRIPT_DIR}/filter-airports.py ${BUCKET} \
-#	> $@
 
 airports-extract-clean:
 	rm -f ${AIRPORTS}
