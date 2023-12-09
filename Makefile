@@ -116,10 +116,29 @@ $(error BUCKET is not defined)
 endif
 
 # Extract coords from the bucket name
-MIN_LON:=$(shell echo ${BUCKET} | sed -e 's/^w0*/-/' -e 's/^e0*//' -e 's/[ns].*$$//')
-MIN_LAT:=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n//')
-MAX_LON:=$(shell expr ${MIN_LON} + 10)
-MAX_LAT:=$(shell expr ${MIN_LAT} + 10)
+ifdef BUCKET
+BUCKET_MIN_LON=$(shell echo ${BUCKET} | sed -e 's/^w0*/-/' -e 's/^e0*//' -e 's/[ns].*$$//')
+BUCKET_MIN_LAT=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n//')
+BUCKET_MAX_LON=$(shell expr ${BUCKET_MIN_LON} + 10)
+BUCKET_MAX_LAT=$(shell expr ${BUCKET_MIN_LAT} + 10)
+
+# Quadrant
+QUADRANT=$(shell [ ${BUCKET_MIN_LAT} -lt 0 ] && echo s || echo n)$(shell [ ${BUCKET_MIN_LON} -lt 0 ] && echo w || echo e)
+QUADRANT_MIN_LON=$(shell [ ${BUCKET_MIN_LON} -lt 0 ] && echo -180 || echo 0)
+QUADRANT_MIN_LAT=$(shell [ ${BUCKET_MIN_LAT} -lt 0 ] && echo -90 || echo 0)
+QUADRANT_MAX_LON=$(shell expr ${QUADRANT_MIN_LON} + 180)
+QUADRANT_MAX_LAT=$(shell expr ${QUADRANT_MIN_LAT} + 90)
+endif
+
+quadrant:
+	echo ${QUADRANT} ${QUADRANT_MIN_LON} ${QUADRANT_MIN_LAT} ${QUADRANT_MAX_LON} ${QUADRANT_MAX_LAT}
+
+
+# Area to actually build (scenery only)
+MIN_LAT:=${BUCKET_MIN_LAT}
+MIN_LON:=${BUCKET_MIN_LON}
+MAX_LAT:=${BUCKET_MAX_LAT}
+MAX_LON:=${BUCKET_MAX_LON}
 
 MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features)
 
@@ -127,10 +146,10 @@ MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features
 # Clip extents
 # Raster extent is padded one degree in each direction, for more-consistent polygons
 #
-QUADRANT_EXTENT=-180,0,0,90
-RASTER_CLIP_EXTENT=$(shell expr ${MIN_LON} - 1) $(shell expr ${MAX_LAT} + 1) $(shell expr ${MAX_LON} + 1)  $(shell expr ${MIN_LAT} - 1)
-SPAT=${MIN_LON} ${MIN_LAT} ${MAX_LON} ${MAX_LAT}
-LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
+QUADRANT_EXTENT=${QUADRANT_MIN_LON},${QUADRANT_MIN_LAT},${QUADRANT_MAX_LON},${QUADRANT_MAX_LAT}
+SPAT=${BUCKET_MIN_LON} ${BUCKET_MIN_LAT} ${BUCKET_MAX_LON} ${BUCKET_MAX_LAT}
+SPAT_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1) $(shell expr ${BUCKET_MIN_LAT} - 1) $(shell expr ${BUCKET_MAX_LON} + 1)  $(shell expr ${BUCKET_MAX_LAT} + 1)
+LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
 
 # common command-line parameters
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
@@ -145,18 +164,21 @@ LANDCOVER_SOURCE_DIR=${INPUTS_DIR}/global-landcover
 
 OSM_DIR=${INPUTS_DIR}/osm
 OSM_PLANET=${OSM_DIR}/planet-latest.osm.pbf
-OSM_SOURCE=${OSM_DIR}/hemisphere-nw.osm.pbf
+OSM_SOURCE=${OSM_DIR}/hemisphere-${QUADRANT}.osm.pbf
 OSM_PBF_CONF=config/osmconf.ini
 
 LANDMASS_SOURCE=${INPUTS_DIR}/land-polygons-split-4326/land_polygons.shp # complete version is very slow
-LANDCOVER_BASE=landcover-nw-clipped
+# old
+LANDCOVER_BASE=landcover-${QUADRANT}-clipped
+# new
+#LANDCOVER_BASE=landcover-${QUADRANT}-valid
 LANDCOVER_SOURCE=${LANDCOVER_SOURCE_DIR}/${LANDCOVER_BASE}.shp
 
 # Output dir for per-area shapefiles
 SHAPEFILES_DIR=${DATA_DIR}/shapefiles/${BUCKET}
 
 # DEM type (SRTM-3 or FABDEM); FABDEM is higher res, but goes only to 80N
-ifeq ($(MIN_LAT), 80)
+ifeq ($(BUCKET_MIN_LAT), 80)
 DEM=SRTM-3
 else
 DEM=FABDEM
@@ -232,13 +254,14 @@ FLAGS_DIR=${FLAGS_BASE}/${BUCKET}
 
 NUDGE=0
 
+LANDCOVER_EXTRACTED_FLAG=${FLAGS_DIR}/landcover-extracted.flag
+
 OSM_AREAS_EXTRACTED_FLAG=${FLAGS_DIR}/osm-areas-extracted.flag
 OSM_LINES_EXTRACTED_FLAG=${FLAGS_DIR}/osm-lines-extracted.flag
 
 LANDCOVER_SHAPEFILES_PREPARED_FLAG=${FLAGS_DIR}/landcover-shapefiles-prepared.flag
 
 ELEVATIONS_FLAG=${FLAGS_DIR}/${DEM}-elevations.flag # depends on DEM as well as BUCKET
-ELEVATIONS_FIT_FLAG=${FLAGS_DIR}/${DEM}-elevations-fit.flag
 AIRPORTS_FLAG=${FLAGS_DIR}/${DEM}-airports.flag # depends on DEM as well as BUCKET
 LANDMASS_FLAG=${FLAGS_DIR}/landmass.flag
 LANDCOVER_LAYERS_FLAG=${FLAGS_DIR}/landcover-areas.flag
@@ -287,24 +310,28 @@ landmass-extract-clean:
 landmass-extract-rebuild: landmass-extract-clean landmass-extract
 
 ${LANDMASS_SHAPEFILE}: ${LANDMASS_SOURCE}
-	ogr2ogr -spat ${SPAT} ${LANDMASS_SHAPEFILE} ${LANDMASS_SOURCE}
+	ogr2ogr -spat ${SPAT_EXPANDED} $@ $< -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry,* FROM land_polygons"
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@ # indexed for clipping landcover
 
 #
 # Extract background landcover for current bucket
 #
 
-landcover-extract: ${LANDCOVER_SHAPEFILE}
+landcover-extract: ${LANDCOVER_EXTRACTED_FLAG}
 
 landcover-extract-clean:
-	rm -fv ${LANDCOVER_SHAPEFILE}
+	rm -fv ${LANDCOVER_SHAPEFILE} ${LANDCOVER_EXTRACTED_FLAG}
 
 landcover-extract-rebuild: landcover-extract-clean landcover-extract
 
-${LANDCOVER_SHAPEFILE}: ${LANDCOVER_SOURCE}
+${LANDCOVER_EXTRACTED_FLAG}: ${LANDCOVER_SOURCE}
+	mkdir -p ${FLAGS_DIR}
+	rm -f ${LANDCOVER_EXTRACTED_FLAG}
 	@echo -e "\nExtracting background landcover for ${BUCKET}..."
-	ogr2ogr -spat ${SPAT} $@ $< -dialect sqlite -sql "SELECT ST_MakeValid(geometry) AS geometry,* FROM '${LANDCOVER_BASE}'"
-	@echo -e "\nCreating index for $@..."
-	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" $@
+	ogr2ogr -spat ${SPAT_EXPANDED} ${LANDCOVER_SHAPEFILE} $<
+	@echo -e "\nCreating index for ${LANDCOVER_SHAPEFILE}..."
+	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}" ${LANDCOVER_SHAPEFILE}
+	touch ${LANDCOVER_EXTRACTED_FLAG}
 
 #
 # Extract OSM foreground features for current bucket
@@ -334,7 +361,7 @@ ${OSM_SOURCE}: ${OSM_PLANET}
 
 ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
 	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
-	osmconvert $< -v -b=${MIN_LON},${MIN_LAT},${MAX_LON},${MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+	osmconvert $< -v -b=${BUCKET_MIN_LON},${BUCKET_MIN_LAT},${BUCKET_MAX_LON},${BUCKET_MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
 
 ${OSM_LINES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM line features for ${BUCKET}..."
@@ -342,7 +369,7 @@ ${OSM_LINES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress ${OSM_LINES_SHAPEFILE} ${OSM_PBF} -sql "SELECT * FROM lines WHERE ${OSM_LINES_QUERY}"
 	@echo Creating spatial index...
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-lines" ${OSM_LINES_SHAPEFILE}
-	@touch $@
+	@mkdir -p ${FLAGS_DIR} && touch $@
 
 ${OSM_AREAS_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM area features for ${BUCKET}..."
@@ -350,7 +377,7 @@ ${OSM_AREAS_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	ogr2ogr -oo CONFIG_FILE="${OSM_PBF_CONF}" -spat ${SPAT} -progress ${OSM_AREAS_SHAPEFILE} ${OSM_PBF} -sql "SELECT * FROM multipolygons WHERE ${OSM_AREAS_QUERY}"
 	@echo Creating spatial index...
 	ogrinfo -sql "CREATE SPATIAL INDEX ON ${BUCKET}-areas" ${OSM_AREAS_SHAPEFILE}
-	@touch $@
+	@mkdir -p ${FLAGS_DIR} && touch $@
 
 
 #
@@ -385,10 +412,10 @@ prepare-rebuild: prepare-clean prepare
 # Set the Makefile var DEM to SRTM-3 or FABDEM (default)
 #
 
-elevations-prepare: ${ELEVATIONS_FIT_FLAG}
+elevations-prepare: ${ELEVATIONS_FLAG}
 
 elevations-prepare-clean:
-	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG} ${ELEVATIONS_FIT_FLAG}
+	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG}
 
 elevations-prepare-rebuild: elevations-prepare-clean elevations-prepare
 
@@ -396,12 +423,25 @@ ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET}
 	rm -f ${ELEVATIONS_FLAG}
 	rm -rf ${WORK_DIR}/${DEM}/${BUCKET}
 	find ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} -name '*.tif' -o -name '*.hgt' | xargs gdalchop ${WORK_DIR}/${DEM}
+	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
-${ELEVATIONS_FIT_FLAG}: ${ELEVATIONS_FLAG}
-	rm -f ${ELEVATIONS_FIT_FLAG}
-	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
-	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FIT_FLAG}
+elevations-rebuild-all: elevations-extract-all elevations-refit-all
+
+elevations-extract-all:
+	echo ${DEM}
+	rm -rf ${WORK_DIR}/${DEM}
+	mkdir -p ${WORK_DIR}/${DEM}
+	for d in ${INPUTS_DIR}/${DEM}/Unpacked/*; do \
+	  echo Unpacking $$d; \
+	  find $$d -name '*.tif' -o -name '*.hgt' | xargs gdalchop ${WORK_DIR}/${DEM} || exit 1; \
+	done
+
+elevations-fit-all:
+	terrafit -f ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
+
+elevations-refit-all:
+	terrafit -f ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
 
 #
 # Prepare the airport areas and objects
@@ -414,7 +454,7 @@ airports-prepare-clean:
 
 airports-prepare-rebuild: airports-prepare-clean airports-prepare
 
-${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FIT_FLAG}
+${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -f ${AIRPORTS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
 	genapts --input=$< ${LATLON_OPTS} --max-slope=0.2618 \
@@ -449,7 +489,7 @@ landcover-prepare-clean:
 
 landcover-prepare-rebuild: landcover-prepare-clean landcover-prepare
 
-${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_SHAPEFILE} ${CONFIG_DIR}/landcover-layers.tsv
+${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_EXTRACTED_FLAG} ${CONFIG_DIR}/landcover-layers.tsv
 	rm -f $@
 	@echo -e "\nPrepareing landcover area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
@@ -531,9 +571,13 @@ osm-clean:
 # 3. Construct
 ########################################################################
 
-#scenery: extract prepare
-#	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-#	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
+scenery-all: extract prepare
+	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
+
+scenery-nodep: extract prepare
+	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	  --min-lat=${MIN_LAT} --min-lon=${MIN_LON} --max-lat=${MAX_LAT} --max-lon=${MAX_LON} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
 
 # Build the scenery in 1x1 deg areas (will replace scenery target soon)
 scenery: extract prepare
@@ -546,7 +590,9 @@ scenery: extract prepare
 	done
 
 scenery-clean:
-	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET}/
+	rm -rf ${SCENERY_DIR}/Terrain/${BUCKET} ${WORK_DIR}/Shared/stage1/${BUCKET} ${WORK_DIR}/Shared/stage2/${BUCKET}
+
+scenery-all-rebuild: scenery-clean scenery-all
 
 scenery-rebuild: scenery-clean scenery
 
@@ -609,9 +655,3 @@ ${FLAGS_DIR}:
 bucket-defined:
 	test "${BUCKET}" == "" && echo BUCKET not defined. &>2 && exit 2
 
-########################################################################
-# Test that do-make.sh is working
-########################################################################
-
-echo:
-	echo -- BUCKET=${BUCKET} ${LATLON_OPTS}
