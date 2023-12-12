@@ -115,6 +115,8 @@ ifndef BUCKET
 $(error BUCKET is not defined)
 endif
 
+IGNORE_LANDMASS=--ignore-landmass
+
 # Extract coords from the bucket name
 ifdef BUCKET
 BUCKET_MIN_LON=$(shell echo ${BUCKET} | sed -e 's/^w0*/-/' -e 's/^e0*//' -e 's/[ns].*$$//')
@@ -149,7 +151,8 @@ MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features
 QUADRANT_EXTENT=${QUADRANT_MIN_LON},${QUADRANT_MIN_LAT},${QUADRANT_MAX_LON},${QUADRANT_MAX_LAT}
 SPAT=${BUCKET_MIN_LON} ${BUCKET_MIN_LAT} ${BUCKET_MAX_LON} ${BUCKET_MAX_LAT}
 SPAT_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1) $(shell expr ${BUCKET_MIN_LAT} - 1) $(shell expr ${BUCKET_MAX_LON} + 1)  $(shell expr ${BUCKET_MAX_LAT} + 1)
-LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
+BUCKET_LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
+LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
 # common command-line parameters
 DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
@@ -401,9 +404,9 @@ airports-extract-rebuild: airports-extract-clean airports-extract
 # 2. Prepare
 ########################################################################
 
-prepare: elevations-prepare airports-prepare landmass-prepare landcover-prepare osm-prepare
+prepare: airports-prepare landmass-prepare landcover-prepare osm-prepare
 
-prepare-clean: elevations-prepare-clean airports-prepare-clean landmass-prepare-clean landcover-prepare-clean osm-prepare-clean
+prepare-clean: airports-prepare-clean landmass-prepare-clean landcover-prepare-clean osm-prepare-clean
 
 prepare-rebuild: prepare-clean prepare
 
@@ -447,7 +450,7 @@ elevations-refit-all:
 # Prepare the airport areas and objects
 #
 
-airports-prepare: ${AIRPORTS_FLAG} elevations-prepare
+airports-prepare: ${AIRPORTS_FLAG}
 
 airports-prepare-clean:
 	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/ ${AIRPORTS_FLAG}
@@ -457,7 +460,7 @@ airports-prepare-rebuild: airports-prepare-clean airports-prepare
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -f ${AIRPORTS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
-	genapts --input=$< ${LATLON_OPTS} --max-slope=0.2618 \
+	genapts --input=$< ${BUCKET_LATLON_OPTS} --max-slope=0.2618 \
 	  --work=${WORK_DIR} --clear-dem-path --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
@@ -577,7 +580,7 @@ scenery-all: extract prepare
 
 scenery-nodep: extract prepare
 	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  --min-lat=${MIN_LAT} --min-lon=${MIN_LON} --max-lat=${MAX_LAT} --max-lon=${MAX_LON} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
+	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
 
 # Build the scenery in 1x1 deg areas (will replace scenery target soon)
 scenery: extract prepare
