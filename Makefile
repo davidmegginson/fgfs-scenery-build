@@ -188,14 +188,14 @@ MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features
 # Clip extents
 # Raster extent is padded one degree in each direction, for more-consistent polygons
 #
-QUADRANT_EXTENT=${QUADRANT_MIN_LON},${QUADRANT_MIN_LAT},${QUADRANT_MAX_LON},${QUADRANT_MAX_LAT}
+QUADRANT_EXTENT=$(shell expr ${QUADRANT_MIN_LON} - 1),$(shell expr ${QUADRANT_MIN_LAT} - 1),$(shell ${QUADRANT_MAX_LON} + 1),$(shell ${QUADRANT_MAX_LAT} + 1)
 SPAT=${BUCKET_MIN_LON} ${BUCKET_MIN_LAT} ${BUCKET_MAX_LON} ${BUCKET_MAX_LAT}
 SPAT_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1) $(shell expr ${BUCKET_MIN_LAT} - 1) $(shell expr ${BUCKET_MAX_LON} + 1)  $(shell expr ${BUCKET_MAX_LAT} + 1)
 BUCKET_LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
 LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
 # common command-line parameters
-DECODE_OPTS=--spat ${SPAT} --threads ${MAX_THREADS}
+DECODE_OPTS=--spat ${SPAT_EXPANDED} --threads ${MAX_THREADS}
 TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 
 #
@@ -443,9 +443,13 @@ airports-extract-rebuild: airports-extract-clean airports-extract
 
 prepare: elevations airports landmass landcover osm
 
-prepare-clean: elevations-clean airports-clean landmass-clean landcover-clean osm-clean
+prepare-clean: airports-clean landmass-clean landcover-clean osm-clean
+
+prepare-clean-all: prepare-clean elevations-clean # don't clean elevations by default
 
 prepare-rebuild: prepare-clean prepare
+
+prepare-rebuild-all: prepare-clean-all prepare
 
 #
 # Prepare elevation data from the DEMs
@@ -536,9 +540,11 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_EXTRACTED_FLAG} ${CONFIG_DIR}/landcover-la
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
+	    rm -rf ${TEMP_DIR}/$$name/${BUCKET} && mkdir ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
-	      ${WORK_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
+	      ${TEMP_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
+	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
+	    mv ${TEMP_DIR}/$$name/${BUCKET} ${WORKDIR}/$$name; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -566,15 +572,17 @@ osm-areas-clean:
 	done
 	rm -fv ${OSM_AREA_LAYERS_FLAG}
 
-${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
 	@echo -e "\nPrepareing OSM area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
+	    rm -rf ${TEMP_DIR}/$$name/${BUCKET} && mkdir ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
-	      ${WORK_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
+	      ${TEMP_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
+	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
+	    mv ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -591,15 +599,17 @@ osm-lines-clean:
 	done
 	rm -fv ${OSM_LINE_LAYERS_FLAG}
 
-${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_SHAPEFILE} ${CONFIG_DIR}/osm-layers.tsv
+${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
 	@echo -e "\nPreparing OSM line layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
+	    rm -rf ${TEMP_DIR}/$$name/${BUCKET} && mkdir ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
-	      ${WORK_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
+	      ${TEMP_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
+	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
+	    mv ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
