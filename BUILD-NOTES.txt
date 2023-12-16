@@ -1,3 +1,6 @@
+Elevation gullies:
+- gdalchop must do all FABDEM geotiffs in a single command
+- solution is to build overlapping areas in a temp directory, then move target bucket into working directory
 
 w080n40:
 - after building bucket, rebuild w74n40 (Manhattan) with SRTM-3, because FABDEM fails to filter out the skyscrapers

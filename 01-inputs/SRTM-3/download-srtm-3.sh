@@ -14,21 +14,20 @@
 
 DIR=Downloads
 
-ROWS="A B C D E F G H I J K L M N O P Q R S T U "
+ROWS="A B C D E F G H I J K L M N O P Q R S T U SA SB SC SD SE SF SG SH SI SJ SK SL SM SN"
 COLS="01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22"
 
-cd $DIR
+#cd $DIR
 
-for row in $ROWS; do
-    for col in $COLS; do
-        file=$row$col.zip
-        url=http://viewfinderpanoramas.org/dem3/$file
-        if [ ! -e $DIR/$file ]; then
-            wget -c -P $DIR -v $url || (rm -f $DIR/$file && exit 2)
-        else
-            echo "Skipping $file"
-        fi
-    done
+cat links.txt | while read url; do
+    file=$(basename $url)
+    if [ -e $DIR/$file ]; then
+        echo "Skipping $file"
+    else
+        wget -c -P $DIR -v $url || (rm -f $DIR/$file && exit 2)
+    fi
 done
+
+exit 0
 
 # end
