@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>North American scenery for FlightGear</title>
+    <title>Americas scenery for FlightGear</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
@@ -22,7 +22,7 @@
         <a href="./" class="logo">
           <img src="icon.png"/>
         </a>
-        North American scenery for FlightGear
+        Americas scenery for FlightGear
       </h1>
     </header>
     <main>
@@ -34,10 +34,10 @@
         <a href="#changes">changes</a>
       </nav>
       <p>
-        Improved North American scenery for the open-source <a
+        Improved default Americas scenery for the open-source <a
         href="https://flightgear.org">FlightGear</a> flight simulator
-        (including Greenland, Bermuda, the West Indies, and Central
-        America). Created by David Megginson.
+        (also including Iceland and Hawaii). Created by David
+        Megginson.
       </p>
 
       <p>
@@ -138,46 +138,104 @@
       <section id="changes">
         <h2>Major changes</h2>
 
+        <section id="changes=20231217">
+          <h3>2023-12-17</h3>
+          <ul>
+            <li>
+              Start building scenery south of the equator, and rebrand
+              as "Americas scenery" in the HTML pages. The name of the
+              actual scenery directory will change to
+              <code>fgfs-americas-scenery/</code> soon as well.
+            </li>
+            <li>
+              Tweak elevation and landcover extracts to use a 1 deg
+              overlap on each side of a 10x10 deg bucket, to help
+              avoid gullies and other discontinuities at the edges of
+              buckets.
+            </li>
+            <li>
+              Remove leisure=nature-reserve from the OSM areas built,
+              because sometimes the nature reserves are actually over
+              water instead of land.
+            </li>
+          </ul>
+        </section>
+
         <section id="changes-20231129">
           <h3>2023-11-29</h3>
           <ul>
-            <li>Switch to ws3.0 airport source, with significantly more airports and airport detail</li>
-            <li>Fixed elevation issue with airports that caused them to appear above or below scenery (was picking up SRTM-3 even when the scenery was using FABDEM)</li>
-            <li>Tweak OSM filter to pick up smaller areas for piers, lock gates, and breakwaters (normal cutoff is about 100x100m)</li>
-            <li>Add tertiary roads back into the scenery</li>
+            <li>
+              Switch to ws3.0 airport source, with significantly more
+              airports and airport detail
+            </li>
+            <li>
+              Fixed elevation issue with airports that caused them to
+              appear above or below scenery (was picking up SRTM-3
+              even when the scenery was using FABDEM)
+            </li>
+            <li>
+              Tweak OSM filter to pick up smaller areas for piers, lock gates, and breakwaters (normal cutoff is about 100x100m)
+            </li>
+            <li>
+              Add tertiary roads back into the scenery
+            </li>
           </ul>
         </section>
 
         <section id="changes-20231116">
           <h3>2023-11-16</h3>
           <ul>
-            <li>Add significantly-improved urban detail, including parks, recreation areas, educational areas, urban forests, etc (BuiltUpArea had previously had too high a priority)</li>
+            <li>
+              Add significantly-improved urban detail, including
+              parks, recreation areas, educational areas, urban
+              forests, etc (BuiltUpArea had previously had too high a
+              priority)
+            </li>
           </ul>
         </section>
 
         <section id="changes20231111">
           <h3>2023-11-11</h3>
           <ul>
-            <li>Major revamp for OSM areas.</li>
+            <li>
+              Major revamp for OSM areas.
+            </li>
           </ul>
         </section>
 
         <section id="changes20231027">
           <h3>2023-10-27</h3>
           <ul>
-            <li>Remove OSM airfield areas (civilian and military), because they don't always correspond to cleared space (especially concerned about water aerodromes).</li>
-            <li>Some tweaks for elevation data.</li>
-            <li>Correct some materials for roads.</li>
-            <li>Switch to OSM Planet for all scenery building, so that we can do any global scenery.</li>
+            <li>
+              Remove OSM airfield areas (civilian and military),
+              because they don't always correspond to cleared space
+              (especially concerned about water aerodromes).
+            </li>
+            <li>
+              Some tweaks for elevation data.
+            </li>
+            <li>
+              Correct some materials for roads.
+            </li>
+            <li>
+              Switch to OSM Planet for all scenery building, so that
+              we can do any global scenery.
+            </li>
           </ul>
         </section>
 
         <section id="changes20231015">
           <h3>2023-10-13</h3>
           <ul>
-            <li>Added Greenland</li>
-            <li>Added Bermuda</li>
-            <li>Added the Caribbean and West Indies</li>
+            <li>
+              Added Greenland
+            </li>
+            <li>
+              Added Bermuda
+            </li>
+            <li>
+              Added the Caribbean and West Indies
+            </li>
           </ul>
         </section>
 
