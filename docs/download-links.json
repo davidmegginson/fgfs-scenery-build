@@ -83,6 +83,12 @@
     "url": "https://www.dropbox.com/scl/fi/ow0we2mp6ntkhs81r9lwu/fgfs-canada-us-scenery-w050n80-20231015.tar?rlkey=plext6huo4d5pxs4ys8ir289w&dl=0",
     "size": 3348480
   },
+  "w050s30": {
+    "name": "fgfs-canada-us-scenery-w050s30-20231218.tar",
+    "date": "20231218",
+    "url": "https://www.dropbox.com/scl/fi/vt5l4csgsri2l7r4ijsw2/fgfs-canada-us-scenery-w050s30-20231218.tar?rlkey=h2gyib1ihxf9ca2jgri4zl66w&dl=0",
+    "size": 2094192640
+  },
   "w060n00": {
     "name": "fgfs-canada-us-scenery-w060n00-20231122.tar",
     "date": "20231122",
@@ -390,10 +396,10 @@
     "size": 928409600
   },
   "w110n50": {
-    "name": "fgfs-canada-us-scenery-w110n50-20231129.tar",
-    "date": "20231129",
-    "url": "https://www.dropbox.com/scl/fi/o2356yykqbzj415fjnzql/fgfs-canada-us-scenery-w110n50-20231129.tar?rlkey=x9ilcl33i4wruq0hpg8w847rr&dl=0",
-    "size": 768829440
+    "name": "fgfs-canada-us-scenery-w110n50-20231217.tar",
+    "date": "20231217",
+    "url": "https://www.dropbox.com/scl/fi/c700vgwty0lvn4jag9yd3/fgfs-canada-us-scenery-w110n50-20231217.tar?rlkey=9qhsurt0lz5ysxm41a0yv3tcv&dl=0",
+    "size": 762347520
   },
   "w110n60": {
     "name": "fgfs-canada-us-scenery-w110n60-20231209.tar",
@@ -426,10 +432,10 @@
     "size": 156928000
   },
   "w120n30": {
-    "name": "fgfs-canada-us-scenery-w120n30-20231201.tar",
-    "date": "20231201",
-    "url": "https://www.dropbox.com/scl/fi/1dmmy3bkdqb1f80c2wfjx/fgfs-canada-us-scenery-w120n30-20231201.tar?rlkey=xrnx2sdc73zdiy2mvq53vpcmr&dl=0",
-    "size": 1630648320
+    "name": "fgfs-canada-us-scenery-w120n30-20231218.tar",
+    "date": "20231218",
+    "url": "https://www.dropbox.com/scl/fi/cyetlo2lpu6wm981yiqwn/fgfs-canada-us-scenery-w120n30-20231218.tar?rlkey=90er5pjx5v59ptuabpzh4acri&dl=0",
+    "size": 1587927040
   },
   "w120n40": {
     "name": "fgfs-canada-us-scenery-w120n40-20231201.tar",
