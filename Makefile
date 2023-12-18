@@ -172,15 +172,12 @@ OSM_AREAS_SHAPEFILE=${DATA_DIR}/osm/${BUCKET}-areas.shp
 
 endif
 
-quadrant:
-	echo ${QUADRANT} ${QUADRANT_MIN_LON} ${QUADRANT_MIN_LAT} ${QUADRANT_MAX_LON} ${QUADRANT_MAX_LAT}
-
 # Area to actually build (scenery only)
 MIN_LAT:=${BUCKET_MIN_LAT}
 MIN_LON:=${BUCKET_MIN_LON}
 MAX_LAT:=${BUCKET_MAX_LAT}
 MAX_LON:=${BUCKET_MAX_LON}
-INCREMENT=1
+INCREMENT=10
 
 MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features)
 
@@ -191,6 +188,7 @@ MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features
 QUADRANT_EXTENT=$(shell expr ${QUADRANT_MIN_LON} - 1),$(shell expr ${QUADRANT_MIN_LAT} - 1),$(shell ${QUADRANT_MAX_LON} + 1),$(shell ${QUADRANT_MAX_LAT} + 1)
 SPAT=${BUCKET_MIN_LON} ${BUCKET_MIN_LAT} ${BUCKET_MAX_LON} ${BUCKET_MAX_LAT}
 SPAT_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1) $(shell expr ${BUCKET_MIN_LAT} - 1) $(shell expr ${BUCKET_MAX_LON} + 1)  $(shell expr ${BUCKET_MAX_LAT} + 1)
+BUCKET_LATLON_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1),$(shell expr ${BUCKET_MIN_LAT} - 1),$(shell expr ${BUCKET_MAX_LON} + 1),$(shell expr ${BUCKET_MAX_LAT} + 1)
 BUCKET_LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
 LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
@@ -234,8 +232,6 @@ OSM_AREAS_QUERY=man_made IN ('breakwater', 'pier') OR water IS NOT NULL OR water
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
-echo2: ${OSM_PBF}
-
 #
 # Prepare areas to include
 #
@@ -264,15 +260,14 @@ osm-greenfield-landuse osm-industrial-landuse				\
 osm-institutional-landuse osm-landfill-landuse osm-lava-natural		\
 osm-line-power osm-lock-gate-waterway-areas				\
 osm-lock-gate-waterway-lines osm-meadow-landuse osm-mine-man_made	\
-osm-motorway-highway osm-nature_reserve-leisure osm-orchard-landuse	\
-osm-park-leisure osm-pier-man_made-areas osm-pier-man_made-lines	\
-osm-primary-highway osm-quarry-landuse osm-railway-railway		\
-osm-recreation-ground-landuse osm-reef-natural-areas			\
-osm-reef-natural-lines osm-residential-landuse osm-retail-landuse	\
-osm-rock-natural osm-sand-natural osm-scrub-natural			\
-osm-secondary-highway osm-trunk-highway osm-tundra-natural		\
-osm-vineyard-landuse osm-water-natural osm-water-water			\
-osm-wetland-natural osm-wood-natural-deciduous				\
+osm-motorway-highway osm-orchard-landuse osm-park-leisure		\
+osm-pier-man_made-areas osm-pier-man_made-lines osm-primary-highway	\
+osm-quarry-landuse osm-railway-railway osm-recreation-ground-landuse	\
+osm-reef-natural-areas osm-reef-natural-lines osm-residential-landuse	\
+osm-retail-landuse osm-rock-natural osm-sand-natural			\
+osm-scrub-natural osm-secondary-highway osm-trunk-highway		\
+osm-tundra-natural osm-vineyard-landuse osm-water-natural		\
+osm-water-water osm-wetland-natural osm-wood-natural-deciduous		\
 osm-wood-natural-evergreen osm-wood-natural-mixed			\
 osm-wood-natural-unspecified
 
@@ -340,7 +335,11 @@ extract: landmass-extract landcover-extract osm-extract airports-extract
 
 extract-clean: landmass-extract-clean landcover-extract-clean osm-extract-clean airports-extract-clean
 
+extract-clean-all: landmass-extract-clean landcover-extract-clean osm-extract-clean-all airports-extract-clean
+
 extract-rebuild: extract-clean extract
+
+extract-rebuild-all: extract-clean-all extract
 
 #
 # Extract landmass (single file; no flag needed)
@@ -400,7 +399,7 @@ ${OSM_SOURCE}: ${OSM_PLANET}
 
 ${OSM_PBF}: ${OSM_SOURCE} # clip PBF to bucket to make processing more efficient; no flag needed
 	@echo -e "\nExtracting OSM PBF for ${BUCKET}..."
-	osmconvert ${OSM_SOURCE} -v -b=${BUCKET_MIN_LON},${BUCKET_MIN_LAT},${BUCKET_MAX_LON},${BUCKET_MAX_LAT} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+	osmconvert ${OSM_SOURCE} -v -b=${BUCKET_LATLON_EXPANDED} --complete-ways --complete-multipolygons --complete-boundaries -o=$@
 
 ${OSM_LINES_EXTRACTED_FLAG}: ${OSM_PBF} ${OSM_PBF_CONF}
 	@echo -e "\nExtracting foreground OSM line features for ${BUCKET}..."
@@ -468,7 +467,7 @@ ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} ${SCRIPT_DIR}/list-
 	mkdir -p ${TEMP_DIR} && gdalchop ${TEMP_DIR}/${DEM} $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET})
 	terrafit ${TEMP_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
 	rm -rf ${WORK_DIR}/${DEM}/${BUCKET} # remove any old stuff to avoid errors
-	mv -v ${TEMP_DIR}/${DEM}/${BUCKET} ${WORK_DIR}/${DEM}/${BUCKET}
+	[ -d ${TEMP_DIR}/${DEM}/${BUCKET} ] && mv -v ${TEMP_DIR}/${DEM}/${BUCKET} ${WORK_DIR}/${DEM}/${BUCKET}
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
 elevations-all-rebuild: elevations-all elevations-refit-all
@@ -540,11 +539,11 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_EXTRACTED_FLAG} ${CONFIG_DIR}/landcover-la
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    rm -rf ${TEMP_DIR}/$$name/${BUCKET} && mkdir ${TEMP_DIR}/$$name/${BUCKET}; \
+	    rm -rf ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
 	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
-	    mv ${TEMP_DIR}/$$name/${BUCKET} ${WORKDIR}/$$name; \
+	    [ -d ${TEMP_DIR}/$$name/${BUCKET} ] && mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -578,11 +577,12 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    rm -rf ${TEMP_DIR}/$$name/${BUCKET} && mkdir ${TEMP_DIR}/$$name/${BUCKET}; \
+	    rm -rf ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
+	    ls -l ${TEMP_DIR}/$$name; \
 	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
-	    mv ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
+	    [ -d ${TEMP_DIR}/$$name/${BUCKET} ] && mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -605,11 +605,11 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
 	    echo -e "\nTrying $$name..."; \
-	    rm -rf ${TEMP_DIR}/$$name/${BUCKET} && mkdir ${TEMP_DIR}/$$name/${BUCKET}; \
+	    rm -rf ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
 	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
-	    mv ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
+	    [ -d ${TEMP_DIR}/$$name/${BUCKET} ] && mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -624,7 +624,7 @@ scenery: extract prepare
 	for lat in $$(seq ${BUCKET_MIN_LAT} ${INCREMENT} $$(expr ${BUCKET_MAX_LAT} - 1)); do \
 	  for lon in $$(seq ${BUCKET_MIN_LON} ${INCREMENT} $$(expr ${BUCKET_MAX_LON} - 1)); do \
 	    tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	      --min-lat=$$lat --min-lon=$$lon --max-lat=$$(expr $$lat + 1) --max-lon=$$(expr $$lon + 1) \
+	      --min-lat=$$lat --min-lon=$$lon --max-lat=$$(expr $$lat + ${INCREMENT}) --max-lon=$$(expr $$lon + ${INCREMENT}) \
 	      --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS};\
 	  done; \
 	done

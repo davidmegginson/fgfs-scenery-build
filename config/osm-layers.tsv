@@ -34,7 +34,6 @@ osm-meadow-landuse	yes	area	CropGrass	-	(landuse='meadow' or crop in ('grass', '
 osm-mine-man_made	yes	area	OpenMining	-	man_made='mine'
 osm-motorway-highway	no	line	ShrubGrassCover	30	highway in ('motorway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-motorway-highway	yes	line	Freeway	10	highway in ('motorway') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
-osm-nature_reserve-leisure	yes	area	Greenspace	-	leisure='nature_reserve'
 osm-orchard-landuse	yes	area	Orchard	-	landuse='orchard'
 osm-park-leisure	yes	area	Greenspace	-	leisure='park'
 osm-pier-man_made-areas	yes	line	BarrenCover	10	man_made='pier'

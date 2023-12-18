@@ -1,7 +1,20 @@
-Elevation gullies:
+Vegetation:
+- crashing (e.g. for TXKF) in osg::Image::getColor called by SGTriangleInfo:addRandomTreePoints adding trees using texture ${FG_ROOT}/Textures/Trees/tropical-alt.png
+
+
+Elevations:
 - gdalchop must do all FABDEM geotiffs in a single command
-- solution is to build overlapping areas in a temp directory, then move target bucket into working directory
+- solution is to build overlapping areas in a temp directory, then
+  move target bucket into working directory
+
+OSM:
+
+- leisure=nature-reserve may be a marine area (like the Galapagos), so
+  don't use for scenery building
 
 w080n40:
-- after building bucket, rebuild w74n40 (Manhattan) with SRTM-3, because FABDEM fails to filter out the skyscrapers
+
+- after building bucket, rebuild w74n40 (Manhattan) with SRTM-3,
+  because FABDEM fails to filter out the skyscrapers
+
 - note also some missing textures in Queens west of KLGA
