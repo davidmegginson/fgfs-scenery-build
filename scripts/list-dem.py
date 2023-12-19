@@ -80,7 +80,7 @@ def dem_file_in_bounds_p (filename, bounds):
     The filename is in the format N00W000 (etc) with a .tif or .hgt extension
     
     """
-    result = re.match(r'([NS])(\d{2})([EW])(\d{3}).*\.(tif|hgt)$', filename)
+    result = re.match(r'([NS])(\d{2})([EW])(\d{3}).*\.(TIF|HGT)$', filename.upper())
     if not result:
         raise Exception("Badly-formatted DEM name " + filename)
     lat = int(result.group(2)) * (1 if result.group(1) == 'N' else -1)
