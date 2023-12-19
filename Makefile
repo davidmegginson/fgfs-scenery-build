@@ -543,7 +543,7 @@ landcover-rebuild: landcover-clean landcover
 
 ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_EXTRACTED_FLAG} ${CONFIG_DIR}/landcover-layers.tsv
 	rm -f $@
-	@echo -e "\nPrepareing landcover area layers...\n"
+	@echo -e "\nPreparing landcover area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/landcover-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
@@ -581,7 +581,7 @@ osm-areas-clean:
 
 ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.tsv
 	rm -f $@
-	@echo -e "\nPrepareing OSM area layers...\n"
+	@echo -e "\nPreparing OSM area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
 	    echo -e "\nTrying $$name..."; \
