@@ -11,10 +11,8 @@ body {
 }
 
 #map {
-    width: 80vw;
-    height: 80vw;
-    max-width: 800px;
-    max-height: 800px;
+    width: 99vw;
+    height: 69vw;
 }
 
 dl dt {
