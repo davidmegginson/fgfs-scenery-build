@@ -153,12 +153,18 @@ BUCKET_MIN_LAT=$(shell echo ${BUCKET} | sed -e 's/^.*s0*/-/' -e 's/^.*n//')
 BUCKET_MAX_LON=$(shell expr ${BUCKET_MIN_LON} + 10)
 BUCKET_MAX_LAT=$(shell expr ${BUCKET_MIN_LAT} + 10)
 
+# expanded by 1 deg in each direction to allow overlap for elevations and land areas
+BUCKET_MIN_LON_EXPANDED=$(shell [ ${BUCKET_MIN_LON} -eq -180 ] && echo 179 || expr ${BUCKET_MIN_LON} - 1)
+BUCKET_MIN_LAT_EXPANDED=$(shell [ ${BUCKET_MIN_LAT} -eq -90 ] && echo -90 || expr ${BUCKET_MIN_LAT} - 1)
+BUCKET_MAX_LON_EXPANDED=$(shell [ ${BUCKET_MAX_LON} -eq 180 ] && echo -179 || expr ${BUCKET_MAX_LON} + 1)
+BUCKET_MAX_LAT_EXPANDED=$(shell [ ${BUCKET_MAX_LAT} -eq 90 ] && echo 90 || expr ${BUCKET_MAX_LAT} + 1)
+
 # Quadrant
 QUADRANT=$(shell [ ${BUCKET_MIN_LAT} -lt 0 ] && echo s || echo n)$(shell [ ${BUCKET_MIN_LON} -lt 0 ] && echo w || echo e)
-QUADRANT_MIN_LON=$(shell [ ${BUCKET_MIN_LON} -lt 0 ] && echo -180 || echo 0)
+QUADRANT_MIN_LON=$(shell [ ${BUCKET_MIN_LON} -lt 0 ] && echo 179 || echo 0)
 QUADRANT_MIN_LAT=$(shell [ ${BUCKET_MIN_LAT} -lt 0 ] && echo -90 || echo 0)
-QUADRANT_MAX_LON=$(shell expr ${QUADRANT_MIN_LON} + 180)
-QUADRANT_MAX_LAT=$(shell expr ${QUADRANT_MIN_LAT} + 90)
+QUADRANT_MAX_LON=$(shell [ ${BUCKET_MIN_LON} -ge 0 ] && echo -179 || echo 0)
+QUADRANT_MAX_LAT=$(shell [ ${BUCKET_MIN_LAT} -ge 0 ] && echo 90 || echo 0)
 
 #
 # Data extracts (specific to bucket)
@@ -187,8 +193,8 @@ MIN_FEATURE_AREA=0.00000004 # approx 200m^2 (for landcover and OSM area features
 #
 QUADRANT_EXTENT=$(shell expr ${QUADRANT_MIN_LON} - 1),$(shell expr ${QUADRANT_MIN_LAT} - 1),$(shell ${QUADRANT_MAX_LON} + 1),$(shell ${QUADRANT_MAX_LAT} + 1)
 SPAT=${BUCKET_MIN_LON} ${BUCKET_MIN_LAT} ${BUCKET_MAX_LON} ${BUCKET_MAX_LAT}
-SPAT_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1) $(shell expr ${BUCKET_MIN_LAT} - 1) $(shell expr ${BUCKET_MAX_LON} + 1)  $(shell expr ${BUCKET_MAX_LAT} + 1)
-BUCKET_LATLON_EXPANDED=$(shell expr ${BUCKET_MIN_LON} - 1),$(shell expr ${BUCKET_MIN_LAT} - 1),$(shell expr ${BUCKET_MAX_LON} + 1),$(shell expr ${BUCKET_MAX_LAT} + 1)
+SPAT_EXPANDED=${BUCKET_MIN_LON_EXPANDED} ${BUCKET_MIN_LAT_EXPANDED} ${BUCKET_MAX_LON_EXPANDED} ${BUCKET_MAX_LAT_EXPANDED}
+BUCKET_LATLON_EXPANDED=${BUCKET_MIN_LON_EXPANDED},${BUCKET_MIN_LAT_EXPANDED},${BUCKET_MAX_LON_EXPANDED},${BUCKET_MAX_LAT_EXPANDED}
 BUCKET_LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
 LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
@@ -307,7 +313,9 @@ VENV=./venv/bin/activate
 
 all: extract prepare
 
-all-rebuild: extract-rebuild prepare-rebuild scenery-rebuild
+rebuild: extract-clean prepare-clean scenery-rebuild
+
+rebuild-all: elevations rebuild
 
 construct: scenery
 
@@ -467,7 +475,7 @@ ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} ${SCRIPT_DIR}/list-
 	mkdir -p ${TEMP_DIR} && gdalchop ${TEMP_DIR}/${DEM} $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET})
 	terrafit ${TEMP_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
 	rm -rf ${WORK_DIR}/${DEM}/${BUCKET} # remove any old stuff to avoid errors
-	[ -d ${TEMP_DIR}/${DEM}/${BUCKET} ] && mv -v ${TEMP_DIR}/${DEM}/${BUCKET} ${WORK_DIR}/${DEM}/${BUCKET}
+	if [ -d ${TEMP_DIR}/${DEM}/${BUCKET} ]; then mv -v ${TEMP_DIR}/${DEM}/${BUCKET} ${WORK_DIR}/${DEM}/${BUCKET}; fi; \
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
 
 elevations-all-rebuild: elevations-all elevations-refit-all
@@ -543,7 +551,7 @@ ${LANDCOVER_LAYERS_FLAG}: ${LANDCOVER_EXTRACTED_FLAG} ${CONFIG_DIR}/landcover-la
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${LANDCOVER_SHAPEFILE} || exit 1;\
 	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
-	    [ -d ${TEMP_DIR}/$$name/${BUCKET} ] && mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
+	    if [ -d ${TEMP_DIR}/$$name/${BUCKET} ]; then mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; fi; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -580,9 +588,9 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 	    rm -rf ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
-	    ls -l ${TEMP_DIR}/$$name; \
+	    echo Moving from ${TEMP_DIR}; \
 	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
-	    [ -d ${TEMP_DIR}/$$name/${BUCKET} ] && mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
+	    if [ -d ${TEMP_DIR}/$$name/${BUCKET} ]; then mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; fi; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
@@ -609,7 +617,7 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\
 	    rm -rf ${WORK_DIR}/$$name/${BUCKET}; \
-	    [ -d ${TEMP_DIR}/$$name/${BUCKET} ] && mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; \
+	    if [ -d ${TEMP_DIR}/$$name/${BUCKET} ]; then mv -v ${TEMP_DIR}/$$name/${BUCKET} ${WORK_DIR}/$$name; fi; \
 	  fi; \
 	done
 	mkdir -p ${FLAGS_DIR} && touch $@
