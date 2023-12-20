@@ -643,7 +643,7 @@ scenery-clean:
 scenery-rebuild: scenery-clean scenery
 
 # Build or rebuild an area of scenery with no dependencies bucket limitation (can cross bucket): HANDLE WITH CARE
-scenery-no-bucket: latlon-test
+scenery-no-bucket:
 	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
 
