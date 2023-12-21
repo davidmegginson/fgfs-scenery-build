@@ -162,10 +162,10 @@
     "size": 1151047680
   },
   "w060s20": {
-    "name": "fgfs-canada-us-scenery-w060s20-20231213.tar",
-    "date": "20231213",
-    "url": "https://www.dropbox.com/scl/fi/cpa6pt3lsdqqxcv9k2hf1/fgfs-canada-us-scenery-w060s20-20231213.tar?rlkey=aadhvfw5y5vndbveb3sdcw51i&dl=0",
-    "size": 653219840
+    "name": "fgfs-canada-us-scenery-w060s20-20231221.tar",
+    "date": "20231221",
+    "url": "https://www.dropbox.com/scl/fi/ax084m1wtr3b5ur67xevd/fgfs-canada-us-scenery-w060s20-20231221.tar?rlkey=7ww43zsqlx9ff92i4n8i6hadu&dl=0",
+    "size": 652984320
   },
   "w060s30": {
     "name": "fgfs-canada-us-scenery-w060s30-20231218.tar",
@@ -233,6 +233,12 @@
     "url": "https://www.dropbox.com/scl/fi/jyackgfsnzyd6ywlsy2ju/fgfs-canada-us-scenery-w070n80-20231031.tar?rlkey=rzvfrsywjq6n4q6enchdc4o21&dl=0",
     "size": 48465920
   },
+  "w070s10": {
+    "name": "fgfs-canada-us-scenery-w070s10-20231221.tar",
+    "date": "20231221",
+    "url": "https://www.dropbox.com/scl/fi/yfaw7ep2bcbqoskugyg0a/fgfs-canada-us-scenery-w070s10-20231221.tar?rlkey=ve8qkyhyb9svr1y0egkmsgb0v&dl=0",
+    "size": 480727040
+  },
   "w070s20": {
     "name": "fgfs-canada-us-scenery-w070s20-20231219.tar",
     "date": "20231219",
@@ -250,6 +256,12 @@
     "date": "20231218",
     "url": "https://www.dropbox.com/scl/fi/69dhqfgy5jv1wwimwmoih/fgfs-canada-us-scenery-w070s40-20231218.tar?rlkey=7ei3vwwrkbxlqign8a25w27xc&dl=0",
     "size": 518778880
+  },
+  "w070s50": {
+    "name": "fgfs-canada-us-scenery-w070s50-20231221.tar",
+    "date": "20231221",
+    "url": "https://www.dropbox.com/scl/fi/x3trtc2zfi81n1cpldpip/fgfs-canada-us-scenery-w070s50-20231221.tar?rlkey=a9454qjjpyc0bz8mr9b8xh6re&dl=0",
+    "size": 207308800
   },
   "w070s60": {
     "name": "fgfs-canada-us-scenery-w070s60-20231219.tar",
@@ -432,10 +444,10 @@
     "size": 1888215040
   },
   "w100n40": {
-    "name": "fgfs-canada-us-scenery-w100n40-20231129.tar",
-    "date": "20231129",
-    "url": "https://www.dropbox.com/scl/fi/twuikcd4okq4uzp0i8x5x/fgfs-canada-us-scenery-w100n40-20231129.tar?rlkey=opv82zg85jeab970tw65najif&dl=0",
-    "size": 1637591040
+    "name": "fgfs-canada-us-scenery-w100n40-20231221.tar",
+    "date": "20231221",
+    "url": "https://www.dropbox.com/scl/fi/ssacgi9ytmcu0iaqbv6p2/fgfs-canada-us-scenery-w100n40-20231221.tar?rlkey=qndba98ctk6nts1fjcawucx6c&dl=0",
+    "size": 1629931520
   },
   "w100n50": {
     "name": "fgfs-canada-us-scenery-w100n50-20231202.tar",
