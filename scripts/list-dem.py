@@ -17,9 +17,9 @@ def parse_bucket (bucket):
 
     def norm_lon(lon):
         if lon < -180:
-            lon += 360
-        elif lon > 179:
-            lon -= 360
+            lon = -180
+        elif lon > 180:
+            lon -= 180
         return lon
 
     def norm_lat(lat):
@@ -61,20 +61,10 @@ def check_in_bounds(lon, lat, bounds):
     """
     (min_lon, min_lat, max_lon, max_lat,) = bounds
 
-    # latitude is easy
-    if lat < min_lat or lat > max_lat:
+    if lat < min_lat or lat > max_lat or lon < min_lon or lon > max_lon:
         return False
-
-    # longitude is trickier because of the antimeridian
-    if min_lon > max_lon:
-        # bounds cross antimeridian
-        result = (lon > max_lon or lon < min_lon)
     else:
-        # bounds do not cross antimeridian
-        result = not (lon > max_lon or lon < min_lon)
-
-    return result
-
+        return True
 
 def dem_file_in_bounds_p (filename, bounds):
     """ Check a DEM filename against the bounds
