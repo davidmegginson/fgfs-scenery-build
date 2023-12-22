@@ -12,15 +12,14 @@ Where BUCKET is a 10x10 deg bucket name like w080n40.
 
 import pathlib, re, sys
 
-
 def parse_bucket (bucket):
     """ Parse a bucket into its bounds, with a 1 deg overlap in each direction"""
 
     def norm_lon(lon):
-        while lon < -180:
-            lon += 180
-        while lon > 179:
-            lon -= 180
+        if lon < -180:
+            lon += 360
+        elif lon > 179:
+            lon -= 360
         return lon
 
     def norm_lat(lat):
@@ -33,8 +32,8 @@ def parse_bucket (bucket):
     result = re.match(r'^([ew])(\d{3})([ns])(\d{2})$', bucket)
     if not result:
         raise Exception("Badly-formatted bucket " + bucket)
-    min_lon = int(result.group(2)) * (1 if result.group(1) == 'e' else -1)
-    min_lat = int(result.group(4)) * (1 if result.group(3) == 'n' else -1)
+    min_lon = norm_lon(int(result.group(2)) * (1 if result.group(1) == 'e' else -1))
+    min_lat = norm_lat(int(result.group(4)) * (1 if result.group(3) == 'n' else -1))
     return (
         norm_lon(min_lon - 1),
         norm_lat(min_lat - 1),
@@ -67,12 +66,14 @@ def check_in_bounds(lon, lat, bounds):
         return False
 
     # longitude is trickier because of the antimeridian
-    if abs(max_lon - min_lon) >= 180:
+    if min_lon > max_lon:
         # bounds cross antimeridian
-        return (lon > max_lon or lon < min_lon)
+        result = (lon > max_lon or lon < min_lon)
     else:
         # bounds do not cross antimeridian
-        return not (lon > max_lon or lon < min_lon)
+        result = not (lon > max_lon or lon < min_lon)
+
+    return result
 
 
 def dem_file_in_bounds_p (filename, bounds):
@@ -113,7 +114,8 @@ if __name__ == "__main__":
     INPUT_DIR=sys.argv[1]
     BUCKET=sys.argv[2]
 
-    files = find_matching_dem_files(INPUT_DIR, parse_bucket(BUCKET))
+    bounds = parse_bucket(BUCKET)
+    files = find_matching_dem_files(INPUT_DIR, bounds)
     for file in files:
         print(file)
 
