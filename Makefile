@@ -130,6 +130,7 @@
 # Basic setup
 SHELL=/bin/bash
 MAX_THREADS=1
+LOG_LEVEL=info
 
 # Directories
 SCENERY_NAME=fgfs-canada-us-scenery
@@ -197,6 +198,10 @@ SPAT_EXPANDED=${BUCKET_MIN_LON_EXPANDED} ${BUCKET_MIN_LAT_EXPANDED} ${BUCKET_MAX
 BUCKET_LATLON_EXPANDED=${BUCKET_MIN_LON_EXPANDED},${BUCKET_MIN_LAT_EXPANDED},${BUCKET_MAX_LON_EXPANDED},${BUCKET_MAX_LAT_EXPANDED}
 BUCKET_LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max-lon=${BUCKET_MAX_LON} --max-lat=${BUCKET_MAX_LAT}
 LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
+
+# common command-line parameters
+DECODE_OPTS=--spat ${SPAT_EXPANDED} --threads ${MAX_THREADS}
+TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
 
 #
 # Data sources
@@ -275,11 +280,7 @@ osm-wood-natural-unspecified
 
 PREPARE_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
 
-# common command-line parameters
-DECODE_OPTS=--spat ${SPAT_EXPANDED} --threads ${MAX_THREADS}
-TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
-CONSTRUCT_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	--priorities=${CONFIG_DIR}/default_priorities.txt
+CONSTRUCT_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain
 
 #
 # Build flags
@@ -633,9 +634,9 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 scenery: extract prepare
 	for lat in $$(seq ${BUCKET_MIN_LAT} ${INCREMENT} $$(expr ${BUCKET_MAX_LAT} - 1)); do \
 	  for lon in $$(seq ${BUCKET_MIN_LON} ${INCREMENT} $$(expr ${BUCKET_MAX_LON} - 1)); do \
-	    tg-construct ${CONSTRUCT_OPTS} \
+	    tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	      --min-lat=$$lat --min-lon=$$lon --max-lat=$$(expr $$lat + ${INCREMENT}) --max-lon=$$(expr $$lon + ${INCREMENT}) \
-	      ${PREPARE_AREAS}
+	      --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS};\
 	  done; \
 	done
 
@@ -646,33 +647,9 @@ scenery-rebuild: scenery-clean scenery
 
 # Build or rebuild an area of scenery with no dependencies bucket limitation (can cross bucket): HANDLE WITH CARE
 scenery-no-bucket:
-	tg-construct ${CONSTRUCT_OPTS} ${LATLON_OPTS} ${PREPARE_AREAS}
+	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
 
-
-# Fill in seams around a bucket (if they exist)
-# Note: doesn't check for antimeridian or poles
-
-OVERLAP=0.025
-
-seam-north:
-	tg-construct ${CONSTRUCT_OPTS} \
-	  --min-lon=${MIN_LON} --min-lat=$(shell expr ${MAX_LAT} - 0.025) --max-lon=${MAX_LON} --max_lat=$(shell expr ${MAX_LAT} + 0.025) \
-	  ${PREPARE_AREAS}
-
-seam-south:
-	tg-construct ${CONSTRUCT_OPTS} \
-	  --min-lon=${MIN_LON} --min-lat=$(shell expr ${MIN_LAT} - 0.025) --max-lon=${MAX_LON} --max_lat=$(shell expr ${MIN_LAT} + 0.025) \
-	  ${PREPARE_AREAS}
-
-seam-east:
-	tg-construct ${CONSTRUCT_OPTS} \
-	  --min-lon=$(shell expr ${MAX_LON} - 0.025) --min-lat=${MIN_LAT} --max-lon=$(shell{MAX_LON} + 0.025) --max_lat=${MAX_LAT} \
-	  ${PREPARE_AREAS}
-
-seam-west:
-	tg-construct ${CONSTRUCT_OPTS} \
-	  --min-lon=$(shell expr ${MIN_LON} - 0.025) --min-lat=${MIN_LAT} --max-lon=$(shell{MIN_LON} + 0.025) --max_lat=${MAX_LAT} \
-	  ${PREPARE_AREAS}
 
 
 ########################################################################
