@@ -10,6 +10,18 @@ body {
     height: 2ex;
 }
 
+.notice {
+    background: #ffffee;
+    padding: 1ex;
+    border: solid #aaaaaa 1px;
+    border-radius: 1ex;
+}
+
+.notice::before {
+    font-weight: bold;
+    content: "Notice: ";
+}
+
 #map {
     width: 60vh;
     height: 80vh;
