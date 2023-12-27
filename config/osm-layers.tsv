@@ -22,6 +22,7 @@ osm-golf-leisure	yes	area	GolfCourse	-	leisure='golf_course'
 osm-golf-sport	yes	area	GolfCourse	-	sport='golf'
 osm-grass-landuse	yes	area	Greenspace	-	landuse='grass'
 osm-grassland-natural	yes	area	Grassland	-	natural='grassland'
+osm-gravel-surface	yes	area	Gravel	-	surface='gravel'
 osm-greenfield-landuse	yes	area	Greenspace	-	landuse='greenfield'
 osm-industrial-landuse	yes	area	Industrial	-	landuse='industrial'
 osm-institutional-landuse	yes	area	ShrubGrassCover	-	landuse='institutional'
@@ -48,8 +49,9 @@ osm-reef-natural-areas	yes	area	Stream	-	natural='reef'
 osm-reef-natural-lines	yes	line	Stream	30	natural='reef'
 osm-residential-landuse	yes	area	Town	-	landuse='residential'
 osm-retail-landuse	yes	area	Urban	-	landuse='retail'
+osm-riverbank-waterway  yes     area    Greenspace      -       waterway in ('riverbank')
 osm-rock-natural	yes	area	Rock	-	natural in ('bare_rock', 'scree', 'stone')
-osm-sand-natural	yes	area	Sand	-	natural in ('beach', 'dune', 'sand')
+osm-sand-natural	yes	area	Sand	-	natural in ('beach', 'dune', 'sand') and (surface is null or surface != 'gravel')
 osm-scrub-natural	yes	area	Scrub	-	natural in ('fell', 'heath', 'moor', 'scrub')
 osm-secondary-highway	no	line	ShrubGrassCover	16	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
 osm-secondary-highway	yes	line	Road	8	highway in ('secondary') and (tunnel is null or tunnel != 'yes') and (bridge is null or bridge != 'yes')
@@ -61,7 +63,9 @@ osm-tundra-natural	yes	area	HerbTundra	-	natural in ('tundra')
 osm-vineyard-landuse	yes	area	Vineyard	-	landuse='vineyard'
 osm-water-natural	yes	area	Lake	-	natural in ('bay', 'strait', 'shoal', 'water')
 osm-water-water	yes	area	Lake	-	water in ('lagoon', 'lake', 'oxbow', 'rapids', 'river', 'basin', 'canal', 'harbour', 'lock', 'pond', 'reservoir', 'wastewater', 'stream', 'stream_pool')
+osm-water-waterway      area    Lake    -       waterway in ('reservoir', 'water')
 osm-wetland-natural	yes	area	Marsh	-	natural='wetland'
+osm-wetland-waterway	yes	area	Marsh	-	waterway='wetland'
 osm-wood-natural-deciduous	yes	area	DeciduousForest	-	natural='wood' and leaf_type='deciduous'
 osm-wood-natural-evergreen	yes	area	EvergreenForest	-	natural='wood' and leaf_type='evergreen'
 osm-wood-natural-mixed	yes	area	MixedForest	-	natural='wood' and leaf_type='mixed'

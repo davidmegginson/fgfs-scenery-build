@@ -1,16 +1,27 @@
 Vegetation:
-- crashing (e.g. for TXKF) in osg::Image::getColor called by SGTriangleInfo:addRandomTreePoints adding trees using texture ${FG_ROOT}/Textures/Trees/tropical-alt.png
+
+- crashing (e.g. for TXKF) in osg::Image::getColor called by
+  SGTriangleInfo:addRandomTreePoints adding trees using texture
+  ${FG_ROOT}/Textures/Trees/tropical-alt.png
 
 
 Elevations:
+
 - gdalchop must do all FABDEM geotiffs in a single command
+
 - solution is to build overlapping areas in a temp directory, then
   move target bucket into working directory
+
+- also need to build from north to south to avoid elevation gullies
 
 OSM:
 
 - leisure=nature-reserve may be a marine area (like the Galapagos), so
   don't use for scenery building
+
+w120n10:
+
+- blank tile near MM81
 
 w080n40:
 

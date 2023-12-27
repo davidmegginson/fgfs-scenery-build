@@ -234,8 +234,29 @@ endif
 
 # Queries for creating intermediate shapefiles from the OSM PBF
 # TODO this duplicates info in config/osm-layers.tsv; we need it all in one place
-OSM_LINES_QUERY=(highway IN ('motorway', 'primary', 'secondary', 'tertiary', 'trunk') OR man_made IN ('breakwater', 'pier') OR natural IN ('reef') OR power IN ('line') OR railway IN ('abandoned', 'rail') OR waterway IN ('dam', 'lock_gate'))
-OSM_AREAS_QUERY=man_made IN ('breakwater', 'pier') OR water IS NOT NULL OR waterway IN ('dam', 'lock_gate') OR (OGR_GEOM_AREA >= ${MIN_FEATURE_AREA} AND (amenity IN ('college', 'school', 'university') OR landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', 'forest', 'grass', 'greenfield', 'industrial', 'institutional', 'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', 'residential', 'retail', 'vineyard', 'wood') OR leisure IN ('golf_course', 'nature_reserve', 'park') OR man_made IN ('mine') OR natural IN ('grassland', 'reef', 'wetland', 'wood') OR sport IN ('golf') OR water IS NOT NULL))
+
+OSM_LINES_QUERY=highway IN ('motorway', 'primary', 'secondary', 'tertiary', 'trunk') OR \
+	man_made IN ('breakwater', 'pier') OR \
+	natural IN ('reef') OR \
+	power IN ('line') OR \
+	railway IN ('abandoned', 'rail') OR \
+	waterway IN ('dam', 'lock_gate')
+
+OSM_AREAS_QUERY=man_made IN ('breakwater', 'pier') OR \
+	natural IN ('beach', 'cliff', 'gully', 'reef', 'sand', 'volcano') OR \
+	water IS NOT NULL OR \
+	waterway IN ('dam', 'lock_gate', 'reservoir', 'riverbank', 'water', 'wetland') OR \
+	(OGR_GEOM_AREA >= ${MIN_FEATURE_AREA} AND ( \
+		amenity IN ('college', 'school', 'university') OR \
+		landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', \
+			'forest', 'grass', 'greenfield', 'industrial', 'institutional', \
+			'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', \
+			'residential', 'retail', 'vineyard', 'wood') OR \
+		leisure IN ('golf_course', 'nature_reserve', 'park') OR \
+		man_made IN ('mine') OR \
+		natural IN ('grassland', 'wetland', 'wood') OR \
+		sport IN ('golf') \
+	))
 
 AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 
@@ -271,10 +292,11 @@ osm-motorway-highway osm-orchard-landuse osm-park-leisure		\
 osm-pier-man_made-areas osm-pier-man_made-lines osm-primary-highway	\
 osm-quarry-landuse osm-railway-railway osm-recreation-ground-landuse	\
 osm-reef-natural-areas osm-reef-natural-lines osm-residential-landuse	\
-osm-retail-landuse osm-rock-natural osm-sand-natural			\
-osm-scrub-natural osm-secondary-highway osm-trunk-highway		\
-osm-tundra-natural osm-vineyard-landuse osm-water-natural		\
-osm-water-water osm-wetland-natural osm-wood-natural-deciduous		\
+osm-retail-landuse osm-riverbank-waterway osm-rock-natural		\
+osm-sand-natural osm-scrub-natural osm-secondary-highway		\
+osm-trunk-highway osm-tundra-natural osm-vineyard-landuse		\
+osm-water-natural osm-water-water osm-water-waterway			\
+osm-wetland-natural osm-wetland-waterway osm-wood-natural-deciduous	\
 osm-wood-natural-evergreen osm-wood-natural-mixed			\
 osm-wood-natural-unspecified
 
@@ -630,13 +652,17 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 # 3. Construct
 ########################################################################
 
-# Build a 10x10 scenery bucket in 1x1 deg areas
+TG_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} \
+	--work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
+	--priorities=${CONFIG_DIR}/default_priorities.txt
+
+# Build a 10x10 scenery bucket, possibly split up into smaller areas
 scenery: extract prepare
 	for lat in $$(seq ${BUCKET_MIN_LAT} ${INCREMENT} $$(expr ${BUCKET_MAX_LAT} - 1)); do \
 	  for lon in $$(seq ${BUCKET_MIN_LON} ${INCREMENT} $$(expr ${BUCKET_MAX_LON} - 1)); do \
-	    tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	      --min-lat=$$lat --min-lon=$$lon --max-lat=$$(expr $$lat + ${INCREMENT}) --max-lon=$$(expr $$lon + ${INCREMENT}) \
-	      --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS};\
+	    tg-construct ${TG_OPTS} \
+		--min-lat=$$lat --min-lon=$$lon --max-lat=$$(expr $$lat + ${INCREMENT}) --max-lon=$$(expr $$lon + ${INCREMENT}) \
+		${PREPARE_AREAS};\
 	  done; \
 	done
 
@@ -647,8 +673,7 @@ scenery-rebuild: scenery-clean scenery
 
 # Build or rebuild an area of scenery with no dependencies bucket limitation (can cross bucket): HANDLE WITH CARE
 scenery-no-bucket:
-	tg-construct --ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
-	  ${LATLON_OPTS} --priorities=${CONFIG_DIR}/default_priorities.txt ${PREPARE_AREAS}
+	tg-construct ${TG_OPTS} ${LATLON_OPTS} ${PREPARE_AREAS}
 
 
 

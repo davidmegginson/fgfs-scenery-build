@@ -24,7 +24,9 @@ body {
 
 #map {
     width: 60vh;
+    min-width: 1200px;
     height: 80vh;
+    min-height: 1600px;
 }
 
 #map {

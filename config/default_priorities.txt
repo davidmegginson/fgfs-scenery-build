@@ -36,6 +36,7 @@ Saline			other	# Saline
 Littoral		other	# Tidal, Sand-covered area
 Dirt			other
 Rock			other	# Rock
+Gravel                  other
 Lava			other	# Lava-covered area
 OpenMining		other	# OpenMining
 Greenspace		other
