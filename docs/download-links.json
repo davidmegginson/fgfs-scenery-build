@@ -119,6 +119,12 @@
     "url": "https://www.dropbox.com/scl/fi/qg7ro0fzsr4qzfvgz1s9r/fgfs-canada-us-scenery-w050s30-20231227.tar?rlkey=k5ltg83u5rmp0ag1lv4o8qp1q&dl=0",
     "size": 2097295360
   },
+  "w050s60": {
+    "name": "fgfs-canada-us-scenery-w050s60-20240103.tar",
+    "date": "20240103",
+    "url": "https://www.dropbox.com/scl/fi/72qrvloa0k8wr2hjl9s7t/fgfs-canada-us-scenery-w050s60-20240103.tar?rlkey=a6da81u2zn0od1x86u4p2wk8z&dl=0",
+    "size": 40960
+  },
   "w060n00": {
     "name": "fgfs-canada-us-scenery-w060n00-20240101.tar",
     "date": "20240101",
