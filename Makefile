@@ -155,9 +155,9 @@ BUCKET_MAX_LON=$(shell expr ${BUCKET_MIN_LON} + 10)
 BUCKET_MAX_LAT=$(shell expr ${BUCKET_MIN_LAT} + 10)
 
 # expanded by 1 deg in each direction to allow overlap for elevations and land areas
-BUCKET_MIN_LON_EXPANDED=$(shell [ ${BUCKET_MIN_LON} -eq -180 ] && echo 179 || expr ${BUCKET_MIN_LON} - 1)
+BUCKET_MIN_LON_EXPANDED=$(shell [ ${BUCKET_MIN_LON} -eq -180 ] && echo -180 || expr ${BUCKET_MIN_LON} - 1)
 BUCKET_MIN_LAT_EXPANDED=$(shell [ ${BUCKET_MIN_LAT} -eq -90 ] && echo -90 || expr ${BUCKET_MIN_LAT} - 1)
-BUCKET_MAX_LON_EXPANDED=$(shell [ ${BUCKET_MAX_LON} -eq 180 ] && echo -179 || expr ${BUCKET_MAX_LON} + 1)
+BUCKET_MAX_LON_EXPANDED=$(shell [ ${BUCKET_MAX_LON} -eq 180 ] && echo 180 || expr ${BUCKET_MAX_LON} + 1)
 BUCKET_MAX_LAT_EXPANDED=$(shell [ ${BUCKET_MAX_LAT} -eq 90 ] && echo 90 || expr ${BUCKET_MAX_LAT} + 1)
 
 # Quadrant
@@ -340,24 +340,13 @@ all: extract prepare
 
 rebuild: extract-clean prepare-clean scenery-rebuild
 
-rebuild-all: elevations rebuild
+rebuild-all: elevations-rebuild rebuild
 
 construct: scenery
 
 reconstruct: scenery-rebuild
 
 publish: archive publish-cloud
-
-# test if BUCKET is defined
-bucket-test:
-	@test ! -z "${BUCKET}" || (echo "BUCKET not defined" && exit 2)
-
-# test if min/max lat/lon are defined
-latlon-test:
-	@test ! -z "${MIN_LAT}" || (echo "MIN_LAT not defined" && exit 2)
-	@test ! -z "${MIN_LON}" || (echo "MIN_LON not defined" && exit 2)
-	@test ! -z "${MAX_LAT}" || (echo "MAX_LAT not defined" && exit 2)
-	@test ! -z "${MAX_LON}" || (echo "MAX_LON not defined" && exit 2)
 
 
 ########################################################################
@@ -497,7 +486,9 @@ elevations-rebuild: elevations-clean elevations
 
 ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} ${SCRIPT_DIR}/list-dem.py
 	rm -rf ${ELEVATIONS_FLAG} ${TEMP_DIR}/${DEM}/${BUCKET}
-	mkdir -p ${TEMP_DIR} && gdalchop ${TEMP_DIR}/${DEM} $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET})
+	mkdir -p ${TEMP_DIR}
+	true #gdalchop ${TEMP_DIR}/${DEM} $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET})
+	for file in $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET}); do gdalchop ${TEMP_DIR}/${DEM} $$file; done
 	terrafit ${TEMP_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
 	rm -rf ${WORK_DIR}/${DEM}/${BUCKET} # remove any old stuff to avoid errors
 	if [ -d ${TEMP_DIR}/${DEM}/${BUCKET} ]; then mv -v ${TEMP_DIR}/${DEM}/${BUCKET} ${WORK_DIR}/${DEM}/${BUCKET}; fi; \
@@ -513,6 +504,10 @@ elevations-all:
 elevations-fit-all:
 	@echo -e "\nFitting all elevations..."
 	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
+
+elevations-fit-bucket:
+	@echo -e "\nFitting all elevations..."
+	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
 
 elevations-refit-all:
 	@echo -e "\nRefitting all elevations..."
@@ -674,6 +669,10 @@ scenery-rebuild: scenery-clean scenery
 # Build or rebuild an area of scenery with no dependencies bucket limitation (can cross bucket): HANDLE WITH CARE
 scenery-no-bucket:
 	tg-construct ${TG_OPTS} ${LATLON_OPTS} ${PREPARE_AREAS}
+
+# Build a single scenery tile (see scripts/tile-index.py)
+scenery-tile:
+	tg-construct ${TG_OPTS} --tile-id=${TILE_ID} ${PREPARE_AREAS}
 
 
 
