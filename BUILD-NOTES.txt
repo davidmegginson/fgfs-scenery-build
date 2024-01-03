@@ -1,31 +1,30 @@
-Vegetation:
+FlightGear scenery build notes
+==============================
 
-- crashing (e.g. for TXKF) in osg::Image::getColor called by
-  SGTriangleInfo:addRandomTreePoints adding trees using texture
-  ${FG_ROOT}/Textures/Trees/tropical-alt.png
+## General issues
 
+### Elevations:
 
-Elevations:
+- build overlapping areas in a temp directory, then move target bucket
+  into working directory to avoid gullies (Makefile handles this now)
 
-- gdalchop must do all FABDEM geotiffs in a single command
-
-- solution is to build overlapping areas in a temp directory, then
-  move target bucket into working directory
-
-- also need to build from north to south to avoid elevation gullies
-
-OSM:
+### OSM:
 
 - leisure=nature-reserve may be a marine area (like the Galapagos), so
   don't use for scenery building
 
-w120n10:
+
+## Specific 10x10 buckets
+
+### w080n40:
+
+- after building bucket, rebuild w74n40 (Manhattan) with SRTM-3,
+  because FABDEM fails to filter out the skyscrapers; rebuild tile
+  1745064 using SRTM-3
+
+- note also some missing textures in Queens west of KLGA
+
+### w120n10:
 
 - blank tile near MM81
 
-w080n40:
-
-- after building bucket, rebuild w74n40 (Manhattan) with SRTM-3,
-  because FABDEM fails to filter out the skyscrapers
-
-- note also some missing textures in Queens west of KLGA
