@@ -5,41 +5,78 @@ North American Scenery
 
 Build FlightGear scenery that
 
-1. has full North American coverage (also includes some of South America)
-2. is suitable for low-altitude VFR navigation, even without osm2city and 3D models enabled.
-3. is compatible with stable versions of FlightGear, not just the _next_ branch.
-4. includes detailed and accurate lakes, rivers, wetlands, and coastlines.
+1. has full Americas coverage (including Greenland, Iceland, the
+   Aleutians to 180W, Bermuda, Christmas Island, the
+   Falklands/Malvinas, the South Georgia Islands, and the South
+   Sandwich Islands)
+2. is suitable for low-altitude VFR navigation, even without osm2city
+   and 3D models enabled.
+3. is compatible with stable versions of FlightGear, not just the
+   _next_ branch.
+4. includes detailed and accurate lakes, rivers, wetlands, and
+   coastlines.
 
 ## Configuration
 
-A Makefile drives the process. Most building happens using 10x10 buckets, and you must supply a _BUCKET_ variable to the make process, e.g.
+A Makefile drives the process. Most building happens using 10x10
+buckets, and you must supply a _BUCKET_ variable to the make process,
+e.g.
 
 ```
 $ make BUCKET=w090n30 prepare
 ```
 
-Dependency management is fairly complete — if something is missing, the make process will probably try to build it before continuing.
+Dependency management is fairly complete — if something is missing,
+the make process will probably try to build it before continuing.
 
 
 ## Data download and preparation
 
 The scenery requires GIS data from several sources
 
-* An elevation raster (DEM) to define the shape of the landscape. The build uses two different sources, in order of preference:
-    * 1-arcsec (30m) FABDEM — Copernicus GLO DEM, with forests and buildings removed: https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn
-    * 3-arcsec (100m) SRTM-3 — Shuttle Radar Topography Mission: http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm (used automatically north of 80N)
-* Global Land Cover by National Mapping Organizations (GLCNMO) at 15 arcsec (nominally 250m) resolution, which provides background landcover to fill in any gaps in more-detailed OSM data (requires some manual preparation in qGIS; see below): https://globalmaps.github.io/glcnmo.html
-* Airport data in the [apt.dat format](http://developer.x-plane.com/wp-content/uploads/2015/11/XP-APT1000-Spec.pdf) that FlightGear shares with the commercial X-Plane simulator. This data defines the shape of runways, taxiways, etc., as well as other information: https://gateway.x-plane.com/airports
-* OpenStreetMap (OSM) data in [PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the area where you want to build scenery. This data defines detailed landcover (like parks and forests), lakes and rivers, as well as linear features like roads, railroads, and powerlines: https://download.geofabrik.de/north-america.html
-    * (Special case) OSM landmass data defining the boundaries between land and ocean (no scenery outside these polygons will be built): https://osmdata.openstreetmap.de/data/land-polygons.html
+* An elevation raster (DEM) to define the shape of the landscape. The
+  build uses two different sources, in order of preference:
+    * 1-arcsec (30m) FABDEM — Copernicus GLO DEM, with forests and
+      buildings removed:
+      https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn
+    * 3-arcsec (100m) SRTM-3 — Shuttle Radar Topography Mission:
+      http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm
+      (used automatically north of 80N)
+* Global Land Cover by National Mapping Organizations (GLCNMO) at 15
+  arcsec (nominally 250m) resolution, which provides background
+  landcover to fill in any gaps in more-detailed OSM data (requires
+  some manual preparation in qGIS; see below):
+  https://globalmaps.github.io/glcnmo.html
+* Airport data in the [apt.dat
+  format](http://developer.x-plane.com/wp-content/uploads/2015/11/XP-APT1000-Spec.pdf)
+  that FlightGear shares with the commercial X-Plane simulator. This
+  data defines the shape of runways, taxiways, etc., as well as other
+  information: https://gateway.x-plane.com/airports Use the
+  Airports/apt.dat.ws3.gz file from the _next_ branch of the
+  FlightGear base package
+* OpenStreetMap (OSM) data in [PBF
+  format](https://wiki.openstreetmap.org/wiki/PBF_Format) covering the
+  area where you want to build scenery. This data defines detailed
+  landcover (like parks and forests), lakes and rivers, as well as
+  linear features like roads, railroads, and powerlines:
+  https://download.geofabrik.de/north-america.html
+    * (Special case) OSM landmass data defining the boundaries between
+      land and ocean (no scenery outside these polygons will be
+      built): https://osmdata.openstreetmap.de/data/land-polygons.html
     
 ### FABDEM elevation data preparation
 
-FABDEM is the preferred elevation source. Download the 1-arcsecond Copernicus GLO DEM, with forests and buildings removed (FABDEM) from https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn for all of the areas that you want to build. Place the files in 01-data/FABDEM/Downloads/
+FABDEM is the preferred elevation source. Download the 1-arcsecond
+Copernicus GLO DEM, with forests and buildings removed (FABDEM) from
+https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn for all
+of the areas that you want to build. Place the files in
+01-data/FABDEM/Downloads/
 
-If you are missing *.tif files for any of the areas you're building, you will end up with flat scenery all at sea level.
+If you are missing *.tif files for any of the areas you're building,
+you will end up with flat scenery all at sea level.
 
-Next, use the following commands to unpack the downloaded files and sort them into bucket subdirectories:
+Next, use the following commands to unpack the downloaded files and
+sort them into bucket subdirectories:
 
 ```
 $ cd 01-data/FABDEM/Unpacked
@@ -50,10 +87,20 @@ $ sh sort-buckets.sh
 
 ### SRTM-3 elevation data preparation
 
-Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3) elevation data for the areas you need from the [original USGS source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip) (needs login) or the interactive map at [Viewfinder Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). Place them in 01-data/SRTM-3/Downloads/
+Download the 3-arcsecond Shuttle Radar Topography Mission (SRTM-3)
+elevation data for the areas you need from the [original USGS
+source](https://e4ftl01.cr.usgs.gov//DP133/SRTM/SRTMGL1.003/2000.02.11/N05E014.SRTMGL1.hgt.zip)
+(needs login) or the interactive map at [Viewfinder
+Panoramas](http://www.viewfinderpanoramas.org/Coverage%20map%20viewfinderpanoramas_org3.htm). Place
+them in 01-data/SRTM-3/Downloads/
 
 
-If you are missing *.hgt files for any of the areas you're building, you will end up with flat scenery all at sea level.
+If you are missing *.hgt files for any of the areas you're building,
+you will end up with flat scenery all at sea level.
+
+SRTM-3 is required north of 80N, which FABDEM doesn't cover, and for
+some areas like Midtown Manhattan, where FABDEM doesn't fully succeed
+in removing buildings.
 
 
 ```
@@ -65,37 +112,73 @@ $ sh sort-buckets.sh
 
 ### Airport data preparation
 
-Obtain an apt.dat file, from the FlightGear distribution (``$FG\_ROOT/Airports/apt.dat.ws3.gz``), X-Plane (``Custom Scenery/Global Airports/Earth nav 02-data/apt.dat``) or by manually downloading airport data from the [X-Plane Scenery Gateway API]() and stiching the individual airport files together.
+Obtain an apt.dat file, from the FlightGear distribution
+(``$FG\_ROOT/Airports/apt.dat.ws3.gz``), X-Plane (``Custom
+Scenery/Global Airports/Earth nav 02-data/apt.dat``) or by manually
+downloading airport data from the [X-Plane Scenery Gateway API]() and
+stiching the individual airport files together.
 
-Uncompress the file (if needed) and rename to ``01-inputs/airports/apt.dat``
+Uncompress the file (if needed) and rename to
+``01-inputs/airports/apt.dat``
 
-You may also place any custom airport .dat files in 01-inputs/airports/custom/ and they will be added to the build.
+You may also place any custom airport .dat files in
+01-inputs/airports/custom/ and they will be added to the build.
 
-### MODIS-250 landcover raster preparation
 
-This section describes the default background, for when we don't have any more-detailed scenery to place on top. It is lower priority than airports or anything we take from OSM.
+#### OSM landmass preparation
 
-We will use the MODIS (250m) North American landcover raster from http://www.cec.org/north-american-environmental-atlas/land-cover-2010-modis-250m/ and save all files in the 01-inputs/MODIS-250/ directory.
+(TODO)
+
+
+### Global landcover raster preparation
+
+This section describes the default background, for when we don't have
+any more-detailed scenery to place on top. It is lower priority than
+airports or anything we take from OSM.
+
+We will use the Global Landcover 15 arcsec (250m) North American
+landcover raster from https://globalmaps.github.io/glcnmo.html and
+save all files in the 01-inputs/global-landcover/ directory.
 
 Preparation:
 
-- load land-polygons.shp from the land-polygons-complete package (see above)
-- run Toolbox/GDAL/Vector geoprocessing/Clip vector by extent with the Clipping extent -180,-50,15,90 (xmin, xmax, ymin, ymax), saving to land-polygons-north-america-complete.shp
+(Substitute "sw" for "nw" in the filenames below when working with the
+southern half of the western hemisphere):
 
-Run each step on the output from the previous step.
-
-- load NA_NALCMS_landcover_2010v2_250m.t.tif
-- run the Raster/Projections/Warp (Reproject) function to reproject the raster to one of the WGS84 projections, saving to modis-250-wgs84.shp
-- run the Toolbox/GRASS/Raster/r.null function to change value 18 (water) to null, saving to modis-250-wgs84-nulled.shp
-- run the Toolbox/GRASS/Raster/r.grow function with default parameters, saving to modis-250-wgs84-grow.shp (to fill into the empty water areas a bit and avoid Default slivers)
-- run the Toolbox/GRASS/Raster/r.to.vect to vectorise, selecting rounded corners and saving to modis-250-vect.shp
-- run the Vector/Geoprocessing Tools/Clip function to clip the landcover to the landmass, setting Invalid Feature Filtering to "Do not filter" with the wrench beside the input layer, land-polygons-north-america-complete as the Overlay layer, and modis-250-clipped.shp as the output file (this may take hours or days to run, and require over 10 GB of RAM)
-
-Next, generate the input polygons for FlightGear, e.g.
-
-```
-$ make BUCKET=w090n40 lc-shapefiles-prepare
-```
+* ensure that the land-polygons-split package from the previous step
+  is in ``01-inputs/land-polygons-split-4326/land_polygons.shp``
+* open ``land\_polygons.shp`` in qGIS and use _Toolbox/GDAL/Vector
+  geoprocessing/Clip vector by extent_ to make two landmass masks with
+  the following extents:
+  * ``landmass-nw-mask.shp`` -180, 0, 0, 90
+  * ``landmass-sw-mask.shp`` -180, 0, -90, 0
+* add an index to each of the masks using _Vector/Data
+  Management Tools/Create Spatial Index_
+* import the appropriate landcover raster into qGIS:
+  * ``gm\_lc\_v3\_1\_1.tif`` - northern half of western hemisphere
+  * ``gm\_lc\_v3\_2\_1.tif`` - southern half of western hemisphere
+* run the _Toolbox/GRASS/Raster/r.null_ function to change value 20
+  (water) to null, saving to ``landcover-nw-nulled.tif``
+* convert the raster from floats to bytes and save to
+  ``landcover-nw-nulled-bytes.tif``
+* run the _Toolbox/GRASS/Raster/r.grow_ function with default
+  parameters, saving to ``landcover-nw-filled.tif`` to fill into the
+  empty water areas a bit and avoid Default slivers
+* run the _Toolbox/GRASS/Raster/r.neighbors_ function with
+  "Neighborhood operation" set to "Median" to simplify the raster
+  slightly, and save to ``landcover-nw-neighbours.tif``
+* run the _Toolbox/GRASS/Raster/r.to.vect_ to vectorise, selecting
+  rounded corners and saving to ``landcover-nw-vect.shp``
+* add an index to ``landcover-nw-vect.shp`` using _Vector/Data
+  Management Tools/Create Spatial Index_
+* run the _Toolbox/Vector geometry/Fix geometries_ function and save
+  to ``landcover-nw-valid.shp``
+- run the Vector/Geoprocessing Tools/Clip function to clip the
+  landcover to the landmass, setting Invalid Feature Filtering to "Do
+  not filter" with the wrench beside the input layer, saving to
+  ``landcover-nw-clipped.shp`` modis-250-clipped.shp as the output
+  file (this may take hours or days to run, and require over 10 GB of
+  RAM)
 
 
 ### OSM data preparation
@@ -108,15 +191,6 @@ If you have them somewhere else, you can override OSM_DIR on the command line, e
 
 ```
 $ make BUCKET=w090n40 OSM_DIR=/usr/share/osm osm-shapefiles-prepare
-```
-
-
-#### OSM landmass preparation
-
-(TODO)
-
-```
-$ make MIN_LON=-90 MIN_LAT=40 MAX_LON=-80 MAX_LAT=50 BUCKET=w090n40 landmass
 ```
 
 
