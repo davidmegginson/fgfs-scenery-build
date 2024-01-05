@@ -264,9 +264,9 @@ AIRPORTS=${DATA_DIR}/airports/${BUCKET}/apt.dat
 # Prepare areas to include
 #
 
-DEM_AREAS=${DEM}
+DEM_AREAS=${DEM}/DEM
 
-AIRPORT_AREAS=AirportObj AirportArea
+AIRPORT_AREAS=${DEM}/AirportObj ${DEM}/AirportArea
 
 LC_AREAS=lc-broadleaf-evergreen-forest lc-broadleaf-deciduous-forest	\
 lc-needleleaf-evergreen-forest lc-needleleaf-deciduous-forest		\
@@ -480,38 +480,30 @@ prepare-rebuild-all: prepare-clean-all prepare
 elevations: ${ELEVATIONS_FLAG}
 
 elevations-clean:
-	rm -rvf ${WORK_DIR}/${DEM}/${BUCKET}/ ${ELEVATIONS_FLAG}
+	rm -rvf ${WORK_DIR}/${DEM}/DEM/${BUCKET}/ ${ELEVATIONS_FLAG}
 
 elevations-rebuild: elevations-clean elevations
 
 ${ELEVATIONS_FLAG}:  ${INPUTS_DIR}/${DEM}/Unpacked/${BUCKET} ${SCRIPT_DIR}/list-dem.py
-	rm -rf ${ELEVATIONS_FLAG} ${TEMP_DIR}/${DEM}/${BUCKET}
-	mkdir -p ${TEMP_DIR}
-	true #gdalchop ${TEMP_DIR}/${DEM} $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET})
-	for file in $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET}); do gdalchop ${TEMP_DIR}/${DEM} $$file; done
-	terrafit ${TEMP_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
-	rm -rf ${WORK_DIR}/${DEM}/${BUCKET} # remove any old stuff to avoid errors
-	if [ -d ${TEMP_DIR}/${DEM}/${BUCKET} ]; then mv -v ${TEMP_DIR}/${DEM}/${BUCKET} ${WORK_DIR}/${DEM}/${BUCKET}; fi; \
+	rm -rf ${ELEVATIONS_FLAG} ${TEMP_DIR}/${DEM}/DEM/${BUCKET}
+	mkdir -p ${TEMP_DIR}/${DEM}/DEM
+	gdalchop ${TEMP_DIR}/${DEM}/DEM $$(python3 ${SCRIPT_DIR}/list-dem.py ${INPUTS_DIR}/${DEM}/Unpacked ${BUCKET})
+	terrafit ${TEMP_DIR}/${DEM}/DEM/${BUCKET} ${TERRAFIT_OPTS}
+	rm -rf ${WORK_DIR}/${DEM}/DEM/${BUCKET} # remove any old stuff to avoid errors
+	if [ -d ${TEMP_DIR}/${DEM}/DEM/${BUCKET} ]; then mv -v ${TEMP_DIR}/${DEM}/DEM/${BUCKET} ${WORK_DIR}/${DEM}/DEM/${BUCKET}; fi; \
 	mkdir -p ${FLAGS_DIR} && touch ${ELEVATIONS_FLAG}
-
-elevations-all-rebuild: elevations-all elevations-refit-all
-
-elevations-all:
-	rm -rf ${WORK_DIR}/${DEM}
-	mkdir -p ${WORK_DIR}/${DEM}
-	find ${INPUTS_DIR}/${DEM}/Unpacked -name '*.tif' -o -name '*.hgt' | xargs gdalchop ${WORK_DIR}/${DEM}
 
 elevations-fit-all:
 	@echo -e "\nFitting all elevations..."
-	terrafit ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
+	terrafit ${WORK_DIR}/${DEM}/DEM ${TERRAFIT_OPTS}
 
 elevations-fit-bucket:
 	@echo -e "\nFitting all elevations..."
-	terrafit ${WORK_DIR}/${DEM}/${BUCKET} ${TERRAFIT_OPTS}
+	terrafit ${WORK_DIR}/${DEM}/DEM/${BUCKET} ${TERRAFIT_OPTS}
 
 elevations-refit-all:
 	@echo -e "\nRefitting all elevations..."
-	terrafit -f ${WORK_DIR}/${DEM} ${TERRAFIT_OPTS}
+	terrafit -f ${WORK_DIR}/${DEM}/DEM ${TERRAFIT_OPTS}
 
 #
 # Prepare the airport areas and objects
@@ -529,7 +521,7 @@ ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
 	@echo -e "\nRegenerating airports for ${BUCKET}..."
 	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.2618 \
-	  --work=${WORK_DIR} --clear-dem-path --dem-path=${DEM} # can't use threads here, due to errors with .idx files; not SRTM-3
+	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=DEM # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
 #

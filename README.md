@@ -1,5 +1,5 @@
-North American Scenery
-======================
+FlightGear Americas Scenery
+===========================
 
 ## Goals
 
