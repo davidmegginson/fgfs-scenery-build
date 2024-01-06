@@ -2,9 +2,10 @@
 /02-prep
 /03-work
 /04-output
-/temp
+/Old
 /accumulator_fail.log
 /config/dropbox-config.json
 /flags
 /osmconvert_tempfile.*
+/temp
 /venv

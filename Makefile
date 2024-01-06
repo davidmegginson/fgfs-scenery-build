@@ -133,7 +133,7 @@ MAX_THREADS=1
 LOG_LEVEL=info
 
 # Directories
-SCENERY_NAME=fgfs-canada-us-scenery
+SCENERY_NAME=fgfs-americas-scenery
 CONFIG_DIR=./config
 TEMP_DIR=./temp
 INPUTS_DIR=./01-inputs
@@ -695,13 +695,13 @@ ${SCENERY_DIR}/NavData/apt/${BUCKET}.apt: ${AIRPORTS}
 
 archive: static-files navdata thresholds-clean thresholds
 	cd ${OUTPUT_DIR} \
-	  && tar cvf fgfs-canada-us-scenery-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/gen-symlinks.bat ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
+	  && tar cvf ${SCENERY_NAME}-${BUCKET}-$$(date +%Y%m%d).tar ${SCENERY_NAME}/README.md ${SCENERY_NAME}/UNLICENSE.md ${SCENERY_NAME}/clean-symlinks.sh ${SCENERY_NAME}/gen-symlinks.sh ${SCENERY_NAME}/gen-symlinks.bat ${SCENERY_NAME}/Airports ${SCENERY_NAME}/NavData/apt/${BUCKET}.dat ${SCENERY_NAME}/Terrain/${BUCKET}
 
 # Will move
 publish-cloud:
 	cp -v ${STATIC_DIR}/README.md "${PUBLISH_DIR}" \
 	  && mkdir -p "${PUBLISH_DIR}"/Old \
-	  && (mv -fv "${PUBLISH_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"/Old || echo "No previous file") \
+	  && (mv -fv "${PUBLISH_DIR}"/*-${BUCKET}-*.tar Old/ || echo "No previous file") \
 	  && mv -fv "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
 
 update-download-links: ${VENV}

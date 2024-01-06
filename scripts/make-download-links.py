@@ -31,7 +31,7 @@ downloads = {}
 for entry in sorted(listing.entries, key=lambda entry: entry.name):
 
     if isinstance(entry, dropbox.files.FileMetadata):
-        result = re.match('^fgfs-canada-us-scenery-([ew]\d{3}[ns]\d{2})-(\d{8}).tar$', entry.name)
+        result = re.match('^fgfs-americas-scenery-([ew]\d{3}[ns]\d{2})-(\d{8}).tar$', entry.name)
         if result:
 
             # extract fields from the filename
