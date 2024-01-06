@@ -155,6 +155,12 @@
     "url": "https://www.dropbox.com/scl/fi/rl8u0tjukhdrdzzs3kx1q/fgfs-americas-scenery-w060n80-20240105.tar?rlkey=d11kw2o2g23uf8yya8lsssv6z&dl=0",
     "size": 12277760
   },
+  "w060s20": {
+    "name": "fgfs-americas-scenery-w060s20-20240102.tar",
+    "date": "20240102",
+    "url": "https://www.dropbox.com/scl/fi/q5gnfapmhn70s3abyhbg5/fgfs-americas-scenery-w060s20-20240102.tar?rlkey=pcy9475felmts89ns9yfaz6t9&dl=0",
+    "size": 650373120
+  },
   "w060s40": {
     "name": "fgfs-americas-scenery-w060s40-20231230.tar",
     "date": "20231230",
@@ -178,6 +184,12 @@
     "date": "20231227",
     "url": "https://www.dropbox.com/scl/fi/qn8yk82ms744ivnvazl7v/fgfs-americas-scenery-w070n30-20231227.tar?rlkey=o1ug5eiwktzxy2hdsfbmuhzg8&dl=0",
     "size": 3440640
+  },
+  "w070n50": {
+    "name": "fgfs-americas-scenery-w070n50-20240104.tar",
+    "date": "20240104",
+    "url": "https://www.dropbox.com/scl/fi/8yzpzqq781yjc52bne5r3/fgfs-americas-scenery-w070n50-20240104.tar?rlkey=of721vqxxrhawjyduv3rh0c06&dl=0",
+    "size": 724736000
   },
   "w070n60": {
     "name": "fgfs-americas-scenery-w070n60-20240104.tar",
@@ -269,6 +281,12 @@
     "url": "https://www.dropbox.com/scl/fi/yjkvanmkga2z2usf26srn/fgfs-americas-scenery-w080s40-20240104.tar?rlkey=lr96brgytabm0ztjrr5epvp44&dl=0",
     "size": 591810560
   },
+  "w080s50": {
+    "name": "fgfs-americas-scenery-w080s50-20240104.tar",
+    "date": "20240104",
+    "url": "https://www.dropbox.com/scl/fi/fjf5kyfng7na9vtmwxovg/fgfs-americas-scenery-w080s50-20240104.tar?rlkey=c261tcw2ti4nh7soijmvl23u6&dl=0",
+    "size": 729712640
+  },
   "w080s60": {
     "name": "fgfs-americas-scenery-w080s60-20240104.tar",
     "date": "20240104",
@@ -280,6 +298,12 @@
     "date": "20240102",
     "url": "https://www.dropbox.com/scl/fi/n0d2saeapjsyxll4kakyd/fgfs-americas-scenery-w090n00-20240102.tar?rlkey=04ghms2djh7bucenm0r7memii&dl=0",
     "size": 185200640
+  },
+  "w090n10": {
+    "name": "fgfs-americas-scenery-w090n10-20231230.tar",
+    "date": "20231230",
+    "url": "https://www.dropbox.com/scl/fi/7enxaxxelsrfmyb5un28n/fgfs-americas-scenery-w090n10-20231230.tar?rlkey=7xbpexcxm15x6a2phd03g7fo8&dl=0",
+    "size": 732098560
   },
   "w090n50": {
     "name": "fgfs-americas-scenery-w090n50-20240103.tar",
@@ -371,6 +395,12 @@
     "url": "https://www.dropbox.com/scl/fi/6wlr4pe8zsc9vtaa2lef7/fgfs-americas-scenery-w110n10-20240101.tar?rlkey=9mx8apmb3b5a0lmdphuwfs8la&dl=0",
     "size": 275015680
   },
+  "w110n50": {
+    "name": "fgfs-americas-scenery-w110n50-20240101.tar",
+    "date": "20240101",
+    "url": "https://www.dropbox.com/scl/fi/hljg7f1l0pnv1rulhup4s/fgfs-americas-scenery-w110n50-20240101.tar?rlkey=zxd82u277ajgcbp7811c1tlwh&dl=0",
+    "size": 763340800
+  },
   "w110n60": {
     "name": "fgfs-americas-scenery-w110n60-20240104.tar",
     "date": "20240104",
@@ -442,6 +472,12 @@
     "date": "20240102",
     "url": "https://www.dropbox.com/scl/fi/3d4x5m6d1wysylecpyr0y/fgfs-americas-scenery-w140n50-20240102.tar?rlkey=vv8wov4mc5bfalm3ywlhapu8z&dl=0",
     "size": 501360640
+  },
+  "w140n60": {
+    "name": "fgfs-americas-scenery-w140n60-20240104.tar",
+    "date": "20240104",
+    "url": "https://www.dropbox.com/scl/fi/v0xb73zgv0yf35nrqavbv/fgfs-americas-scenery-w140n60-20240104.tar?rlkey=viw2x0yk2vp5go2whxbkst35h&dl=0",
+    "size": 743096320
   },
   "w140n70": {
     "name": "fgfs-americas-scenery-w140n70-20240105.tar",
