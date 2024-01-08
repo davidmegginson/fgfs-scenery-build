@@ -16,7 +16,7 @@
 # corners of the area being built (e.g. -80 40 -70 50); default to the
 # corners of the bucket. Required for the scenery-no-bucket bucket.
 #
-# MAX_THREADS - the maximum number of concurrent threads to run for
+# THREADS - the maximum number of concurrent threads to run for
 # some processes (e.g. 8; increase to speed up the build; decrease to
 # avoid crashes).
 #
@@ -129,7 +129,7 @@
 
 # Basic setup
 SHELL=/bin/bash
-MAX_THREADS=1
+THREADS=1
 LOG_LEVEL=info
 
 # Directories
@@ -200,8 +200,8 @@ BUCKET_LATLON_OPTS=--min-lon=${BUCKET_MIN_LON} --min-lat=${BUCKET_MIN_LAT} --max
 LATLON_OPTS=--min-lon=${MIN_LON} --min-lat=${MIN_LAT} --max-lon=${MAX_LON} --max-lat=${MAX_LAT}
 
 # common command-line parameters
-DECODE_OPTS=--spat ${SPAT_EXPANDED} --threads ${MAX_THREADS}
-TERRAFIT_OPTS=-j ${MAX_THREADS} -m 50 -x 10000 -e 10
+DECODE_OPTS=--spat ${SPAT_EXPANDED} --threads ${THREADS}
+TERRAFIT_OPTS=-j ${THREADS} -m 50 -x 10000 -e 10
 
 #
 # Data sources
@@ -243,7 +243,7 @@ OSM_LINES_QUERY=highway IN ('motorway', 'primary', 'secondary', 'tertiary', 'tru
 	waterway IN ('dam', 'lock_gate')
 
 OSM_AREAS_QUERY=man_made IN ('breakwater', 'pier') OR \
-	natural IN ('beach', 'cliff', 'gully', 'reef', 'sand', 'volcano') OR \
+	natural IN ('bay', 'beach', 'cliff', 'gully', 'reef', 'sand', 'shoal', 'strait', 'water', 'volcano') OR \
 	water IS NOT NULL OR \
 	waterway IN ('dam', 'lock_gate', 'reservoir', 'riverbank', 'water', 'wetland') OR \
 	(OGR_GEOM_AREA >= ${MIN_FEATURE_AREA} AND ( \
@@ -302,7 +302,7 @@ osm-wood-natural-unspecified
 
 PREPARE_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
 
-CONSTRUCT_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain
+CONSTRUCT_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain
 
 #
 # Build flags
@@ -404,15 +404,30 @@ ${LANDCOVER_EXTRACTED_FLAG}: ${LANDCOVER_SOURCE}
 # Extract OSM foreground features for current bucket
 #
 
-osm-extract: ${OSM_AREAS_EXTRACTED_FLAG} ${OSM_LINES_EXTRACTED_FLAG}
+osm-extract: osm-areas-extract osm-lines-extract
 
+osm-extract-clean: osm-areas-extract-clean osm-lines-extract-clean
+
+osm-extract-rebuild: osm-extract-clean osm-extract
+
+# use rarely -- also re-extracts PBF
 osm-extract-clean-all: osm-extract-clean
 	rm -rf  ${OSM_PBF}
 
-osm-extract-clean:
-	rm -rf ${OSM_AREAS_EXTRACTED_FLAG} ${OSM_AREAS_SHAPEFILE} ${OSM_LINES_EXTRACTED_FLAG} ${OSM_LINES_SHAPEFILE}
+osm-areas-extract:  ${OSM_AREAS_EXTRACTED_FLAG}
 
-osm-extract-rebuild: osm-extract-clean osm-extract
+osm-areas-extract-clean:
+	rm -rf ${OSM_AREAS_EXTRACTED_FLAG} ${OSM_AREAS_SHAPEFILE}
+
+osm-areas-extract-rebuild: osm-areas-extract-clean osm-areas-extract
+
+osm-lines-extract: ${OSM_LINES_EXTRACTED_FLAG}
+
+osm-lines-extract-clean:
+	${OSM_LINES_EXTRACTED_FLAG} ${OSM_LINES_SHAPEFILE}
+
+osm-lines-extract-rebuild: osm-lines-extract-clean osm-lines-extract
+
 
 # extract the quadrant (e.g. north half of western hemisphere) to speed things up
 ${OSM_SOURCE}: ${OSM_PLANET}
@@ -520,7 +535,7 @@ ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -f ${AIRPORTS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
 	@echo -e "\nRegenerating airports for ${BUCKET}..."
-	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.2618 \
+	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.2618 --threads=${THREADS} \
 	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=DEM # can't use threads here, due to errors with .idx files; not SRTM-3
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
@@ -639,7 +654,7 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 # 3. Construct
 ########################################################################
 
-TG_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${MAX_THREADS} \
+TG_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${THREADS} \
 	--work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain \
 	--priorities=${CONFIG_DIR}/default_priorities.txt
 
@@ -701,7 +716,7 @@ archive: static-files navdata thresholds-clean thresholds
 publish-cloud:
 	cp -v ${STATIC_DIR}/README.md "${PUBLISH_DIR}" \
 	  && mkdir -p "${PUBLISH_DIR}"/Old \
-	  && (mv -fv "${PUBLISH_DIR}"/*-${BUCKET}-*.tar Old/ || echo "No previous file") \
+	  && (mv -fv "${PUBLISH_DIR}"/*-${BUCKET}-*.tar ${PUBLISH_DIR}/Old/ || echo "No previous file") \
 	  && mv -fv "${OUTPUT_DIR}"/*-${BUCKET}-*.tar "${PUBLISH_DIR}"
 
 update-download-links: ${VENV}
