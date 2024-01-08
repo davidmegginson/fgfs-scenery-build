@@ -41,7 +41,12 @@ for entry in sorted(listing.entries, key=lambda entry: entry.name):
             # get existing shared link or create a new one
             sharing = dbx.sharing_create_shared_link("/Downloads/{}".format(entry.name))
 
-            url = sharing.url.replace('?dl=0', '?dl=1')
+            url = sharing.url
+
+            if ("?" in url):
+                url = url.replace('?dl=0', '?dl=1')
+            else:
+                url = url + "?dl=1"
 
             # add the new entry
             downloads[bucket] = {
