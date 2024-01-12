@@ -491,12 +491,6 @@
     "url": "https://www.dropbox.com/scl/fi/9x7al4zk9t4vm3uv85q2r/fgfs-americas-scenery-w100n50-20240111.tar?rlkey=kfp9u7bgzb1zoa1y4cg8ix46q&dl=0",
     "size": 711925760
   },
-  "w100n60": {
-    "name": "fgfs-americas-scenery-w100n60-20240105.tar",
-    "date": "20240105",
-    "url": "https://www.dropbox.com/scl/fi/s2gead6fs92kzr6td0lnt/fgfs-americas-scenery-w100n60-20240105.tar?rlkey=ibnji5sgijg4mbx5qt4x414ds&dl=0",
-    "size": 128317440
-  },
   "w100n70": {
     "name": "fgfs-americas-scenery-w100n70-20240105.tar",
     "date": "20240105",
@@ -744,10 +738,10 @@
     "size": 331059200
   },
   "w170n70": {
-    "name": "fgfs-americas-scenery-w170n70-20240104.tar",
-    "date": "20240104",
-    "url": "https://www.dropbox.com/scl/fi/81goo6yjqrw0petbo2r6c/fgfs-americas-scenery-w170n70-20240104.tar?rlkey=w3esp1bljntklgcg4sh6dzegx&dl=0",
-    "size": 430080
+    "name": "fgfs-americas-scenery-w170n70-20240112.tar",
+    "date": "20240112",
+    "url": "https://www.dropbox.com/scl/fi/9o3r7tmdv619a6awr7ibn/fgfs-americas-scenery-w170n70-20240112.tar?rlkey=gxrcw3xcvmefflz5th0egyv0h&dl=0",
+    "size": 778240
   },
   "w180n20": {
     "name": "fgfs-americas-scenery-w180n20-20240110.tar",
