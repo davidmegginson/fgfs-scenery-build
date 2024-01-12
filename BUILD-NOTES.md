@@ -25,10 +25,11 @@ FlightGear scenery build notes
 ### w080n40:
 
 - after building bucket, rebuild w74n40 (Manhattan) with SRTM-3,
-  because FABDEM fails to filter out the skyscrapers; rebuild tiles
-  1745064, 1745072 using SRTM-3
+  because FABDEM fails to filter out the skyscrapers; in
+  w080n40/w074n40 remove and rebuild 1745064.* and 1745072.* (maybe
+  just 072??)
 
-- note also some missing textures in Queens west of KLGA
+- note also some missing textures in Queens west of KLGA (not yet resolved)
 
 ### w120n10:
 
