@@ -43,8 +43,11 @@ for entry in sorted(listing.entries, key=lambda entry: entry.name):
 
             url = sharing.url
 
-            if ("?" in url):
+
+            if "?dl=0" in url:
                 url = url.replace('?dl=0', '?dl=1')
+            elif "&dl=0" in url:
+                url = url.replace('&dl=0', '&dl=1')
             else:
                 url = url + "?dl=1"
 
