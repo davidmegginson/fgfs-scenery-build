@@ -510,7 +510,7 @@ ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
 	@echo -e "\nRegenerating airports for ${BUCKET}..."
 	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.4 --threads=${THREADS} \
-	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=${DEM}/DEM
+	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=DEM
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
 #

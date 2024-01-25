@@ -3,10 +3,8 @@ Ocean    # Second, the sliver type
 
 # From here, area types in order of descending priority
 Hole			hole	# Leave area completely empty
-OSM_Road                road
 Freeway			road
 Road			road
-OSM_Railway             road
 Railroad		road
 Asphalt			road
 Airport			other

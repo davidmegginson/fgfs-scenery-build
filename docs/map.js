@@ -4,7 +4,7 @@
  * Uses Leaflet.
  */
 
-const STALE_CUTOFF = '20240124'; // buckets before this are considered stale; previously 20240108
+const STALE_CUTOFF = '20240108'; // buckets before this are considered stale
 
 /**
  * Set up the map and download links after the window is loaded
