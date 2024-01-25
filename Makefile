@@ -245,16 +245,17 @@ OSM_LINES_QUERY=highway IN ('motorway', 'primary', 'secondary', 'tertiary', 'tru
 OSM_AREAS_QUERY=man_made IN ('breakwater', 'pier') OR \
 	natural IN ('bay', 'beach', 'cliff', 'gully', 'reef', 'sand', 'shoal', 'strait', 'water', 'volcano') OR \
 	water IS NOT NULL OR \
-	waterway IN ('dam', 'lock_gate', 'reservoir', 'riverbank', 'water', 'wetland') OR \
+	waterway IS NOT NULL OR \
+	natural IS NOT NULL OR \
+	landuse IN ('forest', 'grass', 'meadow', 'orchard', 'wood') OR \
 	(OGR_GEOM_AREA >= ${MIN_FEATURE_AREA} AND ( \
 		amenity IN ('college', 'school', 'university') OR \
 		landuse IN ('brownfield', 'cemetery', 'commercial', 'construction', 'education', \
-			'forest', 'grass', 'greenfield', 'industrial', 'institutional', \
-			'landfill', 'meadow', 'orchard', 'quarry', 'recreation_ground', \
-			'residential', 'retail', 'vineyard', 'wood') OR \
+			'greenfield', 'industrial', 'institutional', \
+			'landfill', 'quarry', 'recreation_ground', \
+			'residential', 'retail', 'vineyard') OR \
 		leisure IN ('golf_course', 'nature_reserve', 'park') OR \
 		man_made IN ('mine') OR \
-		natural IN ('grassland', 'wetland', 'wood') OR \
 		sport IN ('golf') \
 	))
 
@@ -268,39 +269,12 @@ DEM_AREAS=${DEM}/DEM
 
 AIRPORT_AREAS=${DEM}/AirportObj ${DEM}/AirportArea
 
-LC_AREAS=lc-broadleaf-evergreen-forest lc-broadleaf-deciduous-forest	\
-lc-needleleaf-evergreen-forest lc-needleleaf-deciduous-forest		\
-lc-mixed-forest lc-tree-open lc-shrub lc-herbaceous			\
-lc-herbaceous-tree-shrub lc-sparse-vegetation lc-cropland		\
-lc-paddy-field lc-cropland-other-vegetation lc-mangrove lc-wetland	\
-lc-gravel-rock lc-sand lc-urban lc-snow-ice
+LC_AREAS=$(shell cd ${WORK_DIR} && ls | grep lc-)
 
-OSM_AREAS=osm-abandoned-railway osm-breakwater-man_made-areas		\
-osm-breakwater-man_made-lines osm-brownfield-landuse			\
-osm-cemetery-landuse osm-cliff-natural osm-commercial-landuse		\
-osm-construction-landuse osm-dam-waterway-areas				\
-osm-dam-waterway-lines osm-desert-natural osm-dirt-natural		\
-osm-education-amenity osm-education-landuse osm-farmland-landuse	\
-osm-forest-landuse-deciduous osm-forest-landuse-evergreen		\
-osm-forest-landuse-mixed osm-glacier-natural osm-golf-leisure		\
-osm-golf-sport osm-grass-landuse osm-grassland-natural			\
-osm-greenfield-landuse osm-industrial-landuse				\
-osm-institutional-landuse osm-landfill-landuse osm-lava-natural		\
-osm-line-power osm-lock-gate-waterway-areas				\
-osm-lock-gate-waterway-lines osm-meadow-landuse osm-mine-man_made	\
-osm-motorway-highway osm-orchard-landuse osm-park-leisure		\
-osm-pier-man_made-areas osm-pier-man_made-lines osm-primary-highway	\
-osm-quarry-landuse osm-railway-railway osm-recreation-ground-landuse	\
-osm-reef-natural-areas osm-reef-natural-lines osm-residential-landuse	\
-osm-retail-landuse osm-riverbank-waterway osm-rock-natural		\
-osm-sand-natural osm-scrub-natural osm-secondary-highway		\
-osm-trunk-highway osm-tundra-natural osm-vineyard-landuse		\
-osm-water-natural osm-water-water osm-water-waterway			\
-osm-wetland-natural osm-wetland-waterway osm-wood-natural-deciduous	\
-osm-wood-natural-evergreen osm-wood-natural-mixed			\
-osm-wood-natural-unspecified
+OSM_AREAS=$(shell cd ${WORK_DIR} && ls | grep osm-)
 
-PREPARE_AREAS=${DEM_AREAS} ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
+
+PREPARE_AREAS=${DEM_AREAS} Default ${AIRPORT_AREAS} ${LC_AREAS} ${OSM_AREAS}
 
 CONSTRUCT_OPTS=--ignore-landmass --nudge=${NUDGE} --threads=${THREADS} --work-dir=${WORK_DIR} --output-dir=${SCENERY_DIR}/Terrain
 
@@ -424,7 +398,7 @@ osm-areas-extract-rebuild: osm-areas-extract-clean osm-areas-extract
 osm-lines-extract: ${OSM_LINES_EXTRACTED_FLAG}
 
 osm-lines-extract-clean:
-	${OSM_LINES_EXTRACTED_FLAG} ${OSM_LINES_SHAPEFILE}
+	rm -rf ${OSM_LINES_EXTRACTED_FLAG} ${OSM_LINES_SHAPEFILE}
 
 osm-lines-extract-rebuild: osm-lines-extract-clean osm-lines-extract
 
@@ -535,8 +509,8 @@ ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -f ${AIRPORTS_FLAG}
 	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
 	@echo -e "\nRegenerating airports for ${BUCKET}..."
-	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.2618 --threads=${THREADS} \
-	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=DEM # can't use threads here, due to errors with .idx files; not SRTM-3
+	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.4 --threads=${THREADS} \
+	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=${DEM}/DEM
 	mkdir -p ${FLAGS_DIR} && touch ${AIRPORTS_FLAG}
 
 #
@@ -611,7 +585,7 @@ ${OSM_AREA_LAYERS_FLAG}: ${OSM_AREAS_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 	@echo -e "\nPreparing OSM area layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'area' ]; then \
-	    echo -e "\nTrying $$name..."; \
+	    echo -e "\nTrying $$name with $$query..."; \
 	    rm -rf ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${OSM_AREAS_SHAPEFILE} || exit 1;\
@@ -639,7 +613,7 @@ ${OSM_LINE_LAYERS_FLAG}: ${OSM_LINES_EXTRACTED_FLAG} ${CONFIG_DIR}/osm-layers.ts
 	@echo -e "\nPreparing OSM line layers...\n"
 	IFS="\t" cat ${CONFIG_DIR}/osm-layers.tsv | while read name include type material line_width query; do \
           if [ "$$include" = 'yes' -a "$$type" = 'line' ]; then \
-	    echo -e "\nTrying $$name..."; \
+	    echo -e "\nTrying $$name with $$query ..."; \
 	    rm -rf ${TEMP_DIR}/$$name/${BUCKET}; \
 	    ogr-decode ${DECODE_OPTS} --texture-lines --line-width $$line_width --area-type $$material --where "$$query" \
 	      ${TEMP_DIR}/$$name ${OSM_LINES_SHAPEFILE} || exit 1;\

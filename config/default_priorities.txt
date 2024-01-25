@@ -3,8 +3,10 @@ Ocean    # Second, the sliver type
 
 # From here, area types in order of descending priority
 Hole			hole	# Leave area completely empty
+OSM_Road                road
 Freeway			road
 Road			road
+OSM_Railway             road
 Railroad		road
 Asphalt			road
 Airport			other
@@ -45,6 +47,7 @@ Greenspace		other
 # These are low-priority, since known polygons should always win.
 
 Cemetery		other	# Cemetery
+ShrubGrassCover		other	# Mixed Shrubland/Grassland
 DryCrop			other	# Dryland Cropland and Pasture
 IrrCrop			other	# Irrigated Cropland and Pasture
 Rice			other
@@ -62,7 +65,6 @@ GrassCover		other	# Grassland
 Grassland		other
 ScrubCover		other	# Scrub
 Scrub			other
-ShrubGrassCover		other	# Mixed Shrubland/Grassland
 SavannaCover		other	# Savanna
 Orchard			other	# Orchard
 DeciduousForest		other	# Deciduous Forest
