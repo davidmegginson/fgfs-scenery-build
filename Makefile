@@ -501,13 +501,13 @@ elevations-refit-all:
 airports: ${AIRPORTS_FLAG}
 
 airports-clean:
-	rm -rvf ${WORK_DIR}/AirportObj/${BUCKET}/ ${WORK_DIR}/AirportArea/${BUCKET}/ ${AIRPORTS_FLAG}
+	rm -rvf ${WORK_DIR}/${DEM}/AirportObj/${BUCKET}/ ${WORK_DIR}/${DEM}/AirportArea/${BUCKET}/ ${AIRPORTS_FLAG}
 
 airports-rebuild: airports-clean airports
 
 ${AIRPORTS_FLAG}: ${AIRPORTS} ${ELEVATIONS_FLAG}
 	rm -f ${AIRPORTS_FLAG}
-	rm -rf ${WORK_DIR}/AirportArea/${BUCKET} ${WORK_DIR}/AirportObj/${BUCKET}
+	rm -rf ${WORK_DIR}/${DEM}/AirportArea/${BUCKET} ${WORK_DIR}/${DEM}/AirportObj/${BUCKET}
 	@echo -e "\nRegenerating airports for ${BUCKET}..."
 	genapts --input=${AIRPORTS} ${BUCKET_LATLON_OPTS} --max-slope=0.4 --threads=${THREADS} \
 	  --work=${WORK_DIR}/${DEM} --clear-dem-path --dem-path=DEM
