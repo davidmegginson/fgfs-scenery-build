@@ -87,6 +87,10 @@ def filter_airports(bounds, input, output):
         elif type in ('14', '15', '18', '19', '20', '21', '1201', '1300',):
             check_bounds(tokens, 1, 2)
 
+        # see if there's a better identifier
+        elif type in ('1302',):
+            pass
+
         elif type in ('99'):
             continue
 

@@ -8,4 +8,5 @@
 /flags
 /osmconvert_tempfile.*
 /temp
+/terrasync
 /venv
